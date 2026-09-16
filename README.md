@@ -1,114 +1,203 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Spira API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend REST API for **Spira**, built with [NestJS](https://nestjs.com/) 12 (ESM), TypeORM and PostgreSQL.
+Ships with OpenAPI/Swagger documentation and a generator that builds a typed API client for the frontend.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+**Stack:** NestJS 12 · TypeScript 6 (ESM) · TypeORM 1 · PostgreSQL 16 · Vitest · oxlint · pnpm
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Requirements
 
-## Project setup
+| Tool | Version | Needed for |
+|---|---|---|
+| Node.js | >= 22 | Runtime (`import.meta.dirname`, native ESM) |
+| pnpm | >= 10 | Package manager |
+| Docker | any recent | Running the PostgreSQL container |
+| Java | >= 11 | Only for `build:client` (the OpenAPI generator is a Java tool) |
+
+---
+
+## Quick start
 
 ```bash
-$ pnpm install
+pnpm install                                        # 1. install dependencies
+cp .env.example .env                                # 2. create your local env file
+docker compose -f docker-compose.db.yml up -d       # 3. start PostgreSQL (port 5433)
+pnpm start:dev                                      # 4. run the API in watch mode
 ```
 
-## Compile and run the project
+Then open:
+
+| URL | What |
+|---|---|
+| `http://localhost:3333/api` | Swagger UI |
+| `http://localhost:3333/api-json` | Raw OpenAPI spec (JSON) |
+
+> All routes are served under the **`/api`** global prefix.
+
+---
+
+## Environment variables
+
+Copy `.env.example` to `.env` and adjust. The API loads `.env`, `.env.development` and `.env.production` (in that order) via `@nestjs/config`.
+
+### Active — read by the code
+
+| Variable | Default | Description |
+|---|---|---|
+| `PORT` | `5000` | Port the API listens on. `.env.example` sets `3333`. |
+| `DATABASE_URL` | – | Full Postgres connection string. **Takes precedence over every `POSTGRES_*` variable.** |
+| `DB_SYNCHRONIZE` | `false` | `true` lets TypeORM create/update tables from your entities automatically. Dev only. |
+| `DB_LOGGING` | `false` | `true` logs every SQL statement. |
+| `CORS_ORIGIN` | `*` | Space-separated list of allowed origins. |
+| `ACCESS_TOKEN_SECRET` | `secret` | JWT access token secret. |
+| `REFRESH_TOKEN_SECRET` | `refresh` | JWT refresh token secret. |
+
+### Fallback — used only when `DATABASE_URL` is **unset**
+
+`POSTGRES_HOST` · `POSTGRES_PORT` · `POSTGRES_USER` · `POSTGRES_PASSWORD` · `POSTGRES_DB`
+
+`POSTGRES_USER`, `POSTGRES_PASSWORD` and `POSTGRES_DB` are **also** read by `docker-compose.db.yml` to provision the container. `POSTGRES_PORT` is not — the host port is fixed at `5433` in the compose file.
+
+> ⚠️ **Common gotcha:** while `DATABASE_URL` is set, editing `POSTGRES_HOST`/`POSTGRES_PORT`/etc. changes nothing for the API. Comment `DATABASE_URL` out to use the discrete variables.
+
+### Placeholders — not yet wired to any code
+
+`SMTP_HOST` · `SMTP_PORT` · `SMTP_USER` · `SMTP_PASS` · `SMTP_FROM` · `SMTP_SECURE` · `SMTP_SERVICE` · `TOKEN_EXPIRATION_HOURS` · `SECURE_COOKIE`
+
+Reserved for future mail and cookie support. Setting them today has no effect.
+
+---
+
+## Database
+
+PostgreSQL runs in Docker, published on host port **`5433`** to avoid clashing with a local Postgres on `5432`.
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+docker compose -f docker-compose.db.yml up -d      # start (add --wait to block until healthy)
+docker compose -f docker-compose.db.yml ps         # status
+docker compose -f docker-compose.db.yml logs -f    # follow logs
+docker compose -f docker-compose.db.yml down       # stop, keep data
+docker compose -f docker-compose.db.yml down -v    # stop and DELETE the data volume
 ```
 
-## Run tests
+Data lives in the named volume `spira-api_postgres_data` and survives `down`. Verify connectivity directly:
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+psql "postgresql://spira:spira_secret@localhost:5433/spira_db" -c "select version();"
 ```
 
-## Deployment
+---
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## Migrations
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Migrations live in `src/database/migrations/` and use the data source at `src/database/data-source.ts`.
+The TypeORM CLI runs through [`tsx`](https://tsx.is/), so `.ts` migrations execute directly — no build step.
+
+| Command | What it does |
+|---|---|
+| `pnpm migration:create src/database/migrations/<Name>` | Create an **empty** migration (write the SQL yourself). |
+| `pnpm migration:generate src/database/migrations/<Name>` | **Diff** your entities against the live DB and write the SQL for you. Requires a running DB. |
+| `pnpm migration:run` | Apply all pending migrations. |
+| `pnpm migration:revert` | Roll back the last applied migration. |
+| `pnpm migration:show` | List migrations and which are applied. Handy as a connection smoke test. |
+
+### `synchronize` vs. migrations
+
+`DB_SYNCHRONIZE=true` makes TypeORM reshape the schema from your entities on every boot. It's convenient while sketching entities, but it can silently drop columns and it conflicts with migrations.
+
+**Recommended flow:** keep it `true` while modeling, then before any real data exists switch to `false` and lock the schema in:
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+# in .env -> DB_SYNCHRONIZE = false
+pnpm migration:generate src/database/migrations/InitialSchema
+pnpm migration:run
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Observability
+## OpenAPI & the frontend API client
 
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
+`pnpm build:client` turns the API's routes and DTOs into a **ready-to-use, fully typed TypeScript client** that you drop into the frontend — so the frontend calls `api.getUsers()` instead of hand-writing `fetch` calls and response types.
 
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
+It runs in two steps:
 
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
+```bash
+pnpm generate:swagger   # 1. boots the app, writes the OpenAPI spec to ./swagger.json
+pnpm build:client       # 2. runs step 1, then generates ./generated/api-client
+```
 
-## Resources
+| Step | Tool | Output |
+|---|---|---|
+| 1 | `src/generate-swagger.ts` (via `tsx`) | `swagger.json` |
+| 2 | `@openapitools/openapi-generator-cli` (`typescript-axios`) | `generated/api-client/` — `apis/`, `models/`, `configuration.ts` |
 
-Check out a few resources that may come in handy when working with NestJS:
+Generator behaviour is configured in `openapi/config.json` (camelCase models, separate `apis/`+`models/` folders, axios) and the generator version is pinned in `openapitools.json`.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observer](https://observer.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+**Two things to know:**
 
-## Support
+1. **A running database is required.** `generate:swagger` boots the real `AppModule`, which connects via TypeORM. Start the DB first.
+2. **The spec's paths do not include the `/api` prefix** (`/users`, not `/api/users`). That's intentional — the frontend supplies it once through the client's `basePath`:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+   ```ts
+   new Configuration({ basePath: 'http://localhost:3333/api' })
+   ```
 
-## Stay in touch
+`generated/` is git-ignored; regenerate it whenever endpoints or DTOs change.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+---
 
-## License
+## Build & run
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+pnpm start          # run once
+pnpm start:dev      # watch mode (recommended for development)
+pnpm start:debug    # watch mode + debugger attached
+pnpm build          # compile TypeScript to ./dist
+pnpm start:prod     # run the compiled build (node dist/main)
+```
+
+---
+
+## Testing & code quality
+
+```bash
+pnpm test            # unit tests (Vitest)
+pnpm test:watch      # watch mode
+pnpm test:cov        # coverage report
+pnpm test:e2e        # end-to-end tests
+
+pnpm lint            # oxlint, autofixing what it can
+pnpm lint:check      # oxlint, report only (CI)
+pnpm format          # Prettier, write
+pnpm check:format-lint   # format + lint checks, no writes (CI)
+```
+
+---
+
+## Project structure
+
+```
+src/
+├── common/              # Shared building blocks
+│   ├── dto/             #   Reusable DTOs (e.g. MessageResponseDto)
+│   └── use-case/        #   Shared contracts (e.g. CrudRepository)
+├── config/              # Namespaced config, loaded by @nestjs/config
+│   ├── app.config.ts        #   app.port
+│   ├── database.config.ts   #   database.* (TypeORM connection)
+│   ├── jwt.config.ts        #   jwt.*
+│   └── configuration.ts     #   aggregates the three above
+├── database/
+│   ├── data-source.ts   # TypeORM DataSource used by the CLI
+│   └── migrations/      # Migration files
+├── generate-swagger.ts  # Writes swagger.json (used by build:client)
+├── main.ts              # Bootstrap: pipes, logger, CORS, /api prefix, Swagger
+└── app.module.ts        # Root module: ConfigModule + TypeOrmModule
+
+openapi/config.json      # OpenAPI generator options
+openapitools.json        # Pinned generator version
+docker-compose.db.yml    # PostgreSQL service
+```
+
+Entities are auto-discovered: any `*.entity.ts` under `src/` is picked up by both the app (`autoLoadEntities`) and the CLI data source.
