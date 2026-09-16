@@ -1,5 +1,5 @@
-# Solo base de datos PostgreSQL (sin la API).
-# Uso: docker compose -f docker-compose.db.yml up -d
+# PostgreSQL database only (without the API).
+# Usage: docker compose -f docker-compose.db.yml up -d
 
 services:
   db:

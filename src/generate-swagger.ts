@@ -19,7 +19,7 @@ async function generateSwagger() {
 
   writeFileSync('./swagger.json', JSON.stringify(document, null, 2));
   await app.close();
-  console.log('Especificación OpenAPI generada en ./swagger.json');
+  console.log('OpenAPI specification written to ./swagger.json');
 }
 
 await generateSwagger();

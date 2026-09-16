@@ -2,7 +2,7 @@ import 'dotenv/config';
 import * as path from 'node:path';
 import { DataSource } from 'typeorm';
 
-// En ESM no existe `__dirname`; `import.meta.dirname` es su equivalente (Node >= 20.11).
+// ESM has no `__dirname`; `import.meta.dirname` is its equivalent (Node >= 20.11).
 const currentDir = import.meta.dirname;
 
 const entities = [path.join(currentDir, '..', '**', '*.entity.{ts,js}')];
@@ -15,6 +15,7 @@ export const AppDataSource = new DataSource(
     ? {
         type: 'postgres',
         url: databaseUrl.trim(),
+        uuidExtension: 'pgcrypto',
         entities,
         migrations,
       }
@@ -25,6 +26,7 @@ export const AppDataSource = new DataSource(
         username: process.env.POSTGRES_USER || 'spira',
         password: process.env.POSTGRES_PASSWORD || 'spira_secret',
         database: process.env.POSTGRES_DB || 'spira_db',
+        uuidExtension: 'pgcrypto',
         entities,
         migrations,
       },

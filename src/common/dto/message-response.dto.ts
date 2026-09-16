@@ -3,8 +3,8 @@ import { IsNotEmpty, IsString } from 'class-validator';
 
 export class MessageResponseDto {
   @ApiProperty({
-    description: 'Mensaje de respuesta',
-    example: 'Solicitud exitosa',
+    description: 'Human-readable message describing the outcome.',
+    example: 'Request completed successfully',
   })
   @IsNotEmpty()
   @IsString()

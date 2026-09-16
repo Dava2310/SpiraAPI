@@ -8,6 +8,7 @@ export default () => {
       database: {
         type: 'postgres' as const,
         url: databaseUrl.trim(),
+        uuidExtension: 'pgcrypto' as const,
         synchronize,
         logging,
       },
@@ -28,6 +29,7 @@ export default () => {
       username,
       password,
       database,
+      uuidExtension: 'pgcrypto' as const,
       synchronize,
       logging,
     },

@@ -14,6 +14,1091 @@
           "App"
         ]
       }
+    },
+    "/retailers": {
+      "get": {
+        "operationId": "RetailersController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of all retailers.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RetailerResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all retailers",
+        "tags": [
+          "retailers"
+        ]
+      },
+      "post": {
+        "operationId": "RetailersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Data to create a new retailer.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRetailerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The retailer has been created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetailerCreatedResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid data — the slug or the tax ID is already taken."
+          }
+        },
+        "summary": "Create a new retailer",
+        "tags": [
+          "retailers"
+        ]
+      }
+    },
+    "/retailers/{id}": {
+      "get": {
+        "operationId": "RetailersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Retailer ID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retailer found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetailerResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Retailer not found."
+          }
+        },
+        "summary": "Get a single retailer",
+        "tags": [
+          "retailers"
+        ]
+      },
+      "patch": {
+        "operationId": "RetailersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID of the retailer to update",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "New data for the retailer.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRetailerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Retailer updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetailerCreatedResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid data — the slug or the tax ID is already taken."
+          },
+          "404": {
+            "description": "Retailer not found."
+          }
+        },
+        "summary": "Update a retailer",
+        "tags": [
+          "retailers"
+        ]
+      },
+      "delete": {
+        "operationId": "RetailersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Retailer ID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retailer deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Retailer not found."
+          }
+        },
+        "summary": "Delete a retailer by its ID",
+        "tags": [
+          "retailers"
+        ]
+      }
+    },
+    "/recipients": {
+      "get": {
+        "operationId": "RecipientsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of all recipients.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecipientResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all recipients",
+        "tags": [
+          "recipients"
+        ]
+      },
+      "post": {
+        "operationId": "RecipientsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Data to create a new recipient.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRecipientDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The recipient has been created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipientCreatedResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid data — the slug or the tax ID is already taken."
+          }
+        },
+        "summary": "Create a new recipient",
+        "tags": [
+          "recipients"
+        ]
+      }
+    },
+    "/recipients/{id}": {
+      "get": {
+        "operationId": "RecipientsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Recipient ID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recipient found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipientResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recipient not found."
+          }
+        },
+        "summary": "Get a single recipient",
+        "tags": [
+          "recipients"
+        ]
+      },
+      "patch": {
+        "operationId": "RecipientsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID of the recipient to update",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "New data for the recipient.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRecipientDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recipient updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipientCreatedResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid data — the slug or the tax ID is already taken."
+          },
+          "404": {
+            "description": "Recipient not found."
+          }
+        },
+        "summary": "Update a recipient",
+        "tags": [
+          "recipients"
+        ]
+      },
+      "delete": {
+        "operationId": "RecipientsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Recipient ID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recipient deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recipient not found."
+          }
+        },
+        "summary": "Delete a recipient by its ID",
+        "tags": [
+          "recipients"
+        ]
+      }
+    },
+    "/contacts": {
+      "get": {
+        "operationId": "ContactsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of all contacts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ContactResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all contacts",
+        "tags": [
+          "contacts"
+        ]
+      },
+      "post": {
+        "operationId": "ContactsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Data to create a new contact.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContactDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The contact has been created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactCreatedResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid data — owner is not exactly one of retailer/recipient, or the owner already has a primary contact."
+          }
+        },
+        "summary": "Create a new contact",
+        "tags": [
+          "contacts"
+        ]
+      }
+    },
+    "/contacts/{id}": {
+      "get": {
+        "operationId": "ContactsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Contact ID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contact found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Contact not found."
+          }
+        },
+        "summary": "Get a single contact",
+        "tags": [
+          "contacts"
+        ]
+      },
+      "patch": {
+        "operationId": "ContactsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID of the contact to update",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "New data for the contact.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateContactDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contact updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactCreatedResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid data — owner is not exactly one of retailer/recipient, or the owner already has a primary contact."
+          },
+          "404": {
+            "description": "Contact not found."
+          }
+        },
+        "summary": "Update a contact",
+        "tags": [
+          "contacts"
+        ]
+      },
+      "delete": {
+        "operationId": "ContactsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Contact ID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contact deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Contact not found."
+          }
+        },
+        "summary": "Delete a contact by its ID",
+        "tags": [
+          "contacts"
+        ]
+      }
+    },
+    "/locations": {
+      "get": {
+        "operationId": "LocationsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of all locations.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LocationResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all locations",
+        "tags": [
+          "locations"
+        ]
+      },
+      "post": {
+        "operationId": "LocationsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Data to create a new location.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLocationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The location has been created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationCreatedResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid data — owner is not exactly one of retailer/recipient, or the owner already has a primary location."
+          }
+        },
+        "summary": "Create a new location",
+        "tags": [
+          "locations"
+        ]
+      }
+    },
+    "/locations/{id}": {
+      "get": {
+        "operationId": "LocationsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Location ID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Location found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Location not found."
+          }
+        },
+        "summary": "Get a single location",
+        "tags": [
+          "locations"
+        ]
+      },
+      "patch": {
+        "operationId": "LocationsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID of the location to update",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "New data for the location.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLocationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Location updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationCreatedResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid data — owner is not exactly one of retailer/recipient, or the owner already has a primary location."
+          },
+          "404": {
+            "description": "Location not found."
+          }
+        },
+        "summary": "Update a location",
+        "tags": [
+          "locations"
+        ]
+      },
+      "delete": {
+        "operationId": "LocationsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Location ID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Location deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Location not found."
+          }
+        },
+        "summary": "Delete a location by its ID",
+        "tags": [
+          "locations"
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "UsersController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of all users.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all users",
+        "tags": [
+          "users"
+        ]
+      },
+      "post": {
+        "operationId": "UsersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Data to create a new user.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The user has been created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserCreatedResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid data — duplicated email, or profile link does not match the role."
+          }
+        },
+        "summary": "Create a new user",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "UsersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "summary": "Get a single user",
+        "tags": [
+          "users"
+        ]
+      },
+      "patch": {
+        "operationId": "UsersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID of the user to update",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "New data for the user.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserCreatedResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid data — duplicated email, or profile link does not match the role."
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "summary": "Update a user",
+        "tags": [
+          "users"
+        ]
+      },
+      "delete": {
+        "operationId": "UsersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "summary": "Delete a user by its ID",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/invalid-tokens": {
+      "get": {
+        "operationId": "InvalidTokensController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of all denylist entries.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InvalidTokenResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all denylist entries",
+        "tags": [
+          "invalid-tokens"
+        ]
+      },
+      "post": {
+        "operationId": "InvalidTokensController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Data to add a token to the denylist.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInvalidTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The token has been revoked successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidTokenCreatedResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid data — the jti is already on the denylist."
+          }
+        },
+        "summary": "Revoke a token",
+        "tags": [
+          "invalid-tokens"
+        ]
+      }
+    },
+    "/invalid-tokens/{id}": {
+      "get": {
+        "operationId": "InvalidTokensController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Denylist entry ID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Denylist entry found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidTokenResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Denylist entry not found."
+          }
+        },
+        "summary": "Get a single denylist entry",
+        "tags": [
+          "invalid-tokens"
+        ]
+      },
+      "patch": {
+        "operationId": "InvalidTokensController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID of the entry to update",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "New data for the denylist entry.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInvalidTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Denylist entry updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidTokenCreatedResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid data — the jti is already on the denylist."
+          },
+          "404": {
+            "description": "Denylist entry not found."
+          }
+        },
+        "summary": "Update a denylist entry",
+        "tags": [
+          "invalid-tokens"
+        ]
+      },
+      "delete": {
+        "operationId": "InvalidTokensController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Denylist entry ID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Denylist entry deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Denylist entry not found."
+          }
+        },
+        "summary": "Delete a denylist entry by its ID",
+        "tags": [
+          "invalid-tokens"
+        ]
+      }
+    },
+    "/invalid-tokens/expired": {
+      "delete": {
+        "description": "Removes entries past their expiry. Safe because ordinary JWT validation rejects an expired token anyway.",
+        "operationId": "InvalidTokensController_purgeExpired",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Expired entries purged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Purge expired denylist entries",
+        "tags": [
+          "invalid-tokens"
+        ]
+      }
     }
   },
   "info": {
@@ -37,6 +1122,2827 @@
         "type": "http"
       }
     },
-    "schemas": {}
+    "schemas": {
+      "BusinessType": {
+        "type": "string",
+        "enum": [
+          "SUPERMARKET",
+          "HYPERMARKET",
+          "RESTAURANT",
+          "HOTEL",
+          "BAKERY",
+          "CATERING",
+          "DISTRIBUTOR",
+          "MANUFACTURER",
+          "FARM",
+          "CORPORATE_CAFETERIA",
+          "CONVENIENCE_STORE",
+          "OTHER"
+        ],
+        "description": "Kind of business."
+      },
+      "FoodCategory": {
+        "type": "string",
+        "enum": [
+          "PRODUCE",
+          "BAKERY",
+          "DAIRY",
+          "MEAT",
+          "PREPARED",
+          "DRY_GOODS",
+          "FROZEN"
+        ],
+        "description": "Food categories typically donated."
+      },
+      "DonationFrequency": {
+        "type": "string",
+        "enum": [
+          "DAILY",
+          "WEEKLY",
+          "BIWEEKLY",
+          "AD_HOC"
+        ],
+        "description": "How often surplus is expected."
+      },
+      "ProfileStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING_VERIFICATION",
+          "ACTIVE",
+          "SUSPENDED",
+          "INACTIVE"
+        ],
+        "description": "Lifecycle status."
+      },
+      "RetailerResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique retailer ID.",
+            "format": "uuid"
+          },
+          "legalName": {
+            "type": "string",
+            "description": "Registered company name.",
+            "example": "Supermercados Real S.A."
+          },
+          "tradeName": {
+            "type": "object",
+            "description": "Public brand.",
+            "nullable": true,
+            "example": "Real"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly identifier.",
+            "example": "supermercados-real"
+          },
+          "taxId": {
+            "type": "string",
+            "description": "Government tax identifier.",
+            "example": "80012345-6"
+          },
+          "businessType": {
+            "description": "Kind of business.",
+            "example": "SUPERMARKET",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BusinessType"
+              }
+            ]
+          },
+          "description": {
+            "type": "object",
+            "description": "Company description.",
+            "nullable": true
+          },
+          "website": {
+            "type": "object",
+            "description": "Public website.",
+            "nullable": true
+          },
+          "logoUrl": {
+            "type": "object",
+            "description": "Absolute URL of the logo.",
+            "nullable": true
+          },
+          "foodCategories": {
+            "type": "array",
+            "description": "Food categories typically donated.",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/FoodCategory"
+            }
+          },
+          "donationFrequency": {
+            "description": "How often surplus is expected.",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DonationFrequency"
+              }
+            ]
+          },
+          "requiresRecipientTransport": {
+            "type": "boolean",
+            "description": "Whether the recipient must collect the donation.",
+            "example": true
+          },
+          "minPickupNoticeHours": {
+            "type": "number",
+            "description": "Lead time needed before a collection, in hours.",
+            "nullable": true
+          },
+          "handlingInstructions": {
+            "type": "object",
+            "description": "Notes for whoever collects.",
+            "nullable": true
+          },
+          "status": {
+            "description": "Lifecycle status.",
+            "example": "PENDING_VERIFICATION",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProfileStatus"
+              }
+            ]
+          },
+          "isVerified": {
+            "type": "boolean",
+            "description": "Whether an admin has verified this retailer.",
+            "example": false
+          },
+          "verifiedAt": {
+            "type": "string",
+            "description": "When the retailer was verified (ISO 8601).",
+            "format": "date-time",
+            "nullable": true
+          },
+          "verifiedById": {
+            "type": "object",
+            "description": "ID of the admin who verified this retailer.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "foodSafetyLicenseNumber": {
+            "type": "object",
+            "description": "Food-safety licence number.",
+            "nullable": true
+          },
+          "foodSafetyLicenseExpiresAt": {
+            "type": "string",
+            "description": "Licence expiry date.",
+            "format": "date",
+            "nullable": true
+          },
+          "termsAcceptedAt": {
+            "type": "string",
+            "description": "When the platform terms were accepted (ISO 8601).",
+            "format": "date-time",
+            "nullable": true
+          },
+          "termsVersion": {
+            "type": "object",
+            "description": "Version of the terms accepted.",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "When the retailer was created (ISO 8601).",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "When the retailer was last modified (ISO 8601).",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "legalName",
+          "slug",
+          "taxId",
+          "businessType",
+          "requiresRecipientTransport",
+          "status",
+          "isVerified",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateRetailerDto": {
+        "type": "object",
+        "properties": {
+          "legalName": {
+            "type": "string",
+            "description": "Registered company name.",
+            "example": "Supermercados Real S.A.",
+            "minLength": 2,
+            "maxLength": 200
+          },
+          "tradeName": {
+            "type": "string",
+            "description": "Public brand, when it differs from the legal name.",
+            "example": "Real",
+            "maxLength": 200
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly identifier. Must be unique.",
+            "example": "supermercados-real",
+            "maxLength": 120
+          },
+          "taxId": {
+            "type": "string",
+            "description": "Government tax identifier (RUC/NIT/CIF/EIN). Must be unique.",
+            "example": "80012345-6",
+            "maxLength": 40
+          },
+          "businessType": {
+            "description": "Kind of business the retailer runs.",
+            "example": "SUPERMARKET",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BusinessType"
+              }
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "Free-text presentation of the company."
+          },
+          "website": {
+            "type": "string",
+            "description": "Public website.",
+            "example": "https://real.com.py",
+            "maxLength": 255
+          },
+          "logoUrl": {
+            "type": "string",
+            "description": "Absolute URL of the logo.",
+            "example": "https://cdn.spira.app/logos/supermercados-real.png",
+            "maxLength": 255
+          },
+          "foodCategories": {
+            "type": "array",
+            "description": "Food categories this retailer typically donates.",
+            "example": [
+              "PRODUCE",
+              "BAKERY"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/FoodCategory"
+            }
+          },
+          "donationFrequency": {
+            "description": "How often surplus is expected.",
+            "example": "DAILY",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DonationFrequency"
+              }
+            ]
+          },
+          "requiresRecipientTransport": {
+            "type": "boolean",
+            "description": "Whether the recipient must collect the donation itself.",
+            "default": true,
+            "example": true
+          },
+          "minPickupNoticeHours": {
+            "type": "number",
+            "description": "Lead time needed before a collection, in hours.",
+            "example": 4,
+            "minimum": 0,
+            "maximum": 720
+          },
+          "handlingInstructions": {
+            "type": "string",
+            "description": "Practical notes for whoever collects the donation.",
+            "example": "Enter through the loading dock on Calle Palma and ask for the shift manager."
+          },
+          "foodSafetyLicenseNumber": {
+            "type": "string",
+            "description": "Food-safety licence number.",
+            "maxLength": 80
+          },
+          "foodSafetyLicenseExpiresAt": {
+            "type": "string",
+            "description": "Licence expiry date (calendar date, no time).",
+            "format": "date",
+            "example": "2027-03-31"
+          },
+          "termsAcceptedAt": {
+            "type": "string",
+            "description": "When the retailer accepted the platform terms.",
+            "format": "date-time",
+            "example": "2026-09-16T14:32:05.123Z"
+          },
+          "termsVersion": {
+            "type": "string",
+            "description": "Version of the terms that was accepted.",
+            "example": "2026-01",
+            "maxLength": 20
+          }
+        },
+        "required": [
+          "legalName",
+          "slug",
+          "taxId",
+          "businessType"
+        ]
+      },
+      "RetailerCreatedResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique retailer ID.",
+            "format": "uuid"
+          },
+          "legalName": {
+            "type": "string",
+            "description": "Registered company name.",
+            "example": "Supermercados Real S.A."
+          },
+          "tradeName": {
+            "type": "object",
+            "description": "Public brand.",
+            "nullable": true,
+            "example": "Real"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly identifier.",
+            "example": "supermercados-real"
+          },
+          "taxId": {
+            "type": "string",
+            "description": "Government tax identifier.",
+            "example": "80012345-6"
+          },
+          "businessType": {
+            "description": "Kind of business.",
+            "example": "SUPERMARKET",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BusinessType"
+              }
+            ]
+          },
+          "description": {
+            "type": "object",
+            "description": "Company description.",
+            "nullable": true
+          },
+          "website": {
+            "type": "object",
+            "description": "Public website.",
+            "nullable": true
+          },
+          "logoUrl": {
+            "type": "object",
+            "description": "Absolute URL of the logo.",
+            "nullable": true
+          },
+          "foodCategories": {
+            "type": "array",
+            "description": "Food categories typically donated.",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/FoodCategory"
+            }
+          },
+          "donationFrequency": {
+            "description": "How often surplus is expected.",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DonationFrequency"
+              }
+            ]
+          },
+          "requiresRecipientTransport": {
+            "type": "boolean",
+            "description": "Whether the recipient must collect the donation.",
+            "example": true
+          },
+          "minPickupNoticeHours": {
+            "type": "number",
+            "description": "Lead time needed before a collection, in hours.",
+            "nullable": true
+          },
+          "handlingInstructions": {
+            "type": "object",
+            "description": "Notes for whoever collects.",
+            "nullable": true
+          },
+          "status": {
+            "description": "Lifecycle status.",
+            "example": "PENDING_VERIFICATION",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProfileStatus"
+              }
+            ]
+          },
+          "isVerified": {
+            "type": "boolean",
+            "description": "Whether an admin has verified this retailer.",
+            "example": false
+          },
+          "verifiedAt": {
+            "type": "string",
+            "description": "When the retailer was verified (ISO 8601).",
+            "format": "date-time",
+            "nullable": true
+          },
+          "verifiedById": {
+            "type": "object",
+            "description": "ID of the admin who verified this retailer.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "foodSafetyLicenseNumber": {
+            "type": "object",
+            "description": "Food-safety licence number.",
+            "nullable": true
+          },
+          "foodSafetyLicenseExpiresAt": {
+            "type": "string",
+            "description": "Licence expiry date.",
+            "format": "date",
+            "nullable": true
+          },
+          "termsAcceptedAt": {
+            "type": "string",
+            "description": "When the platform terms were accepted (ISO 8601).",
+            "format": "date-time",
+            "nullable": true
+          },
+          "termsVersion": {
+            "type": "object",
+            "description": "Version of the terms accepted.",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "When the retailer was created (ISO 8601).",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "When the retailer was last modified (ISO 8601).",
+            "format": "date-time"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable message describing the outcome.",
+            "example": "Retailer created successfully."
+          }
+        },
+        "required": [
+          "id",
+          "legalName",
+          "slug",
+          "taxId",
+          "businessType",
+          "requiresRecipientTransport",
+          "status",
+          "isVerified",
+          "createdAt",
+          "updatedAt",
+          "message"
+        ]
+      },
+      "UpdateRetailerDto": {
+        "type": "object",
+        "properties": {
+          "legalName": {
+            "type": "string",
+            "description": "Registered company name.",
+            "example": "Supermercados Real S.A.",
+            "minLength": 2,
+            "maxLength": 200
+          },
+          "tradeName": {
+            "type": "string",
+            "description": "Public brand, when it differs from the legal name.",
+            "example": "Real",
+            "maxLength": 200
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly identifier. Must be unique.",
+            "example": "supermercados-real",
+            "maxLength": 120
+          },
+          "taxId": {
+            "type": "string",
+            "description": "Government tax identifier (RUC/NIT/CIF/EIN). Must be unique.",
+            "example": "80012345-6",
+            "maxLength": 40
+          },
+          "businessType": {
+            "description": "Kind of business the retailer runs.",
+            "example": "SUPERMARKET",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BusinessType"
+              }
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "Free-text presentation of the company."
+          },
+          "website": {
+            "type": "string",
+            "description": "Public website.",
+            "example": "https://real.com.py",
+            "maxLength": 255
+          },
+          "logoUrl": {
+            "type": "string",
+            "description": "Absolute URL of the logo.",
+            "example": "https://cdn.spira.app/logos/supermercados-real.png",
+            "maxLength": 255
+          },
+          "foodCategories": {
+            "type": "array",
+            "description": "Food categories this retailer typically donates.",
+            "example": [
+              "PRODUCE",
+              "BAKERY"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/FoodCategory"
+            }
+          },
+          "donationFrequency": {
+            "description": "How often surplus is expected.",
+            "example": "DAILY",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DonationFrequency"
+              }
+            ]
+          },
+          "requiresRecipientTransport": {
+            "type": "boolean",
+            "description": "Whether the recipient must collect the donation itself.",
+            "default": true,
+            "example": true
+          },
+          "minPickupNoticeHours": {
+            "type": "number",
+            "description": "Lead time needed before a collection, in hours.",
+            "example": 4,
+            "minimum": 0,
+            "maximum": 720
+          },
+          "handlingInstructions": {
+            "type": "string",
+            "description": "Practical notes for whoever collects the donation.",
+            "example": "Enter through the loading dock on Calle Palma and ask for the shift manager."
+          },
+          "foodSafetyLicenseNumber": {
+            "type": "string",
+            "description": "Food-safety licence number.",
+            "maxLength": 80
+          },
+          "foodSafetyLicenseExpiresAt": {
+            "type": "string",
+            "description": "Licence expiry date (calendar date, no time).",
+            "format": "date",
+            "example": "2027-03-31"
+          },
+          "termsAcceptedAt": {
+            "type": "string",
+            "description": "When the retailer accepted the platform terms.",
+            "format": "date-time",
+            "example": "2026-09-16T14:32:05.123Z"
+          },
+          "termsVersion": {
+            "type": "string",
+            "description": "Version of the terms that was accepted.",
+            "example": "2026-01",
+            "maxLength": 20
+          }
+        }
+      },
+      "MessageResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Human-readable message describing the outcome.",
+            "example": "Request completed successfully"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "RecipientType": {
+        "type": "string",
+        "enum": [
+          "NGO",
+          "FOOD_BANK",
+          "SOUP_KITCHEN",
+          "SHELTER",
+          "COMMUNITY_FRIDGE",
+          "CHURCH",
+          "SCHOOL",
+          "CERTIFIED_INDIVIDUAL"
+        ],
+        "description": "What kind of receiver this is."
+      },
+      "DietaryRestriction": {
+        "type": "string",
+        "enum": [
+          "HALAL",
+          "KOSHER",
+          "NO_PORK",
+          "NO_ALCOHOL",
+          "VEGETARIAN"
+        ],
+        "description": "Dietary rules their beneficiaries follow."
+      },
+      "BackgroundCheckStatus": {
+        "type": "string",
+        "enum": [
+          "NOT_REQUIRED",
+          "PENDING",
+          "PASSED",
+          "FAILED"
+        ],
+        "description": "Background-check outcome."
+      },
+      "RecipientResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique recipient ID.",
+            "format": "uuid"
+          },
+          "type": {
+            "description": "What kind of receiver this is.",
+            "example": "FOOD_BANK",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecipientType"
+              }
+            ]
+          },
+          "legalName": {
+            "type": "object",
+            "description": "Registered organization name.",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Public name of the organization, or the person's name.",
+            "example": "Banco de Alimentos Paraguay"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly identifier."
+          },
+          "taxId": {
+            "type": "object",
+            "description": "Government tax identifier.",
+            "nullable": true
+          },
+          "nonprofitRegistrationNumber": {
+            "type": "object",
+            "description": "Nonprofit registration number.",
+            "nullable": true
+          },
+          "nationalId": {
+            "type": "object",
+            "description": "National ID document. Individuals only.",
+            "nullable": true
+          },
+          "mission": {
+            "type": "object",
+            "description": "Mission statement.",
+            "nullable": true
+          },
+          "website": {
+            "type": "object",
+            "description": "Public website.",
+            "nullable": true
+          },
+          "logoUrl": {
+            "type": "object",
+            "description": "Absolute URL of the logo.",
+            "nullable": true
+          },
+          "serviceRadiusKm": {
+            "type": "number",
+            "description": "How far they are willing to travel, in kilometres.",
+            "nullable": true
+          },
+          "hasVehicle": {
+            "type": "boolean",
+            "description": "Whether they have their own vehicle."
+          },
+          "transportCapacityKg": {
+            "type": "number",
+            "description": "How much they can carry in one trip, in kilograms.",
+            "nullable": true
+          },
+          "hasRefrigeratedTransport": {
+            "type": "boolean",
+            "description": "Whether their transport is refrigerated."
+          },
+          "peopleServedPerWeek": {
+            "type": "number",
+            "description": "People fed per week.",
+            "nullable": true
+          },
+          "maxDailyIntakeKg": {
+            "type": "number",
+            "description": "Most they can take in a single day, in kilograms.",
+            "nullable": true
+          },
+          "acceptedFoodCategories": {
+            "type": "array",
+            "description": "Categories they will take.",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/FoodCategory"
+            }
+          },
+          "excludedFoodCategories": {
+            "type": "array",
+            "description": "Categories they explicitly refuse.",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/FoodCategory"
+            }
+          },
+          "dietaryRestrictions": {
+            "type": "array",
+            "description": "Dietary rules their beneficiaries follow.",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/DietaryRestriction"
+            }
+          },
+          "acceptsNearExpiry": {
+            "type": "boolean",
+            "description": "Whether they accept near-expiry food."
+          },
+          "acceptsPreparedFood": {
+            "type": "boolean",
+            "description": "Whether they accept prepared food."
+          },
+          "acceptsFrozen": {
+            "type": "boolean",
+            "description": "Whether they accept frozen goods."
+          },
+          "status": {
+            "description": "Lifecycle status.",
+            "example": "PENDING_VERIFICATION",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProfileStatus"
+              }
+            ]
+          },
+          "isVerified": {
+            "type": "boolean",
+            "description": "Whether an admin has verified this recipient."
+          },
+          "verifiedAt": {
+            "type": "string",
+            "description": "When the recipient was verified (ISO 8601).",
+            "format": "date-time",
+            "nullable": true
+          },
+          "verifiedById": {
+            "type": "object",
+            "description": "ID of the admin who verified this recipient.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "foodHandlingCertificationNumber": {
+            "type": "object",
+            "description": "Food-handling certification number.",
+            "nullable": true
+          },
+          "certificationExpiresAt": {
+            "type": "string",
+            "description": "Certification expiry date.",
+            "format": "date",
+            "nullable": true
+          },
+          "backgroundCheckStatus": {
+            "description": "Background-check outcome.",
+            "example": "NOT_REQUIRED",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BackgroundCheckStatus"
+              }
+            ]
+          },
+          "insurancePolicyNumber": {
+            "type": "object",
+            "description": "Liability insurance policy number.",
+            "nullable": true
+          },
+          "termsAcceptedAt": {
+            "type": "string",
+            "description": "When the platform terms were accepted (ISO 8601).",
+            "format": "date-time",
+            "nullable": true
+          },
+          "termsVersion": {
+            "type": "object",
+            "description": "Version of the terms accepted.",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "When the recipient was created (ISO 8601).",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "When the recipient was last modified (ISO 8601).",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "displayName",
+          "slug",
+          "hasVehicle",
+          "hasRefrigeratedTransport",
+          "acceptsNearExpiry",
+          "acceptsPreparedFood",
+          "acceptsFrozen",
+          "status",
+          "isVerified",
+          "backgroundCheckStatus",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateRecipientDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "What kind of receiver this is.",
+            "example": "FOOD_BANK",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecipientType"
+              }
+            ]
+          },
+          "legalName": {
+            "type": "string",
+            "description": "Registered organization name. Leave unset for a certified individual.",
+            "example": "Fundación Banco de Alimentos Paraguay",
+            "maxLength": 200
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Public name of the organization, or the person's name.",
+            "example": "Banco de Alimentos Paraguay",
+            "minLength": 2,
+            "maxLength": 200
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly identifier. Must be unique.",
+            "example": "banco-de-alimentos-py",
+            "maxLength": 120
+          },
+          "taxId": {
+            "type": "string",
+            "description": "Government tax identifier. Organizations only, and unique.",
+            "example": "80098765-4",
+            "maxLength": 40
+          },
+          "nonprofitRegistrationNumber": {
+            "type": "string",
+            "description": "Registration number proving nonprofit status.",
+            "maxLength": 80
+          },
+          "nationalId": {
+            "type": "string",
+            "description": "National ID document. Individuals only.",
+            "maxLength": 40
+          },
+          "mission": {
+            "type": "string",
+            "description": "Free-text description of who they serve and how."
+          },
+          "website": {
+            "type": "string",
+            "description": "Public website.",
+            "maxLength": 255
+          },
+          "logoUrl": {
+            "type": "string",
+            "description": "Absolute URL of the logo.",
+            "maxLength": 255
+          },
+          "serviceRadiusKm": {
+            "type": "number",
+            "description": "How far they are willing to travel, in kilometres.",
+            "example": 15,
+            "minimum": 0,
+            "maximum": 5000
+          },
+          "hasVehicle": {
+            "type": "boolean",
+            "description": "Whether they have their own vehicle for collections.",
+            "default": false
+          },
+          "transportCapacityKg": {
+            "type": "number",
+            "description": "How much they can carry in one trip, in kilograms.",
+            "example": 750.5,
+            "minimum": 0,
+            "maximum": 999999.99
+          },
+          "hasRefrigeratedTransport": {
+            "type": "boolean",
+            "description": "Whether their transport is refrigerated.",
+            "default": false
+          },
+          "peopleServedPerWeek": {
+            "type": "number",
+            "description": "People fed per week.",
+            "example": 1200,
+            "minimum": 0
+          },
+          "maxDailyIntakeKg": {
+            "type": "number",
+            "description": "Most they can take in a single day, in kilograms.",
+            "example": 2000,
+            "minimum": 0,
+            "maximum": 999999.99
+          },
+          "acceptedFoodCategories": {
+            "type": "array",
+            "description": "Categories they will take.",
+            "example": [
+              "PRODUCE",
+              "DRY_GOODS"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/FoodCategory"
+            }
+          },
+          "excludedFoodCategories": {
+            "type": "array",
+            "description": "Categories they explicitly refuse.",
+            "example": [
+              "MEAT"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/FoodCategory"
+            }
+          },
+          "dietaryRestrictions": {
+            "type": "array",
+            "description": "Dietary rules their beneficiaries follow.",
+            "example": [
+              "NO_PORK"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/DietaryRestriction"
+            }
+          },
+          "acceptsNearExpiry": {
+            "type": "boolean",
+            "description": "Whether they accept food close to its expiry date.",
+            "default": false
+          },
+          "acceptsPreparedFood": {
+            "type": "boolean",
+            "description": "Whether they accept already-prepared food.",
+            "default": false
+          },
+          "acceptsFrozen": {
+            "type": "boolean",
+            "description": "Whether they accept frozen goods.",
+            "default": false
+          },
+          "foodHandlingCertificationNumber": {
+            "type": "string",
+            "description": "Food-handling certification number.",
+            "maxLength": 80
+          },
+          "certificationExpiresAt": {
+            "type": "string",
+            "description": "Certification expiry date (calendar date, no time).",
+            "format": "date",
+            "example": "2027-06-30"
+          },
+          "insurancePolicyNumber": {
+            "type": "string",
+            "description": "Liability insurance policy number.",
+            "maxLength": 80
+          },
+          "termsAcceptedAt": {
+            "type": "string",
+            "description": "When the recipient accepted the platform terms.",
+            "format": "date-time",
+            "example": "2026-09-16T14:32:05.123Z"
+          },
+          "termsVersion": {
+            "type": "string",
+            "description": "Version of the terms that was accepted.",
+            "example": "2026-01",
+            "maxLength": 20
+          }
+        },
+        "required": [
+          "type",
+          "displayName",
+          "slug"
+        ]
+      },
+      "RecipientCreatedResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique recipient ID.",
+            "format": "uuid"
+          },
+          "type": {
+            "description": "What kind of receiver this is.",
+            "example": "FOOD_BANK",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecipientType"
+              }
+            ]
+          },
+          "legalName": {
+            "type": "object",
+            "description": "Registered organization name.",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Public name of the organization, or the person's name.",
+            "example": "Banco de Alimentos Paraguay"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly identifier."
+          },
+          "taxId": {
+            "type": "object",
+            "description": "Government tax identifier.",
+            "nullable": true
+          },
+          "nonprofitRegistrationNumber": {
+            "type": "object",
+            "description": "Nonprofit registration number.",
+            "nullable": true
+          },
+          "nationalId": {
+            "type": "object",
+            "description": "National ID document. Individuals only.",
+            "nullable": true
+          },
+          "mission": {
+            "type": "object",
+            "description": "Mission statement.",
+            "nullable": true
+          },
+          "website": {
+            "type": "object",
+            "description": "Public website.",
+            "nullable": true
+          },
+          "logoUrl": {
+            "type": "object",
+            "description": "Absolute URL of the logo.",
+            "nullable": true
+          },
+          "serviceRadiusKm": {
+            "type": "number",
+            "description": "How far they are willing to travel, in kilometres.",
+            "nullable": true
+          },
+          "hasVehicle": {
+            "type": "boolean",
+            "description": "Whether they have their own vehicle."
+          },
+          "transportCapacityKg": {
+            "type": "number",
+            "description": "How much they can carry in one trip, in kilograms.",
+            "nullable": true
+          },
+          "hasRefrigeratedTransport": {
+            "type": "boolean",
+            "description": "Whether their transport is refrigerated."
+          },
+          "peopleServedPerWeek": {
+            "type": "number",
+            "description": "People fed per week.",
+            "nullable": true
+          },
+          "maxDailyIntakeKg": {
+            "type": "number",
+            "description": "Most they can take in a single day, in kilograms.",
+            "nullable": true
+          },
+          "acceptedFoodCategories": {
+            "type": "array",
+            "description": "Categories they will take.",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/FoodCategory"
+            }
+          },
+          "excludedFoodCategories": {
+            "type": "array",
+            "description": "Categories they explicitly refuse.",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/FoodCategory"
+            }
+          },
+          "dietaryRestrictions": {
+            "type": "array",
+            "description": "Dietary rules their beneficiaries follow.",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/DietaryRestriction"
+            }
+          },
+          "acceptsNearExpiry": {
+            "type": "boolean",
+            "description": "Whether they accept near-expiry food."
+          },
+          "acceptsPreparedFood": {
+            "type": "boolean",
+            "description": "Whether they accept prepared food."
+          },
+          "acceptsFrozen": {
+            "type": "boolean",
+            "description": "Whether they accept frozen goods."
+          },
+          "status": {
+            "description": "Lifecycle status.",
+            "example": "PENDING_VERIFICATION",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProfileStatus"
+              }
+            ]
+          },
+          "isVerified": {
+            "type": "boolean",
+            "description": "Whether an admin has verified this recipient."
+          },
+          "verifiedAt": {
+            "type": "string",
+            "description": "When the recipient was verified (ISO 8601).",
+            "format": "date-time",
+            "nullable": true
+          },
+          "verifiedById": {
+            "type": "object",
+            "description": "ID of the admin who verified this recipient.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "foodHandlingCertificationNumber": {
+            "type": "object",
+            "description": "Food-handling certification number.",
+            "nullable": true
+          },
+          "certificationExpiresAt": {
+            "type": "string",
+            "description": "Certification expiry date.",
+            "format": "date",
+            "nullable": true
+          },
+          "backgroundCheckStatus": {
+            "description": "Background-check outcome.",
+            "example": "NOT_REQUIRED",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BackgroundCheckStatus"
+              }
+            ]
+          },
+          "insurancePolicyNumber": {
+            "type": "object",
+            "description": "Liability insurance policy number.",
+            "nullable": true
+          },
+          "termsAcceptedAt": {
+            "type": "string",
+            "description": "When the platform terms were accepted (ISO 8601).",
+            "format": "date-time",
+            "nullable": true
+          },
+          "termsVersion": {
+            "type": "object",
+            "description": "Version of the terms accepted.",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "When the recipient was created (ISO 8601).",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "When the recipient was last modified (ISO 8601).",
+            "format": "date-time"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable message describing the outcome.",
+            "example": "Recipient created successfully."
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "displayName",
+          "slug",
+          "hasVehicle",
+          "hasRefrigeratedTransport",
+          "acceptsNearExpiry",
+          "acceptsPreparedFood",
+          "acceptsFrozen",
+          "status",
+          "isVerified",
+          "backgroundCheckStatus",
+          "createdAt",
+          "updatedAt",
+          "message"
+        ]
+      },
+      "UpdateRecipientDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "What kind of receiver this is.",
+            "example": "FOOD_BANK",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecipientType"
+              }
+            ]
+          },
+          "legalName": {
+            "type": "string",
+            "description": "Registered organization name. Leave unset for a certified individual.",
+            "example": "Fundación Banco de Alimentos Paraguay",
+            "maxLength": 200
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Public name of the organization, or the person's name.",
+            "example": "Banco de Alimentos Paraguay",
+            "minLength": 2,
+            "maxLength": 200
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly identifier. Must be unique.",
+            "example": "banco-de-alimentos-py",
+            "maxLength": 120
+          },
+          "taxId": {
+            "type": "string",
+            "description": "Government tax identifier. Organizations only, and unique.",
+            "example": "80098765-4",
+            "maxLength": 40
+          },
+          "nonprofitRegistrationNumber": {
+            "type": "string",
+            "description": "Registration number proving nonprofit status.",
+            "maxLength": 80
+          },
+          "nationalId": {
+            "type": "string",
+            "description": "National ID document. Individuals only.",
+            "maxLength": 40
+          },
+          "mission": {
+            "type": "string",
+            "description": "Free-text description of who they serve and how."
+          },
+          "website": {
+            "type": "string",
+            "description": "Public website.",
+            "maxLength": 255
+          },
+          "logoUrl": {
+            "type": "string",
+            "description": "Absolute URL of the logo.",
+            "maxLength": 255
+          },
+          "serviceRadiusKm": {
+            "type": "number",
+            "description": "How far they are willing to travel, in kilometres.",
+            "example": 15,
+            "minimum": 0,
+            "maximum": 5000
+          },
+          "hasVehicle": {
+            "type": "boolean",
+            "description": "Whether they have their own vehicle for collections.",
+            "default": false
+          },
+          "transportCapacityKg": {
+            "type": "number",
+            "description": "How much they can carry in one trip, in kilograms.",
+            "example": 750.5,
+            "minimum": 0,
+            "maximum": 999999.99
+          },
+          "hasRefrigeratedTransport": {
+            "type": "boolean",
+            "description": "Whether their transport is refrigerated.",
+            "default": false
+          },
+          "peopleServedPerWeek": {
+            "type": "number",
+            "description": "People fed per week.",
+            "example": 1200,
+            "minimum": 0
+          },
+          "maxDailyIntakeKg": {
+            "type": "number",
+            "description": "Most they can take in a single day, in kilograms.",
+            "example": 2000,
+            "minimum": 0,
+            "maximum": 999999.99
+          },
+          "acceptedFoodCategories": {
+            "type": "array",
+            "description": "Categories they will take.",
+            "example": [
+              "PRODUCE",
+              "DRY_GOODS"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/FoodCategory"
+            }
+          },
+          "excludedFoodCategories": {
+            "type": "array",
+            "description": "Categories they explicitly refuse.",
+            "example": [
+              "MEAT"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/FoodCategory"
+            }
+          },
+          "dietaryRestrictions": {
+            "type": "array",
+            "description": "Dietary rules their beneficiaries follow.",
+            "example": [
+              "NO_PORK"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/DietaryRestriction"
+            }
+          },
+          "acceptsNearExpiry": {
+            "type": "boolean",
+            "description": "Whether they accept food close to its expiry date.",
+            "default": false
+          },
+          "acceptsPreparedFood": {
+            "type": "boolean",
+            "description": "Whether they accept already-prepared food.",
+            "default": false
+          },
+          "acceptsFrozen": {
+            "type": "boolean",
+            "description": "Whether they accept frozen goods.",
+            "default": false
+          },
+          "foodHandlingCertificationNumber": {
+            "type": "string",
+            "description": "Food-handling certification number.",
+            "maxLength": 80
+          },
+          "certificationExpiresAt": {
+            "type": "string",
+            "description": "Certification expiry date (calendar date, no time).",
+            "format": "date",
+            "example": "2027-06-30"
+          },
+          "insurancePolicyNumber": {
+            "type": "string",
+            "description": "Liability insurance policy number.",
+            "maxLength": 80
+          },
+          "termsAcceptedAt": {
+            "type": "string",
+            "description": "When the recipient accepted the platform terms.",
+            "format": "date-time",
+            "example": "2026-09-16T14:32:05.123Z"
+          },
+          "termsVersion": {
+            "type": "string",
+            "description": "Version of the terms that was accepted.",
+            "example": "2026-01",
+            "maxLength": 20
+          }
+        }
+      },
+      "ContactType": {
+        "type": "string",
+        "enum": [
+          "PRIMARY",
+          "OPERATIONS",
+          "LOGISTICS",
+          "BILLING",
+          "EMERGENCY"
+        ],
+        "description": "Which function this contact covers."
+      },
+      "ContactResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique contact ID.",
+            "format": "uuid"
+          },
+          "retailerId": {
+            "type": "object",
+            "description": "Owning retailer. Exactly one owner is set.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "recipientId": {
+            "type": "object",
+            "description": "Owning recipient. Exactly one owner is set.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Full name of the person.",
+            "example": "María González"
+          },
+          "email": {
+            "type": "object",
+            "description": "Email address.",
+            "nullable": true
+          },
+          "phone": {
+            "type": "object",
+            "description": "Phone number in E.164 format.",
+            "nullable": true
+          },
+          "secondaryPhone": {
+            "type": "object",
+            "description": "Alternate phone number in E.164 format.",
+            "nullable": true
+          },
+          "jobTitle": {
+            "type": "object",
+            "description": "Role inside the organization.",
+            "nullable": true
+          },
+          "type": {
+            "description": "Which function this contact covers.",
+            "example": "OPERATIONS",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContactType"
+              }
+            ]
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "description": "Whether this is the main contact."
+          },
+          "notes": {
+            "type": "object",
+            "description": "Internal notes.",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "When the contact was created (ISO 8601).",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "When the contact was last modified (ISO 8601).",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "fullName",
+          "type",
+          "isPrimary",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateContactDto": {
+        "type": "object",
+        "properties": {
+          "retailerId": {
+            "type": "string",
+            "description": "Owning retailer. Provide exactly one of `retailerId` / `recipientId`.",
+            "format": "uuid",
+            "example": "3f2c1b8e-9a4d-4c7f-8b1e-2d6a5c9f0e11"
+          },
+          "recipientId": {
+            "type": "string",
+            "description": "Owning recipient. Provide exactly one of `retailerId` / `recipientId`.",
+            "format": "uuid",
+            "example": "7a1e4c9d-2b8f-4e6a-9c30-5d7b1f2a8c44"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Full name of the person.",
+            "example": "María González",
+            "minLength": 2,
+            "maxLength": 150
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address. Stored case-insensitively.",
+            "example": "maria.gonzalez@real.com.py"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number in E.164 format.",
+            "example": "+595981123456",
+            "maxLength": 30
+          },
+          "secondaryPhone": {
+            "type": "string",
+            "description": "Alternate phone number in E.164 format.",
+            "example": "+595981654321",
+            "maxLength": 30
+          },
+          "jobTitle": {
+            "type": "string",
+            "description": "Role inside the organization.",
+            "example": "Head of Operations",
+            "maxLength": 100
+          },
+          "type": {
+            "description": "Which function this contact covers.",
+            "example": "OPERATIONS",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContactType"
+              }
+            ]
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "description": "Marks the main contact for the owner. At most one per owner.",
+            "default": false,
+            "example": false
+          },
+          "notes": {
+            "type": "string",
+            "description": "Internal notes about reaching this person.",
+            "example": "Prefers WhatsApp. Unavailable Mondays."
+          }
+        },
+        "required": [
+          "fullName",
+          "type"
+        ]
+      },
+      "ContactCreatedResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique contact ID.",
+            "format": "uuid"
+          },
+          "retailerId": {
+            "type": "object",
+            "description": "Owning retailer. Exactly one owner is set.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "recipientId": {
+            "type": "object",
+            "description": "Owning recipient. Exactly one owner is set.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Full name of the person.",
+            "example": "María González"
+          },
+          "email": {
+            "type": "object",
+            "description": "Email address.",
+            "nullable": true
+          },
+          "phone": {
+            "type": "object",
+            "description": "Phone number in E.164 format.",
+            "nullable": true
+          },
+          "secondaryPhone": {
+            "type": "object",
+            "description": "Alternate phone number in E.164 format.",
+            "nullable": true
+          },
+          "jobTitle": {
+            "type": "object",
+            "description": "Role inside the organization.",
+            "nullable": true
+          },
+          "type": {
+            "description": "Which function this contact covers.",
+            "example": "OPERATIONS",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContactType"
+              }
+            ]
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "description": "Whether this is the main contact."
+          },
+          "notes": {
+            "type": "object",
+            "description": "Internal notes.",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "When the contact was created (ISO 8601).",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "When the contact was last modified (ISO 8601).",
+            "format": "date-time"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable message describing the outcome.",
+            "example": "Contact created successfully."
+          }
+        },
+        "required": [
+          "id",
+          "fullName",
+          "type",
+          "isPrimary",
+          "createdAt",
+          "updatedAt",
+          "message"
+        ]
+      },
+      "UpdateContactDto": {
+        "type": "object",
+        "properties": {
+          "retailerId": {
+            "type": "string",
+            "description": "Owning retailer. Provide exactly one of `retailerId` / `recipientId`.",
+            "format": "uuid",
+            "example": "3f2c1b8e-9a4d-4c7f-8b1e-2d6a5c9f0e11"
+          },
+          "recipientId": {
+            "type": "string",
+            "description": "Owning recipient. Provide exactly one of `retailerId` / `recipientId`.",
+            "format": "uuid",
+            "example": "7a1e4c9d-2b8f-4e6a-9c30-5d7b1f2a8c44"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Full name of the person.",
+            "example": "María González",
+            "minLength": 2,
+            "maxLength": 150
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address. Stored case-insensitively.",
+            "example": "maria.gonzalez@real.com.py"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number in E.164 format.",
+            "example": "+595981123456",
+            "maxLength": 30
+          },
+          "secondaryPhone": {
+            "type": "string",
+            "description": "Alternate phone number in E.164 format.",
+            "example": "+595981654321",
+            "maxLength": 30
+          },
+          "jobTitle": {
+            "type": "string",
+            "description": "Role inside the organization.",
+            "example": "Head of Operations",
+            "maxLength": 100
+          },
+          "type": {
+            "description": "Which function this contact covers.",
+            "example": "OPERATIONS",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContactType"
+              }
+            ]
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "description": "Marks the main contact for the owner. At most one per owner.",
+            "default": false,
+            "example": false
+          },
+          "notes": {
+            "type": "string",
+            "description": "Internal notes about reaching this person.",
+            "example": "Prefers WhatsApp. Unavailable Mondays."
+          }
+        }
+      },
+      "LocationType": {
+        "type": "string",
+        "enum": [
+          "STORE",
+          "WAREHOUSE",
+          "DISTRIBUTION_CENTER",
+          "KITCHEN",
+          "OFFICE",
+          "PICKUP_POINT"
+        ],
+        "description": "What kind of site this is."
+      },
+      "PickupWindowDto": {
+        "type": "object",
+        "properties": {
+          "weekday": {
+            "type": "number",
+            "description": "ISO-8601 weekday: 1 = Monday … 7 = Sunday.",
+            "minimum": 1,
+            "maximum": 7,
+            "example": 1
+          },
+          "startTime": {
+            "type": "string",
+            "description": "Local start time in `HH:mm` (24h).",
+            "example": "18:00"
+          },
+          "endTime": {
+            "type": "string",
+            "description": "Local end time in `HH:mm` (24h).",
+            "example": "20:00"
+          },
+          "note": {
+            "type": "string",
+            "description": "Free-text qualifier.",
+            "example": "after closing",
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "weekday",
+          "startTime",
+          "endTime"
+        ]
+      },
+      "LocationResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique location ID.",
+            "format": "uuid"
+          },
+          "retailerId": {
+            "type": "object",
+            "description": "Owning retailer. Exactly one owner is set.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "recipientId": {
+            "type": "object",
+            "description": "Owning recipient. Exactly one owner is set.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "label": {
+            "type": "string",
+            "description": "Human-readable name for the site.",
+            "example": "Sucursal Centro"
+          },
+          "type": {
+            "description": "What kind of site this is.",
+            "example": "STORE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocationType"
+              }
+            ]
+          },
+          "addressLine1": {
+            "type": "string",
+            "description": "Street address, first line."
+          },
+          "addressLine2": {
+            "type": "object",
+            "description": "Street address, second line.",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "description": "City.",
+            "example": "Asunción"
+          },
+          "state": {
+            "type": "object",
+            "description": "State, region or department.",
+            "nullable": true
+          },
+          "postalCode": {
+            "type": "object",
+            "description": "Postal code.",
+            "nullable": true
+          },
+          "countryCode": {
+            "type": "string",
+            "description": "Country as an ISO 3166-1 alpha-2 code.",
+            "example": "PY"
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Latitude in decimal degrees.",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Longitude in decimal degrees.",
+            "nullable": true
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone of the site.",
+            "example": "America/Asuncion"
+          },
+          "pickupWindows": {
+            "description": "Recurring collection availability, by weekday.",
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickupWindowDto"
+            }
+          },
+          "hasColdStorage": {
+            "type": "boolean",
+            "description": "Whether the site has refrigerated storage."
+          },
+          "hasFreezer": {
+            "type": "boolean",
+            "description": "Whether the site has a freezer."
+          },
+          "storageCapacityKg": {
+            "type": "number",
+            "description": "How much the site can hold, in kilograms.",
+            "nullable": true
+          },
+          "phone": {
+            "type": "object",
+            "description": "Direct line for the site, in E.164 format.",
+            "nullable": true
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "description": "Whether this is the main site."
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the site is accepting collections."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "When the location was created (ISO 8601).",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "When the location was last modified (ISO 8601).",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "type",
+          "addressLine1",
+          "city",
+          "countryCode",
+          "timezone",
+          "hasColdStorage",
+          "hasFreezer",
+          "isPrimary",
+          "isActive",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateLocationDto": {
+        "type": "object",
+        "properties": {
+          "retailerId": {
+            "type": "string",
+            "description": "Owning retailer. Provide exactly one of `retailerId` / `recipientId`.",
+            "format": "uuid"
+          },
+          "recipientId": {
+            "type": "string",
+            "description": "Owning recipient. Provide exactly one of `retailerId` / `recipientId`.",
+            "format": "uuid"
+          },
+          "label": {
+            "type": "string",
+            "description": "Human-readable name for the site.",
+            "example": "Sucursal Centro",
+            "minLength": 2,
+            "maxLength": 150
+          },
+          "type": {
+            "description": "What kind of site this is.",
+            "example": "STORE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocationType"
+              }
+            ]
+          },
+          "addressLine1": {
+            "type": "string",
+            "description": "Street address, first line.",
+            "example": "Palma 456",
+            "maxLength": 200
+          },
+          "addressLine2": {
+            "type": "string",
+            "description": "Street address, second line.",
+            "example": "esq. Alberdi",
+            "maxLength": 200
+          },
+          "city": {
+            "type": "string",
+            "description": "City.",
+            "example": "Asunción",
+            "maxLength": 100
+          },
+          "state": {
+            "type": "string",
+            "description": "State, region or department.",
+            "example": "Central",
+            "maxLength": 100
+          },
+          "postalCode": {
+            "type": "string",
+            "description": "Postal code.",
+            "example": "1209",
+            "maxLength": 20
+          },
+          "countryCode": {
+            "type": "string",
+            "description": "Country as an ISO 3166-1 alpha-2 code.",
+            "example": "PY",
+            "minLength": 2,
+            "maxLength": 2
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Latitude in decimal degrees.",
+            "example": -25.281
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Longitude in decimal degrees.",
+            "example": -57.635
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone of the site. `pickupWindows` are local to it.",
+            "example": "America/Asuncion",
+            "maxLength": 50
+          },
+          "pickupWindows": {
+            "description": "Recurring collection availability, by weekday.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickupWindowDto"
+            }
+          },
+          "hasColdStorage": {
+            "type": "boolean",
+            "description": "Whether the site has refrigerated storage.",
+            "default": false
+          },
+          "hasFreezer": {
+            "type": "boolean",
+            "description": "Whether the site has a freezer.",
+            "default": false
+          },
+          "storageCapacityKg": {
+            "type": "number",
+            "description": "How much the site can hold, in kilograms.",
+            "example": 5000,
+            "minimum": 0,
+            "maximum": 999999.99
+          },
+          "phone": {
+            "type": "string",
+            "description": "Direct line for the site, in E.164 format.",
+            "example": "+595214451234",
+            "maxLength": 30
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "description": "Marks the headquarters / main site. At most one per owner.",
+            "default": false
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Set to `false` to take the site out of matching temporarily.",
+            "default": true
+          }
+        },
+        "required": [
+          "label",
+          "type",
+          "addressLine1",
+          "city",
+          "countryCode",
+          "timezone"
+        ]
+      },
+      "LocationCreatedResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique location ID.",
+            "format": "uuid"
+          },
+          "retailerId": {
+            "type": "object",
+            "description": "Owning retailer. Exactly one owner is set.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "recipientId": {
+            "type": "object",
+            "description": "Owning recipient. Exactly one owner is set.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "label": {
+            "type": "string",
+            "description": "Human-readable name for the site.",
+            "example": "Sucursal Centro"
+          },
+          "type": {
+            "description": "What kind of site this is.",
+            "example": "STORE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocationType"
+              }
+            ]
+          },
+          "addressLine1": {
+            "type": "string",
+            "description": "Street address, first line."
+          },
+          "addressLine2": {
+            "type": "object",
+            "description": "Street address, second line.",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "description": "City.",
+            "example": "Asunción"
+          },
+          "state": {
+            "type": "object",
+            "description": "State, region or department.",
+            "nullable": true
+          },
+          "postalCode": {
+            "type": "object",
+            "description": "Postal code.",
+            "nullable": true
+          },
+          "countryCode": {
+            "type": "string",
+            "description": "Country as an ISO 3166-1 alpha-2 code.",
+            "example": "PY"
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Latitude in decimal degrees.",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Longitude in decimal degrees.",
+            "nullable": true
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone of the site.",
+            "example": "America/Asuncion"
+          },
+          "pickupWindows": {
+            "description": "Recurring collection availability, by weekday.",
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickupWindowDto"
+            }
+          },
+          "hasColdStorage": {
+            "type": "boolean",
+            "description": "Whether the site has refrigerated storage."
+          },
+          "hasFreezer": {
+            "type": "boolean",
+            "description": "Whether the site has a freezer."
+          },
+          "storageCapacityKg": {
+            "type": "number",
+            "description": "How much the site can hold, in kilograms.",
+            "nullable": true
+          },
+          "phone": {
+            "type": "object",
+            "description": "Direct line for the site, in E.164 format.",
+            "nullable": true
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "description": "Whether this is the main site."
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the site is accepting collections."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "When the location was created (ISO 8601).",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "When the location was last modified (ISO 8601).",
+            "format": "date-time"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable message describing the outcome.",
+            "example": "Location created successfully."
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "type",
+          "addressLine1",
+          "city",
+          "countryCode",
+          "timezone",
+          "hasColdStorage",
+          "hasFreezer",
+          "isPrimary",
+          "isActive",
+          "createdAt",
+          "updatedAt",
+          "message"
+        ]
+      },
+      "UpdateLocationDto": {
+        "type": "object",
+        "properties": {
+          "retailerId": {
+            "type": "string",
+            "description": "Owning retailer. Provide exactly one of `retailerId` / `recipientId`.",
+            "format": "uuid"
+          },
+          "recipientId": {
+            "type": "string",
+            "description": "Owning recipient. Provide exactly one of `retailerId` / `recipientId`.",
+            "format": "uuid"
+          },
+          "label": {
+            "type": "string",
+            "description": "Human-readable name for the site.",
+            "example": "Sucursal Centro",
+            "minLength": 2,
+            "maxLength": 150
+          },
+          "type": {
+            "description": "What kind of site this is.",
+            "example": "STORE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocationType"
+              }
+            ]
+          },
+          "addressLine1": {
+            "type": "string",
+            "description": "Street address, first line.",
+            "example": "Palma 456",
+            "maxLength": 200
+          },
+          "addressLine2": {
+            "type": "string",
+            "description": "Street address, second line.",
+            "example": "esq. Alberdi",
+            "maxLength": 200
+          },
+          "city": {
+            "type": "string",
+            "description": "City.",
+            "example": "Asunción",
+            "maxLength": 100
+          },
+          "state": {
+            "type": "string",
+            "description": "State, region or department.",
+            "example": "Central",
+            "maxLength": 100
+          },
+          "postalCode": {
+            "type": "string",
+            "description": "Postal code.",
+            "example": "1209",
+            "maxLength": 20
+          },
+          "countryCode": {
+            "type": "string",
+            "description": "Country as an ISO 3166-1 alpha-2 code.",
+            "example": "PY",
+            "minLength": 2,
+            "maxLength": 2
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Latitude in decimal degrees.",
+            "example": -25.281
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Longitude in decimal degrees.",
+            "example": -57.635
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone of the site. `pickupWindows` are local to it.",
+            "example": "America/Asuncion",
+            "maxLength": 50
+          },
+          "pickupWindows": {
+            "description": "Recurring collection availability, by weekday.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickupWindowDto"
+            }
+          },
+          "hasColdStorage": {
+            "type": "boolean",
+            "description": "Whether the site has refrigerated storage.",
+            "default": false
+          },
+          "hasFreezer": {
+            "type": "boolean",
+            "description": "Whether the site has a freezer.",
+            "default": false
+          },
+          "storageCapacityKg": {
+            "type": "number",
+            "description": "How much the site can hold, in kilograms.",
+            "example": 5000,
+            "minimum": 0,
+            "maximum": 999999.99
+          },
+          "phone": {
+            "type": "string",
+            "description": "Direct line for the site, in E.164 format.",
+            "example": "+595214451234",
+            "maxLength": 30
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "description": "Marks the headquarters / main site. At most one per owner.",
+            "default": false
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Set to `false` to take the site out of matching temporarily.",
+            "default": true
+          }
+        }
+      },
+      "UserRole": {
+        "type": "string",
+        "enum": [
+          "ADMIN",
+          "RETAILER",
+          "RECIPIENT"
+        ],
+        "description": "Authorization role."
+      },
+      "UserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique user ID.",
+            "format": "uuid",
+            "example": "3f2c1b8e-9a4d-4c7f-8b1e-2d6a5c9f0e11"
+          },
+          "email": {
+            "type": "string",
+            "description": "Login email.",
+            "example": "maria.gonzalez@real.com.py"
+          },
+          "role": {
+            "description": "Authorization role.",
+            "example": "RETAILER",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserRole"
+              }
+            ]
+          },
+          "retailerId": {
+            "type": "object",
+            "description": "Linked retailer, when `role` is `RETAILER`.",
+            "format": "uuid",
+            "nullable": true,
+            "example": null
+          },
+          "recipientId": {
+            "type": "object",
+            "description": "Linked recipient, when `role` is `RECIPIENT`.",
+            "format": "uuid",
+            "nullable": true,
+            "example": null
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the account may log in.",
+            "example": true
+          },
+          "isEmailVerified": {
+            "type": "boolean",
+            "description": "Whether the email has been confirmed.",
+            "example": false
+          },
+          "emailVerifiedAt": {
+            "type": "string",
+            "description": "When the email was confirmed (ISO 8601).",
+            "format": "date-time",
+            "nullable": true,
+            "example": null
+          },
+          "lastLoginAt": {
+            "type": "string",
+            "description": "Last successful login (ISO 8601).",
+            "format": "date-time",
+            "nullable": true,
+            "example": null
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "When the account was created (ISO 8601).",
+            "format": "date-time",
+            "example": "2026-09-16T14:32:05.123Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "When the account was last modified (ISO 8601).",
+            "format": "date-time",
+            "example": "2026-09-16T14:32:05.123Z"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "role",
+          "isActive",
+          "isEmailVerified",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Login email. Stored case-insensitively.",
+            "example": "maria.gonzalez@real.com.py",
+            "maxLength": 255
+          },
+          "password": {
+            "type": "string",
+            "description": "Plain-text password. Hashed before storage and never returned by the API.",
+            "example": "Str0ng-P4ssw0rd",
+            "minLength": 12,
+            "maxLength": 72
+          },
+          "role": {
+            "description": "Authorization role. Determines which profile must be linked: `RETAILER` requires `retailerId`, `RECIPIENT` requires `recipientId`, `ADMIN` requires neither.",
+            "example": "RETAILER",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserRole"
+              }
+            ]
+          },
+          "retailerId": {
+            "type": "string",
+            "description": "Retailer to link. Required when `role` is `RETAILER`.",
+            "format": "uuid",
+            "example": "3f2c1b8e-9a4d-4c7f-8b1e-2d6a5c9f0e11"
+          },
+          "recipientId": {
+            "type": "string",
+            "description": "Recipient to link. Required when `role` is `RECIPIENT`.",
+            "format": "uuid",
+            "example": "7a1e4c9d-2b8f-4e6a-9c30-5d7b1f2a8c44"
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "role"
+        ]
+      },
+      "UserCreatedResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique user ID.",
+            "format": "uuid",
+            "example": "3f2c1b8e-9a4d-4c7f-8b1e-2d6a5c9f0e11"
+          },
+          "email": {
+            "type": "string",
+            "description": "Login email.",
+            "example": "maria.gonzalez@real.com.py"
+          },
+          "role": {
+            "description": "Authorization role.",
+            "example": "RETAILER",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserRole"
+              }
+            ]
+          },
+          "retailerId": {
+            "type": "object",
+            "description": "Linked retailer, when `role` is `RETAILER`.",
+            "format": "uuid",
+            "nullable": true,
+            "example": null
+          },
+          "recipientId": {
+            "type": "object",
+            "description": "Linked recipient, when `role` is `RECIPIENT`.",
+            "format": "uuid",
+            "nullable": true,
+            "example": null
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the account may log in.",
+            "example": true
+          },
+          "isEmailVerified": {
+            "type": "boolean",
+            "description": "Whether the email has been confirmed.",
+            "example": false
+          },
+          "emailVerifiedAt": {
+            "type": "string",
+            "description": "When the email was confirmed (ISO 8601).",
+            "format": "date-time",
+            "nullable": true,
+            "example": null
+          },
+          "lastLoginAt": {
+            "type": "string",
+            "description": "Last successful login (ISO 8601).",
+            "format": "date-time",
+            "nullable": true,
+            "example": null
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "When the account was created (ISO 8601).",
+            "format": "date-time",
+            "example": "2026-09-16T14:32:05.123Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "When the account was last modified (ISO 8601).",
+            "format": "date-time",
+            "example": "2026-09-16T14:32:05.123Z"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable message describing the outcome.",
+            "example": "User created successfully."
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "role",
+          "isActive",
+          "isEmailVerified",
+          "createdAt",
+          "updatedAt",
+          "message"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Login email. Stored case-insensitively.",
+            "example": "maria.gonzalez@real.com.py",
+            "maxLength": 255
+          },
+          "password": {
+            "type": "string",
+            "description": "Plain-text password. Hashed before storage and never returned by the API.",
+            "example": "Str0ng-P4ssw0rd",
+            "minLength": 12,
+            "maxLength": 72
+          },
+          "role": {
+            "description": "Authorization role. Determines which profile must be linked: `RETAILER` requires `retailerId`, `RECIPIENT` requires `recipientId`, `ADMIN` requires neither.",
+            "example": "RETAILER",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserRole"
+              }
+            ]
+          },
+          "retailerId": {
+            "type": "string",
+            "description": "Retailer to link. Required when `role` is `RETAILER`.",
+            "format": "uuid",
+            "example": "3f2c1b8e-9a4d-4c7f-8b1e-2d6a5c9f0e11"
+          },
+          "recipientId": {
+            "type": "string",
+            "description": "Recipient to link. Required when `role` is `RECIPIENT`.",
+            "format": "uuid",
+            "example": "7a1e4c9d-2b8f-4e6a-9c30-5d7b1f2a8c44"
+          }
+        }
+      },
+      "InvalidTokenReason": {
+        "type": "string",
+        "enum": [
+          "LOGOUT",
+          "PASSWORD_CHANGE",
+          "ADMIN_REVOKE",
+          "SECURITY"
+        ],
+        "description": "Why the token was revoked."
+      },
+      "InvalidTokenResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique denylist entry ID.",
+            "format": "uuid"
+          },
+          "jti": {
+            "type": "string",
+            "description": "The revoked token's `jti` claim.",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "description": "Owner of the revoked token.",
+            "format": "uuid"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "When the token naturally expires (ISO 8601).",
+            "format": "date-time"
+          },
+          "reason": {
+            "description": "Why the token was revoked.",
+            "example": "LOGOUT",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InvalidTokenReason"
+              }
+            ]
+          },
+          "isExpired": {
+            "type": "boolean",
+            "description": "Whether the token is already past its expiry.",
+            "example": false
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "When the token was invalidated (ISO 8601).",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "When the entry was last modified (ISO 8601).",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "jti",
+          "userId",
+          "expiresAt",
+          "reason",
+          "isExpired",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateInvalidTokenDto": {
+        "type": "object",
+        "properties": {
+          "jti": {
+            "type": "string",
+            "description": "The revoked token's `jti` claim. Must be unique.",
+            "format": "uuid",
+            "example": "9b1d4f2a-6c3e-4a8b-9f10-7e5c2d4a8b16"
+          },
+          "userId": {
+            "type": "string",
+            "description": "Owner of the revoked token.",
+            "format": "uuid",
+            "example": "3f2c1b8e-9a4d-4c7f-8b1e-2d6a5c9f0e11"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "When the token naturally expires (the JWT `exp`).",
+            "format": "date-time",
+            "example": "2026-09-16T15:32:05.000Z"
+          },
+          "reason": {
+            "description": "Why the token was revoked.",
+            "example": "LOGOUT",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InvalidTokenReason"
+              }
+            ]
+          }
+        },
+        "required": [
+          "jti",
+          "userId",
+          "expiresAt",
+          "reason"
+        ]
+      },
+      "InvalidTokenCreatedResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique denylist entry ID.",
+            "format": "uuid"
+          },
+          "jti": {
+            "type": "string",
+            "description": "The revoked token's `jti` claim.",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "description": "Owner of the revoked token.",
+            "format": "uuid"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "When the token naturally expires (ISO 8601).",
+            "format": "date-time"
+          },
+          "reason": {
+            "description": "Why the token was revoked.",
+            "example": "LOGOUT",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InvalidTokenReason"
+              }
+            ]
+          },
+          "isExpired": {
+            "type": "boolean",
+            "description": "Whether the token is already past its expiry.",
+            "example": false
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "When the token was invalidated (ISO 8601).",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "When the entry was last modified (ISO 8601).",
+            "format": "date-time"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable message describing the outcome.",
+            "example": "Token revoked successfully."
+          }
+        },
+        "required": [
+          "id",
+          "jti",
+          "userId",
+          "expiresAt",
+          "reason",
+          "isExpired",
+          "createdAt",
+          "updatedAt",
+          "message"
+        ]
+      },
+      "UpdateInvalidTokenDto": {
+        "type": "object",
+        "properties": {
+          "jti": {
+            "type": "string",
+            "description": "The revoked token's `jti` claim. Must be unique.",
+            "format": "uuid",
+            "example": "9b1d4f2a-6c3e-4a8b-9f10-7e5c2d4a8b16"
+          },
+          "userId": {
+            "type": "string",
+            "description": "Owner of the revoked token.",
+            "format": "uuid",
+            "example": "3f2c1b8e-9a4d-4c7f-8b1e-2d6a5c9f0e11"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "When the token naturally expires (the JWT `exp`).",
+            "format": "date-time",
+            "example": "2026-09-16T15:32:05.000Z"
+          },
+          "reason": {
+            "description": "Why the token was revoked.",
+            "example": "LOGOUT",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InvalidTokenReason"
+              }
+            ]
+          }
+        }
+      }
+    }
   }
 }
