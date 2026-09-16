@@ -1,0 +1,12 @@
+{
+  "modelPropertyNaming": "camelCase",
+  "withSeparateModelsAndApi": true,
+  "apiPackage": "apis",
+  "modelPackage": "models",
+  "supportsES6": true,
+  "withInterfaces": true,
+  "useSingleRequestParameter": true,
+  "generatePublicApi": true,
+  "typescriptThreePlus": true,
+  "useAxios": true
+}

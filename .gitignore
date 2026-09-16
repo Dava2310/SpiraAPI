@@ -3,6 +3,9 @@
 /node_modules
 /build
 
+# generated API client (pnpm build:client)
+/generated
+
 # TypeScript build cache
 *.tsbuildinfo
 
