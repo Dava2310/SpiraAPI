@@ -115,6 +115,47 @@ export class UsersService implements CrudRepository<User> {
   }
 
   /**
+   * Finds a user for the authentication path: present, not soft-deleted, and
+   * returned as null rather than throwing, so the guard can answer 401.
+   * @param id The ID taken from the token's `sub` claim.
+   * @returns A Promise that resolves with the user found, or null.
+   */
+  async findValidForAuth(id: string): Promise<User | null> {
+    if (!UUID_PATTERN.test(id)) {
+      return null;
+    }
+
+    return await this.userRepository.findOne({ where: { id } });
+  }
+
+  /**
+   * Stamps a successful sign-in on the user.
+   * @param user The user that just signed in.
+   * @returns A Promise that resolves once the timestamp is stored.
+   */
+  async recordLogin(user: User): Promise<void> {
+    await this.userRepository.update(user.id, { lastLoginAt: new Date() });
+  }
+
+  /**
+   * Replaces a user's password hash. Callers are responsible for having
+   * verified the current password first.
+   * @param user The user whose password is changing.
+   * @param newPassword The new plain-text password.
+   * @returns A Promise that resolves with a success message.
+   */
+  async changePassword(
+    user: User,
+    newPassword: string,
+  ): Promise<MessageResponseDto> {
+    await this.userRepository.update(user.id, {
+      passwordHash: await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS),
+    });
+
+    return new MessageResponseDto('Password updated successfully.');
+  }
+
+  /**
    * Creates a user, hashing the password before storage.
    * @param createUserDto The data to create the user with.
    * @returns A Promise that resolves with the created user and a success message.

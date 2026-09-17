@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
   ApiNotFoundResponse,
@@ -17,6 +18,7 @@ import {
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
 import { MessageResponseDto } from '../common/dto/index.js';
@@ -29,6 +31,8 @@ import {
 import { ContactsService } from './contacts.service.js';
 
 @ApiTags('contacts')
+@ApiBearerAuth()
+@ApiUnauthorizedResponse({ description: 'Missing, invalid or revoked token.' })
 @Controller('contacts')
 export class ContactsController {
   constructor(private readonly contactsService: ContactsService) {}
