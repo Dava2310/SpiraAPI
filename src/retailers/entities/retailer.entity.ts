@@ -14,35 +14,27 @@ import {
 } from 'typeorm';
 
 import { SoftDeletableEntity } from '../../common/entities/soft-deletable.entity.js';
-import { FoodCategory } from '../../common/enums/food-category.enum.js';
 import {
   PROFILE_STATUS_ENUM_NAME,
   ProfileStatus,
 } from '../../common/enums/profile-status.enum.js';
 import { Contact } from '../../contacts/entities/contact.entity.js';
 import { Location } from '../../locations/entities/location.entity.js';
+import { Partnership } from '../../partnerships/entities/partnership.entity.js';
+import { Product } from '../../products/entities/product.entity.js';
 import { User } from '../../users/entities/user.entity.js';
 import {
   BUSINESS_TYPE_ENUM_NAME,
   BusinessType,
 } from '../enums/business-type.enum.js';
-import {
-  DONATION_FREQUENCY_ENUM_NAME,
-  DonationFrequency,
-} from '../enums/donation-frequency.enum.js';
 
 /** A food-surplus donor: supermarket, restaurant, hotel, distributor. */
 @Entity('retailer')
-@Index('uq_retailer_slug', ['slug'], {
-  unique: true,
-  where: 'deleted_at IS NULL',
-})
 @Index('uq_retailer_tax_id', ['taxId'], {
   unique: true,
   where: 'deleted_at IS NULL',
 })
 @Index('idx_retailer_status', ['status'], { where: 'deleted_at IS NULL' })
-@Index('idx_retailer_categories', ['foodCategories'], { type: 'gin' })
 export class Retailer extends SoftDeletableEntity {
   // --- Identity & legal ---
 
@@ -62,14 +54,6 @@ export class Retailer extends SoftDeletableEntity {
   })
   @Column({ name: 'trade_name', type: 'varchar', length: 200, nullable: true })
   tradeName: string | null;
-
-  @ApiProperty({
-    description: 'URL-friendly identifier. Unique among non-deleted retailers.',
-    maxLength: 120,
-    example: 'supermercados-real',
-  })
-  @Column({ name: 'slug', type: 'varchar', length: 120 })
-  slug: string;
 
   @ApiProperty({
     description:
@@ -120,77 +104,11 @@ export class Retailer extends SoftDeletableEntity {
   @Column({ name: 'logo_url', type: 'varchar', length: 255, nullable: true })
   logoUrl: string | null;
 
-  // --- Donation policy (company-level defaults) ---
-
-  @ApiPropertyOptional({
-    description: 'Food categories this retailer typically donates.',
-    enum: FoodCategory,
-    enumName: 'FoodCategory',
-    isArray: true,
-    nullable: true,
-    example: [FoodCategory.PRODUCE, FoodCategory.BAKERY, FoodCategory.DAIRY],
-  })
-  @Column({
-    name: 'food_categories',
-    type: 'text',
-    array: true,
-    nullable: true,
-  })
-  foodCategories: FoodCategory[] | null;
-
-  @ApiPropertyOptional({
-    description: 'How often surplus is expected.',
-    enum: DonationFrequency,
-    enumName: 'DonationFrequency',
-    nullable: true,
-    example: DonationFrequency.DAILY,
-  })
-  @Column({
-    name: 'donation_frequency',
-    type: 'enum',
-    enum: DonationFrequency,
-    enumName: DONATION_FREQUENCY_ENUM_NAME,
-    nullable: true,
-  })
-  donationFrequency: DonationFrequency | null;
-
-  @ApiProperty({
-    description:
-      'Whether the recipient must collect the donation itself. `false` means the retailer delivers.',
-    default: true,
-    example: true,
-  })
-  @Column({
-    name: 'requires_recipient_transport',
-    type: 'boolean',
-    default: true,
-  })
-  requiresRecipientTransport: boolean;
-
-  @ApiPropertyOptional({
-    description: 'Lead time the retailer needs before a collection, in hours.',
-    type: Number,
-    nullable: true,
-    example: 4,
-  })
-  @Column({ name: 'min_pickup_notice_hours', type: 'smallint', nullable: true })
-  minPickupNoticeHours: number | null;
-
-  @ApiPropertyOptional({
-    description:
-      'Practical notes for whoever collects: loading dock, who to ask for, access restrictions.',
-    nullable: true,
-    example:
-      'Enter through the loading dock on Calle Palma and ask for the shift manager.',
-  })
-  @Column({ name: 'handling_instructions', type: 'text', nullable: true })
-  handlingInstructions: string | null;
-
   // --- Verification & compliance ---
 
   @ApiProperty({
     description:
-      'Lifecycle status. Only `ACTIVE` retailers take part in matching.',
+      'Lifecycle status. Only `ACTIVE` retailers can create donations.',
     enum: ProfileStatus,
     enumName: 'ProfileStatus',
     default: ProfileStatus.PENDING_VERIFICATION,
@@ -296,4 +214,12 @@ export class Retailer extends SoftDeletableEntity {
   @ApiHideProperty()
   @OneToMany(() => User, (user) => user.retailer)
   users?: Relation<User>[];
+
+  @ApiHideProperty()
+  @OneToMany(() => Product, (product) => product.retailer)
+  products?: Relation<Product>[];
+
+  @ApiHideProperty()
+  @OneToMany(() => Partnership, (partnership) => partnership.retailer)
+  partnerships?: Relation<Partnership>[];
 }

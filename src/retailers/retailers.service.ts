@@ -79,15 +79,6 @@ export class RetailersService implements CrudRepository<Retailer> {
   }
 
   /**
-   * Finds a retailer by slug.
-   * @param slug The slug to search for.
-   * @returns A Promise that resolves with the retailer found, or null.
-   */
-  async findOneBySlug(slug: string): Promise<Retailer | null> {
-    return await this.retailerRepository.findOne({ where: { slug } });
-  }
-
-  /**
    * Finds a retailer by tax ID.
    * @param taxId The tax ID to search for.
    * @returns A Promise that resolves with the retailer found, or null.
@@ -97,46 +88,31 @@ export class RetailersService implements CrudRepository<Retailer> {
   }
 
   /**
-   * Finds a retailer holding either the given slug or tax ID, excluding one
-   * retailer from the search by its ID.
+   * Finds a retailer with the given tax ID, excluding one retailer from the search
+   * by its ID.
    * @param id The ID of the retailer to exclude from the search.
-   * @param slug The slug to search for, if any.
-   * @param taxId The tax ID to search for, if any.
+   * @param taxId The tax ID to search for.
    * @returns A Promise that resolves with the retailer found, or null.
    */
-  async findDuplicatedExcludingId(
+  async findOneByTaxIdNotId(
     id: string,
-    slug?: string,
-    taxId?: string,
+    taxId: string,
   ): Promise<Retailer | null> {
-    const where = [
-      ...(slug ? [{ slug, id: Not(id) }] : []),
-      ...(taxId ? [{ taxId, id: Not(id) }] : []),
-    ];
-
-    if (where.length === 0) {
-      return null;
-    }
-
-    return await this.retailerRepository.findOne({ where });
+    return await this.retailerRepository.findOne({
+      where: { taxId, id: Not(id) },
+    });
   }
 
   /**
    * Creates a retailer.
    * @param createRetailerDto The data to create the retailer with.
    * @returns A Promise that resolves with the created retailer and a success message.
-   * @throws BadRequestException If the slug or the tax ID is already taken.
+   * @throws BadRequestException If the tax ID is already taken.
    */
   async create(
     createRetailerDto: CreateRetailerDto,
   ): Promise<RetailerCreatedResponseDto> {
-    const { slug, taxId, termsAcceptedAt } = createRetailerDto;
-
-    if (await this.findOneBySlug(slug)) {
-      throw new BadRequestException(
-        `A retailer already exists with the slug: ${slug}`,
-      );
-    }
+    const { taxId, termsAcceptedAt } = createRetailerDto;
 
     if (await this.findOneByTaxId(taxId)) {
       throw new BadRequestException(
@@ -163,41 +139,23 @@ export class RetailersService implements CrudRepository<Retailer> {
    * @param updateRetailerDto The new data for the retailer.
    * @returns A Promise that resolves with the updated retailer and a success message.
    * @throws NotFoundException If the retailer is not found.
-   * @throws BadRequestException If the slug or the tax ID is taken by another retailer.
+   * @throws BadRequestException If the tax ID is taken by another retailer.
    */
   async update(
     id: string,
     updateRetailerDto: UpdateRetailerDto,
   ): Promise<RetailerCreatedResponseDto> {
-    const { slug, taxId, termsAcceptedAt, ...rest } = updateRetailerDto;
+    const { taxId, termsAcceptedAt, ...rest } = updateRetailerDto;
 
     const retailer = await this.findValid(id);
 
-    if (slug || taxId) {
-      const duplicated = await this.findDuplicatedExcludingId(
-        retailer.id,
-        slug,
-        taxId,
+    if (taxId && (await this.findOneByTaxIdNotId(retailer.id, taxId))) {
+      throw new BadRequestException(
+        `Another retailer is already registered with the tax ID: ${taxId}`,
       );
-
-      if (duplicated) {
-        if (slug && duplicated.slug === slug) {
-          throw new BadRequestException(
-            `Another retailer is already registered with the slug: ${slug}`,
-          );
-        }
-
-        throw new BadRequestException(
-          `Another retailer is already registered with the tax ID: ${taxId}`,
-        );
-      }
     }
 
     Object.assign(retailer, rest);
-
-    if (slug) {
-      retailer.slug = slug;
-    }
 
     if (taxId) {
       retailer.taxId = taxId;
@@ -219,7 +177,7 @@ export class RetailersService implements CrudRepository<Retailer> {
 
   /**
    * Soft-deletes a retailer, so the row is kept for historical records and its
-   * slug and tax ID can be reused.
+   * tax ID can be reused.
    * @param id The ID of the retailer to delete.
    * @returns A Promise that resolves with a success message.
    * @throws NotFoundException If the retailer is not found.

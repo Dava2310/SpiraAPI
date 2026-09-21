@@ -131,4 +131,13 @@ export class CreateContactDto {
   @IsOptional()
   @IsString({ message: 'The notes must be a string.' })
   notes?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Login this person owns, when they have one. Gives a logged-in driver a name for the donation certificate.',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID('4', { message: 'The user ID must be a valid UUID.' })
+  userId?: string;
 }

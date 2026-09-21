@@ -10,17 +10,21 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   type Relation,
 } from 'typeorm';
 
 import { SoftDeletableEntity } from '../../common/entities/soft-deletable.entity.js';
 import { numericTransformer } from '../../common/transformers/numeric.transformer.js';
+import { Donation } from '../../donations/entities/donation.entity.js';
+import { InventoryItem } from '../../inventory-items/entities/inventory-item.entity.js';
 import { Recipient } from '../../recipients/entities/recipient.entity.js';
 import { Retailer } from '../../retailers/entities/retailer.entity.js';
 import {
   LOCATION_TYPE_ENUM_NAME,
   LocationType,
 } from '../enums/location-type.enum.js';
+import type { OpeningHours } from './opening-hours.interface.js';
 import type { PickupWindow } from './pickup-window.interface.js';
 
 /** A physical site belonging to a retailer or a recipient. */
@@ -37,6 +41,10 @@ import type { PickupWindow } from './pickup-window.interface.js';
   where: 'is_primary AND recipient_id IS NOT NULL AND deleted_at IS NULL',
 })
 @Index('idx_location_geo', ['latitude', 'longitude'])
+@Index('uq_location_code_retailer', ['retailerId', 'code'], {
+  unique: true,
+  where: 'deleted_at IS NULL AND retailer_id IS NOT NULL AND code IS NOT NULL',
+})
 export class Location extends SoftDeletableEntity {
   // --- Owner — exactly one of the two is set ---
 
@@ -67,6 +75,16 @@ export class Location extends SoftDeletableEntity {
   })
   @Column({ name: 'label', type: 'varchar', length: 150 })
   label: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Human-readable branch code, unique per retailer or recipient.',
+    maxLength: 40,
+    nullable: true,
+    example: 'WF-NYC-402',
+  })
+  @Column({ name: 'code', type: 'varchar', length: 40, nullable: true })
+  code: string | null;
 
   @ApiProperty({
     description: 'What kind of site this is.',
@@ -207,6 +225,25 @@ export class Location extends SoftDeletableEntity {
       { weekday: 4, startTime: '18:00', endTime: '20:00' },
     ],
   })
+  @ApiPropertyOptional({
+    description:
+      'When the site is open to the public, by weekday. Distinct from `pickupWindows`, which is when collections may happen.',
+    type: 'array',
+    nullable: true,
+    items: {
+      type: 'object',
+      required: ['weekday', 'opensAt', 'closesAt'],
+      properties: {
+        weekday: { type: 'integer', minimum: 1, maximum: 7 },
+        opensAt: { type: 'string', example: '08:00' },
+        closesAt: { type: 'string', example: '22:00' },
+      },
+    },
+    example: [{ weekday: 1, opensAt: '08:00', closesAt: '22:00' }],
+  })
+  @Column({ name: 'opening_hours', type: 'jsonb', nullable: true })
+  openingHours: OpeningHours[] | null;
+
   @Column({ name: 'pickup_windows', type: 'jsonb', nullable: true })
   pickupWindows: PickupWindow[] | null;
 
@@ -227,22 +264,6 @@ export class Location extends SoftDeletableEntity {
   })
   @Column({ name: 'has_freezer', type: 'boolean', default: false })
   hasFreezer: boolean;
-
-  @ApiPropertyOptional({
-    description: 'How much the site can hold, in kilograms.',
-    type: Number,
-    nullable: true,
-    example: 5000,
-  })
-  @Column({
-    name: 'storage_capacity_kg',
-    type: 'numeric',
-    precision: 8,
-    scale: 2,
-    nullable: true,
-    transformer: numericTransformer,
-  })
-  storageCapacityKg: number | null;
 
   // --- Operational flags ---
 
@@ -290,4 +311,12 @@ export class Location extends SoftDeletableEntity {
   })
   @JoinColumn({ name: 'recipient_id' })
   recipient?: Relation<Recipient> | null;
+
+  @ApiHideProperty()
+  @OneToMany(() => InventoryItem, (item) => item.location)
+  inventoryItems?: Relation<InventoryItem>[];
+
+  @ApiHideProperty()
+  @OneToMany(() => Donation, (donation) => donation.location)
+  donations?: Relation<Donation>[];
 }

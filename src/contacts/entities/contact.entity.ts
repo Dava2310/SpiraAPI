@@ -16,6 +16,7 @@ import {
 import { SoftDeletableEntity } from '../../common/entities/soft-deletable.entity.js';
 import { Recipient } from '../../recipients/entities/recipient.entity.js';
 import { Retailer } from '../../retailers/entities/retailer.entity.js';
+import { User } from '../../users/entities/user.entity.js';
 import {
   CONTACT_TYPE_ENUM_NAME,
   ContactType,
@@ -33,6 +34,10 @@ import {
 @Index('uq_contact_primary_recipient', ['recipientId'], {
   unique: true,
   where: 'is_primary AND recipient_id IS NOT NULL AND deleted_at IS NULL',
+})
+@Index('uq_contact_user', ['userId'], {
+  unique: true,
+  where: 'deleted_at IS NULL AND user_id IS NOT NULL',
 })
 export class Contact extends SoftDeletableEntity {
   // --- Owner — exactly one of the two is set ---
@@ -136,6 +141,15 @@ export class Contact extends SoftDeletableEntity {
   @Column({ name: 'notes', type: 'text', nullable: true })
   notes: string | null;
 
+  @ApiPropertyOptional({
+    description:
+      'Login this person owns, when they have one. `user` holds credentials only, so a contact is what gives a logged-in driver a name for the donation certificate.',
+    format: 'uuid',
+    nullable: true,
+  })
+  @Column({ name: 'user_id', type: 'uuid', nullable: true })
+  userId: string | null;
+
   // --- Relations ---
 
   @ApiHideProperty()
@@ -153,4 +167,9 @@ export class Contact extends SoftDeletableEntity {
   })
   @JoinColumn({ name: 'recipient_id' })
   recipient?: Relation<Recipient> | null;
+
+  @ApiHideProperty()
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'user_id' })
+  user?: Relation<User> | null;
 }
