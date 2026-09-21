@@ -140,6 +140,21 @@ export class DonationReceipt extends AuditedEntity {
   })
   vehiclePlate: string | null;
 
+  @ApiPropertyOptional({
+    description:
+      'Who signed for the goods on the receiving side, as a free-text name. The driver need not be a platform user.',
+    maxLength: 150,
+    nullable: true,
+    example: 'Marta Ruiz',
+  })
+  @Column({
+    name: 'received_by_label',
+    type: 'varchar',
+    length: 150,
+    nullable: true,
+  })
+  receivedByLabel: string | null;
+
   // --- Totals, frozen at issue ---
 
   @ApiProperty({ description: 'Number of lines certified.', type: Number })
@@ -155,6 +170,17 @@ export class DonationReceipt extends AuditedEntity {
     transformer: numericTransformer,
   })
   totalWeightKg: number;
+
+  @ApiProperty({ description: 'Total units certified.', type: Number })
+  @Column({
+    name: 'total_quantity',
+    type: 'numeric',
+    precision: 12,
+    scale: 3,
+    default: 0,
+    transformer: numericTransformer,
+  })
+  totalQuantity: number;
 
   @ApiPropertyOptional({
     description: 'Total retail value certified.',
@@ -175,9 +201,9 @@ export class DonationReceipt extends AuditedEntity {
     description: 'Currency of the totals, as an ISO 4217 code.',
     minLength: 3,
     maxLength: 3,
-    example: 'USD',
+    example: 'EUR',
   })
-  @Column({ name: 'currency', type: 'char', length: 3, default: 'USD' })
+  @Column({ name: 'currency', type: 'char', length: 3, default: 'EUR' })
   currency: string;
 
   @ApiPropertyOptional({
@@ -186,7 +212,14 @@ export class DonationReceipt extends AuditedEntity {
     type: Number,
     nullable: true,
   })
-  @Column({ name: 'estimated_meals', type: 'integer', nullable: true })
+  @Column({
+    name: 'estimated_meals',
+    type: 'numeric',
+    precision: 12,
+    scale: 2,
+    nullable: true,
+    transformer: numericTransformer,
+  })
   estimatedMeals: number | null;
 
   @ApiPropertyOptional({

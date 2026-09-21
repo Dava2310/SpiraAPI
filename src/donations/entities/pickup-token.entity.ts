@@ -31,6 +31,12 @@ import { Donation } from './donation.entity.js';
 @Index('idx_pickup_token_open', ['donationId'], {
   where: 'consumed_at IS NULL',
 })
+// A keyed-in PIN has to resolve to one donation, so it can only collide with
+// tokens already spent. Generation retries on conflict.
+@Index('uq_pickup_token_pin_open', ['pin'], {
+  unique: true,
+  where: 'consumed_at IS NULL',
+})
 export class PickupToken extends AuditedEntity {
   @ApiProperty({ description: 'Donation this token releases.', format: 'uuid' })
   @Column({ name: 'donation_id', type: 'uuid' })
@@ -67,6 +73,15 @@ export class PickupToken extends AuditedEntity {
   })
   @Column({ name: 'consumed_by_user_id', type: 'uuid', nullable: true })
   consumedByUserId: string | null;
+
+  @ApiProperty({
+    description:
+      'Short numeric code the driver reads out when the QR scan will not work. Same lifetime and single use as the token itself.',
+    maxLength: 8,
+    example: '482913',
+  })
+  @Column({ name: 'pin', type: 'varchar', length: 8 })
+  pin: string;
 
   // --- Relations ---
 

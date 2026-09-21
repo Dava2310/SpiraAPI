@@ -19,12 +19,22 @@ import { SoftDeletableEntity } from '../../common/entities/soft-deletable.entity
 import { numericTransformer } from '../../common/transformers/numeric.transformer.js';
 import { Contact } from '../../contacts/entities/contact.entity.js';
 import { DonationReceipt } from '../../donation-receipts/entities/donation-receipt.entity.js';
+import { ImpactFactor } from '../../impact-factors/entities/impact-factor.entity.js';
 import { InventoryItem } from '../../inventory-items/entities/inventory-item.entity.js';
+import { LocationPickupSlot } from '../../location-pickup-slots/entities/location-pickup-slot.entity.js';
 import { Location } from '../../locations/entities/location.entity.js';
 import { RecipientVehicle } from '../../recipient-vehicles/entities/recipient-vehicle.entity.js';
 import { Recipient } from '../../recipients/entities/recipient.entity.js';
 import { Retailer } from '../../retailers/entities/retailer.entity.js';
 import { User } from '../../users/entities/user.entity.js';
+import {
+  CANCELLATION_REASON_CODE_ENUM_NAME,
+  CancellationReasonCode,
+} from '../enums/cancellation-reason-code.enum.js';
+import {
+  DONATION_ORIGIN_ENUM_NAME,
+  DonationOrigin,
+} from '../enums/donation-origin.enum.js';
 import {
   DONATION_STATUS_ENUM_NAME,
   DonationStatus,
@@ -35,10 +45,11 @@ import { PickupToken } from './pickup-token.entity.js';
 /**
  * One handover of surplus stock from a retailer branch to a recipient.
  *
- * Both sides move it: the retailer offers and stages, the recipient accepts,
- * declines and sets off. Totals are recomputed from {@link DonationLine} while
- * the donation is open and frozen once it is `DELIVERED`, because a certificate
- * has been issued against them.
+ * Reached from either direction — see {@link DonationOrigin}. Both sides then
+ * move it: the retailer offers and stages, the recipient accepts, declines and
+ * sets off. Totals are recomputed from {@link DonationLine} while the donation
+ * is open and frozen once it is `DELIVERED`, because a certificate has been
+ * issued against them.
  */
 @Entity('donation')
 @Check(
@@ -52,6 +63,10 @@ import { PickupToken } from './pickup-token.entity.js';
 @Check(
   'chk_donation_decision',
   'NOT (accepted_at IS NOT NULL AND declined_at IS NOT NULL)',
+)
+@Check(
+  'chk_donation_pickup_window',
+  'pickup_window_start IS NULL OR pickup_window_end IS NULL OR pickup_window_end > pickup_window_start',
 )
 @Index('uq_donation_code', ['code'], {
   unique: true,
@@ -107,6 +122,23 @@ export class Donation extends SoftDeletableEntity {
     default: DonationStatus.DRAFT,
   })
   status: DonationStatus;
+
+  @ApiProperty({
+    description:
+      'Which side started it. A `RECIPIENT_CLAIM` skips the offer/accept exchange and opens already accepted.',
+    enum: DonationOrigin,
+    enumName: 'DonationOrigin',
+    default: DonationOrigin.RETAILER_OFFER,
+    example: DonationOrigin.RECIPIENT_CLAIM,
+  })
+  @Column({
+    name: 'origin',
+    type: 'enum',
+    enum: DonationOrigin,
+    enumName: DONATION_ORIGIN_ENUM_NAME,
+    default: DonationOrigin.RETAILER_OFFER,
+  })
+  origin: DonationOrigin;
 
   // --- Parties collecting ---
 
@@ -185,13 +217,32 @@ export class Donation extends SoftDeletableEntity {
 
   @ApiPropertyOptional({
     description:
-      'Agreed collection time. Proposed by the retailer, confirmed on accept.',
+      'Start of the agreed collection window. Proposed by the retailer, confirmed on accept.',
     type: String,
     format: 'date-time',
     nullable: true,
   })
-  @Column({ name: 'scheduled_pickup_at', type: 'timestamptz', nullable: true })
-  scheduledPickupAt: Date | null;
+  @Column({ name: 'pickup_window_start', type: 'timestamptz', nullable: true })
+  pickupWindowStart: Date | null;
+
+  @ApiPropertyOptional({
+    description:
+      'End of the agreed collection window. Both apps show a range rather than an instant.',
+    type: String,
+    format: 'date-time',
+    nullable: true,
+  })
+  @Column({ name: 'pickup_window_end', type: 'timestamptz', nullable: true })
+  pickupWindowEnd: Date | null;
+
+  @ApiPropertyOptional({
+    description:
+      'The named branch slot the window was reserved against, when the recipient picked one rather than the retailer proposing a time.',
+    format: 'uuid',
+    nullable: true,
+  })
+  @Column({ name: 'pickup_slot_id', type: 'uuid', nullable: true })
+  pickupSlotId: string | null;
 
   @ApiPropertyOptional({
     description:
@@ -227,11 +278,54 @@ export class Donation extends SoftDeletableEntity {
   @Column({ name: 'cancellation_reason', type: 'text', nullable: true })
   cancellationReason: string | null;
 
+  @ApiPropertyOptional({
+    description:
+      'Cancellation reason as a fixed code, so the apps can offer a picker and the platform can report on causes.',
+    enum: CancellationReasonCode,
+    enumName: 'CancellationReasonCode',
+    nullable: true,
+    example: CancellationReasonCode.VEHICLE_BREAKDOWN,
+  })
+  @Column({
+    name: 'cancellation_reason_code',
+    type: 'enum',
+    enum: CancellationReasonCode,
+    enumName: CANCELLATION_REASON_CODE_ENUM_NAME,
+    nullable: true,
+  })
+  cancellationReasonCode: CancellationReasonCode | null;
+
+  @ApiPropertyOptional({
+    description:
+      'User who cancelled. Either side can, and the apps say which one did.',
+    format: 'uuid',
+    nullable: true,
+  })
+  @Column({ name: 'cancelled_by_user_id', type: 'uuid', nullable: true })
+  cancelledByUserId: string | null;
+
   // --- Totals, recomputed from the lines until DELIVERED ---
 
   @ApiProperty({ description: 'Number of lines.', type: Number, default: 0 })
   @Column({ name: 'line_count', type: 'smallint', default: 0 })
   lineCount: number;
+
+  @ApiProperty({
+    description:
+      'Total units across every line. Kept beside the weight because both apps count items, not only kilos.',
+    type: Number,
+    default: 0,
+    example: 42,
+  })
+  @Column({
+    name: 'total_quantity',
+    type: 'numeric',
+    precision: 12,
+    scale: 3,
+    default: 0,
+    transformer: numericTransformer,
+  })
+  totalQuantity: number;
 
   @ApiProperty({
     description: 'Total weight of every line.',
@@ -269,11 +363,54 @@ export class Donation extends SoftDeletableEntity {
     description: 'Currency of the totals, as an ISO 4217 code.',
     minLength: 3,
     maxLength: 3,
-    default: 'USD',
-    example: 'USD',
+    default: 'EUR',
+    example: 'EUR',
   })
-  @Column({ name: 'currency', type: 'char', length: 3, default: 'USD' })
+  @Column({ name: 'currency', type: 'char', length: 3, default: 'EUR' })
   currency: string;
+
+  // --- Impact, frozen on delivery ---
+
+  @ApiPropertyOptional({
+    description:
+      'Meals this donation represents. Written at delivery from the factor in force then, so a later factor change cannot restate a certificate.',
+    type: Number,
+    nullable: true,
+    example: 45.75,
+  })
+  @Column({
+    name: 'estimated_meals',
+    type: 'numeric',
+    precision: 12,
+    scale: 2,
+    nullable: true,
+    transformer: numericTransformer,
+  })
+  estimatedMeals: number | null;
+
+  @ApiPropertyOptional({
+    description: 'CO₂-equivalent emissions avoided, in kilograms.',
+    type: Number,
+    nullable: true,
+    example: 36.6,
+  })
+  @Column({
+    name: 'co2_avoided_kg',
+    type: 'numeric',
+    precision: 12,
+    scale: 3,
+    nullable: true,
+    transformer: numericTransformer,
+  })
+  co2AvoidedKg: number | null;
+
+  @ApiPropertyOptional({
+    description: 'The factor row the two figures above were computed from.',
+    format: 'uuid',
+    nullable: true,
+  })
+  @Column({ name: 'impact_factor_id', type: 'uuid', nullable: true })
+  impactFactorId: string | null;
 
   // --- Relations ---
 
@@ -320,6 +457,21 @@ export class Donation extends SoftDeletableEntity {
   @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'confirmed_by_user_id' })
   confirmedByUser?: Relation<User> | null;
+
+  @ApiHideProperty()
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'cancelled_by_user_id' })
+  cancelledByUser?: Relation<User> | null;
+
+  @ApiHideProperty()
+  @ManyToOne(() => LocationPickupSlot, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'pickup_slot_id' })
+  pickupSlot?: Relation<LocationPickupSlot> | null;
+
+  @ApiHideProperty()
+  @ManyToOne(() => ImpactFactor, { nullable: true, onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'impact_factor_id' })
+  impactFactor?: Relation<ImpactFactor> | null;
 
   @ApiHideProperty()
   @OneToMany(() => DonationLine, (line) => line.donation)

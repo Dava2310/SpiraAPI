@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
+  IsDateString,
   IsEnum,
   IsISO4217CurrencyCode,
   IsNotEmpty,
@@ -8,7 +9,6 @@ import {
   IsOptional,
   IsString,
   IsUUID,
-  Matches,
   Max,
   Min,
 } from 'class-validator';
@@ -105,15 +105,16 @@ export class CreateInventoryItemDto {
 
   @ApiPropertyOptional({
     description:
-      'Best-by date. Omit for non-perishables. Days remaining is derived from this.',
-    format: 'date',
-    example: '2026-09-18',
+      'When the lot expires. Omit for non-perishables. Urgency and hours remaining are derived from this.',
+    format: 'date-time',
+    example: '2026-09-18T23:59:00.000Z',
   })
   @IsOptional()
-  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-    message: 'The expiry date must use the format YYYY-MM-DD.',
-  })
-  expiryDate?: string;
+  @IsDateString(
+    {},
+    { message: 'The expiry must be a valid ISO 8601 date-time.' },
+  )
+  expiresAt?: string;
 
   @ApiProperty({
     description: 'Why the lot is donatable rather than sellable.',

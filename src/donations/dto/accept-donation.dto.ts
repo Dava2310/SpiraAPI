@@ -22,14 +22,26 @@ export class AcceptDonationDto {
 
   @ApiPropertyOptional({
     description:
-      'Collection time the recipient can actually make, if it differs from the one offered.',
+      'Start of a collection window the recipient can actually make, if it differs from the one offered.',
     format: 'date-time',
     example: '2026-09-18T19:30:00.000Z',
   })
   @IsOptional()
   @IsDateString(
     {},
-    { message: 'The scheduled pickup time must be a valid ISO 8601 date.' },
+    { message: 'The pickup window start must be a valid ISO 8601 date.' },
   )
-  scheduledPickupAt?: string;
+  pickupWindowStart?: string;
+
+  @ApiPropertyOptional({
+    description: 'End of that window.',
+    format: 'date-time',
+    example: '2026-09-18T21:00:00.000Z',
+  })
+  @IsOptional()
+  @IsDateString(
+    {},
+    { message: 'The pickup window end must be a valid ISO 8601 date.' },
+  )
+  pickupWindowEnd?: string;
 }

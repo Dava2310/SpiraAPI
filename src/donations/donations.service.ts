@@ -193,7 +193,8 @@ export class DonationsService implements CrudRepository<Donation> {
       retailerId,
       locationId,
       recipientId,
-      scheduledPickupAt,
+      pickupWindowStart,
+      pickupWindowEnd,
       inventoryItemIds,
     } = createDonationDto;
 
@@ -207,9 +208,10 @@ export class DonationsService implements CrudRepository<Donation> {
         recipientId,
         status: DonationStatus.DRAFT,
         createdByUserId: caller?.id ?? null,
-        scheduledPickupAt: scheduledPickupAt
-          ? new Date(scheduledPickupAt)
+        pickupWindowStart: pickupWindowStart
+          ? new Date(pickupWindowStart)
           : null,
+        pickupWindowEnd: pickupWindowEnd ? new Date(pickupWindowEnd) : null,
       }),
     );
 
@@ -240,8 +242,13 @@ export class DonationsService implements CrudRepository<Donation> {
 
     this.assertTransition(donation, 'edit');
 
-    const { recipientId, scheduledPickupAt, inventoryItemIds, ...rest } =
-      updateDonationDto;
+    const {
+      recipientId,
+      pickupWindowStart,
+      pickupWindowEnd,
+      inventoryItemIds,
+      ...rest
+    } = updateDonationDto;
 
     if (recipientId && recipientId !== donation.recipientId) {
       await this.assertActivePartnership(donation.retailerId, recipientId);
@@ -250,9 +257,15 @@ export class DonationsService implements CrudRepository<Donation> {
 
     Object.assign(donation, rest);
 
-    if (scheduledPickupAt !== undefined) {
-      donation.scheduledPickupAt = scheduledPickupAt
-        ? new Date(scheduledPickupAt)
+    if (pickupWindowStart !== undefined) {
+      donation.pickupWindowStart = pickupWindowStart
+        ? new Date(pickupWindowStart)
+        : null;
+    }
+
+    if (pickupWindowEnd !== undefined) {
+      donation.pickupWindowEnd = pickupWindowEnd
+        ? new Date(pickupWindowEnd)
         : null;
     }
 
@@ -362,8 +375,12 @@ export class DonationsService implements CrudRepository<Donation> {
     donation.declinedAt = null;
     donation.declineReason = null;
 
-    if (offerDonationDto.scheduledPickupAt) {
-      donation.scheduledPickupAt = new Date(offerDonationDto.scheduledPickupAt);
+    if (offerDonationDto.pickupWindowStart) {
+      donation.pickupWindowStart = new Date(offerDonationDto.pickupWindowStart);
+    }
+
+    if (offerDonationDto.pickupWindowEnd) {
+      donation.pickupWindowEnd = new Date(offerDonationDto.pickupWindowEnd);
     }
 
     await this.donationRepository.save(donation);
@@ -392,8 +409,12 @@ export class DonationsService implements CrudRepository<Donation> {
 
     this.assertTransition(donation, 'accept');
 
-    const { recipientVehicleId, driverContactId, scheduledPickupAt } =
-      acceptDonationDto;
+    const {
+      recipientVehicleId,
+      driverContactId,
+      pickupWindowStart,
+      pickupWindowEnd,
+    } = acceptDonationDto;
 
     donation.status = DonationStatus.ACCEPTED;
     donation.acceptedAt = new Date();
@@ -407,8 +428,12 @@ export class DonationsService implements CrudRepository<Donation> {
       donation.driverContactId = driverContactId;
     }
 
-    if (scheduledPickupAt) {
-      donation.scheduledPickupAt = new Date(scheduledPickupAt);
+    if (pickupWindowStart) {
+      donation.pickupWindowStart = new Date(pickupWindowStart);
+    }
+
+    if (pickupWindowEnd) {
+      donation.pickupWindowEnd = new Date(pickupWindowEnd);
     }
 
     await this.donationRepository.save(donation);

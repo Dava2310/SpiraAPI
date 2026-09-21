@@ -112,17 +112,15 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
     locationId: string,
     withinDays = 1,
   ): Promise<InventoryItemResponseDto[]> {
-    const cutoff = new Date(Date.now() + withinDays * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .slice(0, 10);
+    const cutoff = new Date(Date.now() + withinDays * 24 * 60 * 60 * 1000);
 
     const items = await this.inventoryItemRepository.find({
       where: {
         locationId,
         status: InventoryItemStatus.IN_INVENTORY,
-        expiryDate: LessThanOrEqual(cutoff),
+        expiresAt: LessThanOrEqual(cutoff),
       },
-      order: { expiryDate: 'ASC' },
+      order: { expiresAt: 'ASC' },
     });
 
     return items.map((item) => new InventoryItemResponseDto(item));
@@ -151,8 +149,11 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
   async create(
     createInventoryItemDto: CreateInventoryItemDto,
   ): Promise<InventoryItemCreatedResponseDto> {
+    const { expiresAt, ...rest } = createInventoryItemDto;
+
     const item = this.inventoryItemRepository.create({
-      ...createInventoryItemDto,
+      ...rest,
+      expiresAt: expiresAt ? new Date(expiresAt) : null,
       status: InventoryItemStatus.IN_INVENTORY,
       listedAt: new Date(),
     });
@@ -181,7 +182,13 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
 
     this.assertAvailable(item, 'edited');
 
-    Object.assign(item, updateInventoryItemDto);
+    const { expiresAt, ...rest } = updateInventoryItemDto;
+
+    Object.assign(item, rest);
+
+    if (expiresAt !== undefined) {
+      item.expiresAt = expiresAt ? new Date(expiresAt) : null;
+    }
 
     const updatedItem = await this.inventoryItemRepository.save(item);
 

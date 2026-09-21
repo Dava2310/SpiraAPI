@@ -1,11 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import { DonationReason } from '../../common/enums/donation-reason.enum.js';
+import {
+  CRITICAL_HOURS_THRESHOLD,
+  EXPIRING_HOURS_THRESHOLD,
+  SurplusUrgency,
+} from '../../common/enums/surplus-urgency.enum.js';
 import { UnitOfMeasure } from '../../common/enums/unit-of-measure.enum.js';
 import type { InventoryItem } from '../entities/inventory-item.entity.js';
 import { InventoryItemStatus } from '../enums/inventory-item-status.enum.js';
 
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const MS_PER_HOUR = 60 * 60 * 1000;
+const HOURS_PER_DAY = 24;
 
 /** API representation of a donatable stock lot. */
 export class InventoryItemResponseDto {
@@ -43,25 +49,44 @@ export class InventoryItemResponseDto {
   })
   retailValue: number | null;
 
-  @ApiProperty({ description: 'Currency of the retail value.', example: 'USD' })
+  @ApiProperty({ description: 'Currency of the retail value.', example: 'EUR' })
   currency: string;
 
   @ApiPropertyOptional({
-    description: 'Best-by date.',
+    description: 'When the lot expires (ISO 8601).',
     type: String,
-    format: 'date',
+    format: 'date-time',
     nullable: true,
   })
-  expiryDate: string | null;
+  expiresAt: string | null;
 
   @ApiPropertyOptional({
     description:
-      'Whole days until the best-by date, derived from `expiryDate` rather than stored. Negative once past, null when there is no expiry.',
+      'Hours until expiry, derived rather than stored. Negative once past, null when there is no expiry.',
+    type: Number,
+    nullable: true,
+    example: 4.5,
+  })
+  hoursRemaining: number | null;
+
+  @ApiPropertyOptional({
+    description:
+      'Whole days until expiry, derived. Negative once past, null when there is no expiry.',
     type: Number,
     nullable: true,
     example: 1,
   })
   daysRemaining: number | null;
+
+  @ApiPropertyOptional({
+    description:
+      'How pressing the lot is, derived from the hours remaining. Null when there is no expiry.',
+    enum: SurplusUrgency,
+    enumName: 'SurplusUrgency',
+    nullable: true,
+    example: SurplusUrgency.CRITICAL,
+  })
+  urgency: SurplusUrgency | null;
 
   @ApiProperty({
     description: 'Why the lot is donatable.',
@@ -132,8 +157,13 @@ export class InventoryItemResponseDto {
     this.weightKg = data.weightKg;
     this.retailValue = data.retailValue;
     this.currency = data.currency;
-    this.expiryDate = data.expiryDate;
-    this.daysRemaining = InventoryItemResponseDto.daysUntil(data.expiryDate);
+    this.expiresAt = data.expiresAt ? data.expiresAt.toISOString() : null;
+    this.hoursRemaining = InventoryItemResponseDto.hoursUntil(data.expiresAt);
+    this.daysRemaining =
+      this.hoursRemaining === null
+        ? null
+        : Math.floor(this.hoursRemaining / HOURS_PER_DAY);
+    this.urgency = InventoryItemResponseDto.urgencyOf(this.hoursRemaining);
     this.reason = data.reason;
     this.reasonDescription = data.reasonDescription;
     this.status = data.status;
@@ -145,29 +175,40 @@ export class InventoryItemResponseDto {
   }
 
   /**
-   * Counts whole days from today to a calendar date, comparing at UTC midnight
-   * so the result does not shift with the time of day.
-   * @param expiryDate The stored `YYYY-MM-DD` date, or null.
-   * @returns Whole days remaining, negative once past, or null without a date.
+   * Counts hours from now until an expiry instant, to one decimal place.
+   * @param expiresAt The stored expiry, or null.
+   * @returns Hours remaining, negative once past, or null without an expiry.
    */
-  private static daysUntil(expiryDate: string | null): number | null {
-    if (!expiryDate) {
+  private static hoursUntil(expiresAt: Date | null): number | null {
+    if (!expiresAt) {
       return null;
     }
 
-    const expiry = Date.parse(`${expiryDate}T00:00:00Z`);
-
-    if (Number.isNaN(expiry)) {
-      return null;
-    }
-
-    const today = new Date();
-    const todayUtc = Date.UTC(
-      today.getUTCFullYear(),
-      today.getUTCMonth(),
-      today.getUTCDate(),
+    return (
+      Math.round(((expiresAt.getTime() - Date.now()) / MS_PER_HOUR) * 10) / 10
     );
+  }
 
-    return Math.round((expiry - todayUtc) / MS_PER_DAY);
+  /**
+   * Buckets hours remaining into the urgency the apps colour-code on.
+   * @param hoursRemaining Hours until expiry, or null.
+   * @returns The urgency band, or null without an expiry.
+   */
+  private static urgencyOf(
+    hoursRemaining: number | null,
+  ): SurplusUrgency | null {
+    if (hoursRemaining === null) {
+      return null;
+    }
+
+    if (hoursRemaining < CRITICAL_HOURS_THRESHOLD) {
+      return SurplusUrgency.CRITICAL;
+    }
+
+    if (hoursRemaining < EXPIRING_HOURS_THRESHOLD) {
+      return SurplusUrgency.EXPIRING;
+    }
+
+    return SurplusUrgency.STANDARD;
   }
 }

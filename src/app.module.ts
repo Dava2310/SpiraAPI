@@ -20,6 +20,7 @@ import { DonationReceiptsModule } from './donation-receipts/donation-receipts.mo
 import { RecipientVehiclesModule } from './recipient-vehicles/recipient-vehicles.module.js';
 import { PartnershipsModule } from './partnerships/partnerships.module.js';
 import { ImpactFactorsModule } from './impact-factors/impact-factors.module.js';
+import { LocationPickupSlotsModule } from './location-pickup-slots/location-pickup-slots.module.js';
 
 import configuration from './config/configuration.js';
 
@@ -55,6 +56,7 @@ import configuration from './config/configuration.js';
     RecipientVehiclesModule,
     PartnershipsModule,
     ImpactFactorsModule,
+    LocationPickupSlotsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: AuthGuard }],

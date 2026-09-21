@@ -91,12 +91,27 @@ export class DonationResponseDto {
   declineReason: string | null;
 
   @ApiPropertyOptional({
-    description: 'Agreed collection time (ISO 8601).',
+    description: 'Start of the agreed collection window (ISO 8601).',
     type: String,
     format: 'date-time',
     nullable: true,
   })
-  scheduledPickupAt: string | null;
+  pickupWindowStart: string | null;
+
+  @ApiPropertyOptional({
+    description: 'End of the agreed collection window (ISO 8601).',
+    type: String,
+    format: 'date-time',
+    nullable: true,
+  })
+  pickupWindowEnd: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Named branch slot the window was reserved against.',
+    format: 'uuid',
+    nullable: true,
+  })
+  pickupSlotId: string | null;
 
   @ApiPropertyOptional({
     description: 'Retailer-side user who confirmed the handover.',
@@ -187,9 +202,13 @@ export class DonationResponseDto {
     this.acceptedAt = data.acceptedAt ? data.acceptedAt.toISOString() : null;
     this.declinedAt = data.declinedAt ? data.declinedAt.toISOString() : null;
     this.declineReason = data.declineReason;
-    this.scheduledPickupAt = data.scheduledPickupAt
-      ? data.scheduledPickupAt.toISOString()
+    this.pickupWindowStart = data.pickupWindowStart
+      ? data.pickupWindowStart.toISOString()
       : null;
+    this.pickupWindowEnd = data.pickupWindowEnd
+      ? data.pickupWindowEnd.toISOString()
+      : null;
+    this.pickupSlotId = data.pickupSlotId;
     this.confirmedByUserId = data.confirmedByUserId;
     this.completedAt = data.completedAt ? data.completedAt.toISOString() : null;
     this.cancelledAt = data.cancelledAt ? data.cancelledAt.toISOString() : null;

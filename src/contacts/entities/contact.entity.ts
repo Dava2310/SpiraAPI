@@ -14,6 +14,7 @@ import {
 } from 'typeorm';
 
 import { SoftDeletableEntity } from '../../common/entities/soft-deletable.entity.js';
+import { Location } from '../../locations/entities/location.entity.js';
 import { Recipient } from '../../recipients/entities/recipient.entity.js';
 import { Retailer } from '../../retailers/entities/retailer.entity.js';
 import { User } from '../../users/entities/user.entity.js';
@@ -27,6 +28,9 @@ import {
 @Check('chk_contact_owner', 'num_nonnulls(retailer_id, recipient_id) = 1')
 @Index('idx_contact_retailer', ['retailerId'])
 @Index('idx_contact_recipient', ['recipientId'])
+@Index('idx_contact_location', ['locationId'], {
+  where: 'deleted_at IS NULL AND location_id IS NOT NULL',
+})
 @Index('uq_contact_primary_retailer', ['retailerId'], {
   unique: true,
   where: 'is_primary AND retailer_id IS NOT NULL AND deleted_at IS NULL',
@@ -150,6 +154,15 @@ export class Contact extends SoftDeletableEntity {
   @Column({ name: 'user_id', type: 'uuid', nullable: true })
   userId: string | null;
 
+  @ApiPropertyOptional({
+    description:
+      'Branch this person is attached to, for a site-level contact such as a store manager. Null for an organization-wide contact.',
+    format: 'uuid',
+    nullable: true,
+  })
+  @Column({ name: 'location_id', type: 'uuid', nullable: true })
+  locationId: string | null;
+
   // --- Relations ---
 
   @ApiHideProperty()
@@ -172,4 +185,9 @@ export class Contact extends SoftDeletableEntity {
   @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'user_id' })
   user?: Relation<User> | null;
+
+  @ApiHideProperty()
+  @ManyToOne(() => Location, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'location_id' })
+  location?: Relation<Location> | null;
 }

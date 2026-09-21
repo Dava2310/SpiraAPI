@@ -7,6 +7,8 @@ export enum ProductCategory {
   MEAT = 'MEAT',
   BEVERAGE = 'BEVERAGE',
   BABY_CARE = 'BABY_CARE',
+  DELI = 'DELI',
+  PREPARED = 'PREPARED',
 }
 
 export const PRODUCT_CATEGORY_ENUM_NAME = 'product_category';
