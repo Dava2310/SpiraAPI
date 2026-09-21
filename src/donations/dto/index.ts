@@ -1,5 +1,6 @@
 export * from './accept-donation.dto.js';
 export * from './add-donation-lines.dto.js';
+export * from './add-lines-to-open-donation.dto.js';
 export * from './cancel-donation.dto.js';
 export * from './confirm-donation.dto.js';
 export * from './create-donation.dto.js';
@@ -9,4 +10,7 @@ export * from './donation-line-response.dto.js';
 export * from './donation-response.dto.js';
 export * from './offer-donation.dto.js';
 export * from './pickup-token-response.dto.js';
+export * from './query-donations.dto.js';
 export * from './update-donation.dto.js';
+export * from './verify-pickup-token-response.dto.js';
+export * from './verify-pickup-token.dto.js';

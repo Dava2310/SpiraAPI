@@ -64,8 +64,26 @@ export class DonationReceiptResponseDto {
   })
   vehiclePlate: string | null;
 
+  @ApiPropertyOptional({
+    description:
+      'Who signed for the goods on the receiving side, as free text.',
+    nullable: true,
+    example: 'Marta Ruiz',
+  })
+  receivedByLabel: string | null;
+
+  @ApiPropertyOptional({
+    description: 'PIN of the pickup token that released the goods.',
+    nullable: true,
+    example: '482913',
+  })
+  handoverPin: string | null;
+
   @ApiProperty({ description: 'Number of lines certified.', type: Number })
   lineCount: number;
+
+  @ApiProperty({ description: 'Total units certified.', type: Number })
+  totalQuantity: number;
 
   @ApiProperty({ description: 'Total weight certified.', type: Number })
   totalWeightKg: number;
@@ -139,7 +157,10 @@ export class DonationReceiptResponseDto {
     this.recipientTaxId = data.recipientTaxId;
     this.driverName = data.driverName;
     this.vehiclePlate = data.vehiclePlate;
+    this.receivedByLabel = data.receivedByLabel;
+    this.handoverPin = data.handoverPin;
     this.lineCount = data.lineCount;
+    this.totalQuantity = data.totalQuantity;
     this.totalWeightKg = data.totalWeightKg;
     this.totalRetailValue = data.totalRetailValue;
     this.currency = data.currency;

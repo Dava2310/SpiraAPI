@@ -1,5 +1,14 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
+
+import { CancellationReasonCode } from '../enums/cancellation-reason-code.enum.js';
 
 /** Input for either side calling off a donation, including a driver no-show. */
 export class CancelDonationDto {
@@ -18,4 +27,17 @@ export class CancelDonationDto {
     message: 'The cancellation reason cannot be longer than 500 characters.',
   })
   cancellationReason: string;
+
+  @ApiPropertyOptional({
+    description:
+      'The reason as a fixed code, so both apps can offer a picker and the platform can report on causes.',
+    enum: CancellationReasonCode,
+    enumName: 'CancellationReasonCode',
+    example: CancellationReasonCode.DRIVER_NO_SHOW,
+  })
+  @IsOptional()
+  @IsEnum(CancellationReasonCode, {
+    message: `The cancellation reason code must be one of: ${Object.values(CancellationReasonCode).join(', ')}.`,
+  })
+  cancellationReasonCode?: CancellationReasonCode;
 }

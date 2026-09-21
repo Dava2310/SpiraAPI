@@ -20,8 +20,14 @@ export interface IssueReceiptContext {
   /** Name of the person who collected, when one is recorded. */
   driverName?: string | null;
 
+  /** Who signed for the goods on the receiving side. */
+  receivedByLabel?: string | null;
+
   /** The pickup token that was consumed, retained as evidence. */
   verificationCode?: string | null;
+
+  /** PIN of that token, which the certificate prints. */
+  handoverPin?: string | null;
 
   /** Statute the certificate is issued under, which depends on jurisdiction. */
   legalReference?: string | null;
@@ -135,6 +141,44 @@ export class DonationReceiptsService implements CrudRepository<DonationReceipt> 
    * @param context Names and evidence the donation flow resolved.
    * @returns A Promise that resolves with the issued certificate and a success message.
    */
+  /**
+   * Reads the certificates in a date range, for a bulk export.
+   * @param from Inclusive lower bound on the issue date.
+   * @param to Exclusive upper bound on the issue date.
+   * @param recipientId Narrow to one recipient's collections.
+   * @param retailerId Narrow to one retailer's donations.
+   * @returns A Promise that resolves with the matching certificates, oldest first.
+   */
+  async findForExport(
+    from?: string,
+    to?: string,
+    recipientId?: string,
+    retailerId?: string,
+  ): Promise<DonationReceipt[]> {
+    const builder = this.receiptRepository
+      .createQueryBuilder('receipt')
+      .innerJoin('receipt.donation', 'donation')
+      .where('donation.deleted_at IS NULL');
+
+    if (from) {
+      builder.andWhere('receipt.issued_at >= :from', { from: new Date(from) });
+    }
+
+    if (to) {
+      builder.andWhere('receipt.issued_at < :to', { to: new Date(to) });
+    }
+
+    if (recipientId) {
+      builder.andWhere('donation.recipient_id = :recipientId', { recipientId });
+    }
+
+    if (retailerId) {
+      builder.andWhere('donation.retailer_id = :retailerId', { retailerId });
+    }
+
+    return await builder.orderBy('receipt.issued_at', 'ASC').getMany();
+  }
+
   async issueForDonation(
     donation: Donation,
     context: IssueReceiptContext,
@@ -160,20 +204,29 @@ export class DonationReceiptsService implements CrudRepository<DonationReceipt> 
         'Unknown recipient',
       recipientTaxId: donation.recipient?.taxId ?? null,
       driverName: context.driverName ?? null,
+      receivedByLabel: context.receivedByLabel ?? null,
       vehiclePlate: donation.recipientVehicle?.plate ?? null,
       lineCount: donation.lineCount,
+      totalQuantity: donation.totalQuantity,
       totalWeightKg: donation.totalWeightKg,
       totalRetailValue: donation.totalRetailValue,
       currency: donation.currency,
-      estimatedMeals: factor
-        ? Math.round(donation.totalWeightKg * factor.mealsPerKg)
-        : null,
-      co2AvoidedKg: factor
-        ? Number((donation.totalWeightKg * factor.co2KgPerKg).toFixed(3))
-        : null,
-      impactFactorId: factor?.id ?? null,
+      // Prefer what the donation already carried: the recipient app showed
+      // those figures before delivery, and the certificate must not restate them.
+      estimatedMeals:
+        donation.estimatedMeals ??
+        (factor
+          ? Number((donation.totalWeightKg * factor.mealsPerKg).toFixed(2))
+          : null),
+      co2AvoidedKg:
+        donation.co2AvoidedKg ??
+        (factor
+          ? Number((donation.totalWeightKg * factor.co2KgPerKg).toFixed(3))
+          : null),
+      impactFactorId: donation.impactFactorId ?? factor?.id ?? null,
       legalReference: context.legalReference ?? null,
       verificationCode: context.verificationCode ?? null,
+      handoverPin: context.handoverPin ?? null,
     });
 
     const newReceipt = await this.receiptRepository.save(receipt);

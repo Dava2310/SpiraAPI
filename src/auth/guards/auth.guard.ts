@@ -91,6 +91,9 @@ export class AuthGuard implements CanActivate {
       id: user.id,
       jti: payload.jti,
       expiresAt: new Date(payload.exp * 1000),
+      role: user.role,
+      retailerId: user.retailerId,
+      recipientId: user.recipientId,
     };
 
     return true;

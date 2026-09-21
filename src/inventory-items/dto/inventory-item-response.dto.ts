@@ -1,17 +1,55 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import { DonationReason } from '../../common/enums/donation-reason.enum.js';
-import {
-  CRITICAL_HOURS_THRESHOLD,
-  EXPIRING_HOURS_THRESHOLD,
-  SurplusUrgency,
-} from '../../common/enums/surplus-urgency.enum.js';
+import { ProductCategory } from '../../common/enums/product-category.enum.js';
+import { SurplusUrgency } from '../../common/enums/surplus-urgency.enum.js';
 import { UnitOfMeasure } from '../../common/enums/unit-of-measure.enum.js';
+import { expiryView } from '../../common/expiry/expiry.view.js';
 import type { InventoryItem } from '../entities/inventory-item.entity.js';
 import { InventoryItemStatus } from '../enums/inventory-item-status.enum.js';
 
-const MS_PER_HOUR = 60 * 60 * 1000;
-const HOURS_PER_DAY = 24;
+/**
+ * The catalogue details a lot is displayed by.
+ *
+ * Flattened onto the lot rather than left as a bare `productId`: every list in
+ * both apps shows the name, category and image beside the quantity, and a
+ * second round trip per row is what made the demo lists slow.
+ */
+export class InventoryItemProductDto {
+  @ApiProperty({ description: 'The catalogue product.', format: 'uuid' })
+  id: string;
+
+  @ApiProperty({ description: 'Product name.', example: 'Sourdough Loaf' })
+  name: string;
+
+  @ApiPropertyOptional({ description: 'Brand.', nullable: true })
+  brand: string | null;
+
+  @ApiPropertyOptional({ description: 'Barcode.', nullable: true })
+  barcode: string | null;
+
+  @ApiProperty({
+    description: 'Category the lot is filtered and grouped by.',
+    enum: ProductCategory,
+    enumName: 'ProductCategory',
+  })
+  category: ProductCategory;
+
+  @ApiPropertyOptional({
+    description: 'Catalogue image, used when the lot has none of its own.',
+    nullable: true,
+  })
+  imageUrl: string | null;
+
+  constructor(init: InventoryItemProductDto) {
+    this.id = init.id;
+    this.name = init.name;
+    this.brand = init.brand;
+    this.barcode = init.barcode;
+    this.category = init.category;
+    this.imageUrl = init.imageUrl;
+  }
+}
 
 /** API representation of a donatable stock lot. */
 export class InventoryItemResponseDto {
@@ -23,6 +61,21 @@ export class InventoryItemResponseDto {
 
   @ApiProperty({ description: 'What the lot contains.', format: 'uuid' })
   productId: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Catalogue details, present when the product relation was loaded.',
+    type: InventoryItemProductDto,
+    nullable: true,
+  })
+  product: InventoryItemProductDto | null;
+
+  @ApiPropertyOptional({
+    description:
+      'The image to render: the lot\u2019s own photo, falling back to the catalogue image.',
+    nullable: true,
+  })
+  displayImageUrl: string | null;
 
   @ApiProperty({ description: 'How much there is.', type: Number, example: 4 })
   quantity: number;
@@ -48,6 +101,27 @@ export class InventoryItemResponseDto {
     nullable: true,
   })
   retailValue: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Retail value of a single unit.',
+    type: Number,
+    nullable: true,
+    example: 1.25,
+  })
+  unitPrice: number | null;
+
+  @ApiPropertyOptional({
+    description: 'How the unit is named to staff.',
+    nullable: true,
+    example: 'bottles',
+  })
+  unitLabel: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Photo of this lot, overriding the catalogue image.',
+    nullable: true,
+  })
+  imageUrl: string | null;
 
   @ApiProperty({ description: 'Currency of the retail value.', example: 'EUR' })
   currency: string;
@@ -107,6 +181,12 @@ export class InventoryItemResponseDto {
   })
   status: InventoryItemStatus;
 
+  @ApiProperty({
+    description: 'Whether the lot is published to the surplus shelf.',
+    example: true,
+  })
+  isListed: boolean;
+
   @ApiPropertyOptional({
     description: 'Donation this lot is committed to.',
     format: 'uuid',
@@ -152,18 +232,33 @@ export class InventoryItemResponseDto {
     this.id = data.id;
     this.locationId = data.locationId;
     this.productId = data.productId;
+    this.product = data.product
+      ? new InventoryItemProductDto({
+          id: data.product.id,
+          name: data.product.name,
+          brand: data.product.brand,
+          barcode: data.product.barcode,
+          category: data.product.category,
+          imageUrl: data.product.imageUrl,
+        })
+      : null;
+    this.displayImageUrl = data.imageUrl ?? data.product?.imageUrl ?? null;
     this.quantity = data.quantity;
     this.unit = data.unit;
     this.weightKg = data.weightKg;
     this.retailValue = data.retailValue;
     this.currency = data.currency;
     this.expiresAt = data.expiresAt ? data.expiresAt.toISOString() : null;
-    this.hoursRemaining = InventoryItemResponseDto.hoursUntil(data.expiresAt);
-    this.daysRemaining =
-      this.hoursRemaining === null
-        ? null
-        : Math.floor(this.hoursRemaining / HOURS_PER_DAY);
-    this.urgency = InventoryItemResponseDto.urgencyOf(this.hoursRemaining);
+
+    const expiry = expiryView(data.expiresAt);
+
+    this.hoursRemaining = expiry.hoursRemaining;
+    this.daysRemaining = expiry.daysRemaining;
+    this.urgency = expiry.urgency;
+    this.unitPrice = data.unitPrice;
+    this.unitLabel = data.unitLabel;
+    this.imageUrl = data.imageUrl;
+    this.isListed = data.isListed;
     this.reason = data.reason;
     this.reasonDescription = data.reasonDescription;
     this.status = data.status;
@@ -172,43 +267,5 @@ export class InventoryItemResponseDto {
     this.queuedAt = data.queuedAt ? data.queuedAt.toISOString() : null;
     this.createdAt = data.createdAt.toISOString();
     this.updatedAt = data.updatedAt.toISOString();
-  }
-
-  /**
-   * Counts hours from now until an expiry instant, to one decimal place.
-   * @param expiresAt The stored expiry, or null.
-   * @returns Hours remaining, negative once past, or null without an expiry.
-   */
-  private static hoursUntil(expiresAt: Date | null): number | null {
-    if (!expiresAt) {
-      return null;
-    }
-
-    return (
-      Math.round(((expiresAt.getTime() - Date.now()) / MS_PER_HOUR) * 10) / 10
-    );
-  }
-
-  /**
-   * Buckets hours remaining into the urgency the apps colour-code on.
-   * @param hoursRemaining Hours until expiry, or null.
-   * @returns The urgency band, or null without an expiry.
-   */
-  private static urgencyOf(
-    hoursRemaining: number | null,
-  ): SurplusUrgency | null {
-    if (hoursRemaining === null) {
-      return null;
-    }
-
-    if (hoursRemaining < CRITICAL_HOURS_THRESHOLD) {
-      return SurplusUrgency.CRITICAL;
-    }
-
-    if (hoursRemaining < EXPIRING_HOURS_THRESHOLD) {
-      return SurplusUrgency.EXPIRING;
-    }
-
-    return SurplusUrgency.STANDARD;
   }
 }

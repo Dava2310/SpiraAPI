@@ -1,6 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import type { Donation } from '../entities/donation.entity.js';
+import { CancellationReasonCode } from '../enums/cancellation-reason-code.enum.js';
+import { DonationOrigin } from '../enums/donation-origin.enum.js';
 import { DonationStatus } from '../enums/donation-status.enum.js';
 import { DonationLineResponseDto } from './donation-line-response.dto.js';
 
@@ -31,6 +33,15 @@ export class DonationResponseDto {
     example: DonationStatus.OFFERED,
   })
   status: DonationStatus;
+
+  @ApiProperty({
+    description:
+      'Which side started it. A `RECIPIENT_CLAIM` skips the offer/accept exchange.',
+    enum: DonationOrigin,
+    enumName: 'DonationOrigin',
+    example: DonationOrigin.RETAILER_OFFER,
+  })
+  origin: DonationOrigin;
 
   @ApiPropertyOptional({
     description: 'Vehicle that will collect.',
@@ -146,6 +157,13 @@ export class DonationResponseDto {
   lineCount: number;
 
   @ApiProperty({
+    description: 'Total units across every line.',
+    type: Number,
+    example: 42,
+  })
+  totalQuantity: number;
+
+  @ApiProperty({
     description: 'Total weight of every line.',
     type: Number,
     example: 18.3,
@@ -159,8 +177,47 @@ export class DonationResponseDto {
   })
   totalRetailValue: number;
 
-  @ApiProperty({ description: 'Currency of the totals.', example: 'USD' })
+  @ApiProperty({ description: 'Currency of the totals.', example: 'EUR' })
   currency: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Meals this donation represents. Pinned when the donation is claimed or delivered.',
+    type: Number,
+    nullable: true,
+    example: 45.75,
+  })
+  estimatedMeals: number | null;
+
+  @ApiPropertyOptional({
+    description: 'CO₂-equivalent emissions avoided, in kilograms.',
+    type: Number,
+    nullable: true,
+    example: 36.6,
+  })
+  co2AvoidedKg: number | null;
+
+  @ApiPropertyOptional({
+    description: 'The factor row the two figures above were computed from.',
+    format: 'uuid',
+    nullable: true,
+  })
+  impactFactorId: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Cancellation reason as a fixed code.',
+    enum: CancellationReasonCode,
+    enumName: 'CancellationReasonCode',
+    nullable: true,
+  })
+  cancellationReasonCode: CancellationReasonCode | null;
+
+  @ApiPropertyOptional({
+    description: 'User who cancelled, whichever side they belong to.',
+    format: 'uuid',
+    nullable: true,
+  })
+  cancelledByUserId: string | null;
 
   @ApiPropertyOptional({
     description: 'The lines, when they were loaded with the donation.',
@@ -194,6 +251,7 @@ export class DonationResponseDto {
     this.locationId = data.locationId;
     this.recipientId = data.recipientId;
     this.status = data.status;
+    this.origin = data.origin;
     this.recipientVehicleId = data.recipientVehicleId;
     this.driverContactId = data.driverContactId;
     this.createdByUserId = data.createdByUserId;
@@ -214,9 +272,15 @@ export class DonationResponseDto {
     this.cancelledAt = data.cancelledAt ? data.cancelledAt.toISOString() : null;
     this.cancellationReason = data.cancellationReason;
     this.lineCount = data.lineCount;
+    this.totalQuantity = data.totalQuantity;
     this.totalWeightKg = data.totalWeightKg;
     this.totalRetailValue = data.totalRetailValue;
     this.currency = data.currency;
+    this.estimatedMeals = data.estimatedMeals;
+    this.co2AvoidedKg = data.co2AvoidedKg;
+    this.impactFactorId = data.impactFactorId;
+    this.cancellationReasonCode = data.cancellationReasonCode;
+    this.cancelledByUserId = data.cancelledByUserId;
     this.lines = data.lines?.map((line) => new DonationLineResponseDto(line));
     this.createdAt = data.createdAt.toISOString();
     this.updatedAt = data.updatedAt.toISOString();

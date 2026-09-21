@@ -21,6 +21,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
+import { Roles } from '../common/decorators/index.js';
 import { MessageResponseDto } from '../common/dto/index.js';
 import {
   CreateProductDto,
@@ -29,6 +30,7 @@ import {
   UpdateProductDto,
 } from './dto/index.js';
 import { ProductsService } from './products.service.js';
+import { UserRole } from '../users/enums/user-role.enum.js';
 
 @ApiTags('products')
 @ApiBearerAuth()
@@ -93,6 +95,7 @@ export class ProductsController {
    * @throws BadRequestException If the barcode is already used by this retailer.
    */
   @Post()
+  @Roles(UserRole.RETAILER)
   @ApiOperation({ summary: 'Create a new product' })
   @ApiBody({
     type: CreateProductDto,
@@ -120,6 +123,7 @@ export class ProductsController {
    * @throws BadRequestException If the barcode is used by another product of the same retailer.
    */
   @Patch(':id')
+  @Roles(UserRole.RETAILER)
   @ApiOperation({ summary: 'Update a product' })
   @ApiParam({
     name: 'id',
@@ -149,6 +153,7 @@ export class ProductsController {
    * @throws NotFoundException If the product is not found.
    */
   @Delete(':id')
+  @Roles(UserRole.RETAILER)
   @ApiOperation({ summary: 'Delete a product by its ID' })
   @ApiParam({ name: 'id', description: 'Product ID', format: 'uuid' })
   @ApiOkResponse({

@@ -16,6 +16,7 @@ import {
 
 import { SoftDeletableEntity } from '../../common/entities/soft-deletable.entity.js';
 import { numericTransformer } from '../../common/transformers/numeric.transformer.js';
+import { Contact } from '../../contacts/entities/contact.entity.js';
 import { Donation } from '../../donations/entities/donation.entity.js';
 import { LocationPickupSlot } from '../../location-pickup-slots/entities/location-pickup-slot.entity.js';
 import { InventoryItem } from '../../inventory-items/entities/inventory-item.entity.js';
@@ -359,4 +360,8 @@ export class Location extends SoftDeletableEntity {
   @ApiHideProperty()
   @OneToMany(() => LocationPickupSlot, (slot) => slot.location)
   pickupSlots?: Relation<LocationPickupSlot>[];
+
+  @ApiHideProperty()
+  @OneToMany(() => Contact, (contact) => contact.location)
+  contacts?: Relation<Contact>[];
 }

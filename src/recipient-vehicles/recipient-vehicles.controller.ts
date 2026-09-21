@@ -21,6 +21,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
+import { Roles } from '../common/decorators/index.js';
 import { MessageResponseDto } from '../common/dto/index.js';
 import {
   CreateRecipientVehicleDto,
@@ -29,6 +30,7 @@ import {
   UpdateRecipientVehicleDto,
 } from './dto/index.js';
 import { RecipientVehiclesService } from './recipient-vehicles.service.js';
+import { UserRole } from '../users/enums/user-role.enum.js';
 
 @ApiTags('recipient-vehicles')
 @ApiBearerAuth()
@@ -102,6 +104,7 @@ export class RecipientVehiclesController {
    * @throws BadRequestException If the plate is already registered to this recipient.
    */
   @Post()
+  @Roles(UserRole.RECIPIENT)
   @ApiOperation({ summary: 'Create a new vehicle' })
   @ApiBody({
     type: CreateRecipientVehicleDto,
@@ -132,6 +135,7 @@ export class RecipientVehiclesController {
    * @throws BadRequestException If the plate is registered to another vehicle of the same recipient.
    */
   @Patch(':id')
+  @Roles(UserRole.RECIPIENT)
   @ApiOperation({ summary: 'Update a vehicle' })
   @ApiParam({
     name: 'id',
@@ -168,6 +172,7 @@ export class RecipientVehiclesController {
    * @throws NotFoundException If the vehicle is not found.
    */
   @Delete(':id')
+  @Roles(UserRole.RECIPIENT)
   @ApiOperation({ summary: 'Delete a vehicle by its ID' })
   @ApiParam({ name: 'id', description: 'RecipientVehicle ID', format: 'uuid' })
   @ApiOkResponse({

@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Contact } from '../contacts/entities/contact.entity.js';
 import { DonationReceiptsModule } from '../donation-receipts/donation-receipts.module.js';
 import { InventoryItem } from '../inventory-items/entities/inventory-item.entity.js';
+import { Location } from '../locations/entities/location.entity.js';
 import { Partnership } from '../partnerships/entities/partnership.entity.js';
 import { DonationsController } from './donations.controller.js';
 import { DonationsService } from './donations.service.js';
@@ -20,6 +21,7 @@ import { PickupToken } from './entities/pickup-token.entity.js';
       InventoryItem,
       Partnership,
       Contact,
+      Location,
     ]),
     DonationReceiptsModule,
   ],

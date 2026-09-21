@@ -155,6 +155,16 @@ export class DonationReceipt extends AuditedEntity {
   })
   receivedByLabel: string | null;
 
+  @ApiPropertyOptional({
+    description:
+      'PIN of the pickup token that released the goods. Snapshotted because the certificate prints it and must stay readable after the token is spent.',
+    maxLength: 8,
+    nullable: true,
+    example: '482913',
+  })
+  @Column({ name: 'handover_pin', type: 'varchar', length: 8, nullable: true })
+  handoverPin: string | null;
+
   // --- Totals, frozen at issue ---
 
   @ApiProperty({ description: 'Number of lines certified.', type: Number })

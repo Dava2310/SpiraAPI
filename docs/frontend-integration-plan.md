@@ -35,6 +35,32 @@ Smaller calls made while implementing:
 
 ---
 
+## 0b. Implementation status
+
+Everything in §4 and §5 is implemented, verified against a throwaway Postgres by
+driving the built `dist/` with 131 end-to-end assertions (all passing). 121
+routes are mapped; `swagger.json` carries 77 paths, 121 operations, 116 schemas.
+
+**Beyond the plan as written, and why:**
+
+| Addition | Why |
+|---|---|
+| `donation.pickup_slot_id` | §4.8 exists so a reservation round-trips; without the link it cannot. |
+| `donation_receipt.handover_pin` | N17 requires the certificate to print the PIN, and the certificate must stay readable after the token is spent. |
+| `RolesGuard` + `@Roles()` + `resolveScope`/`assert*Scope` | The §5.1 prerequisite. Registered globally after `AuthGuard`; ADMIN passes every check. |
+| Cursor pagination (`PaginationQueryDto`, `PageMetaDto`) | Every list is bounded by default, since both apps fetched unbounded lists and reduced them client-side. |
+| `pdfkit` dependency | R15 and N18 need a real file; `Download` was wired to nothing in both apps. |
+| Shared `expiryView`, `haversineKm`, `resolvePeriod` | The three derivations the plan insists are never stored, each in one place. |
+| `initials` from first **and last** word | First-two-words turned "Banc dels Aliments" into "BD". |
+
+**Deliberately still open:** the `GET /me` response does not carry
+`charityPartnersCount` (N2) — it is derivable from `/recipients/me/partner-locations`
+and adding a second aggregate to the sign-in path was not worth the latency.
+`DRIVER_EN_ROUTE` remains in `donation_status` with a transition route but no UI
+in either app, as recorded in §7.
+
+---
+
 ## 1. The headline
 
 **The retailer app needs no schema change.** Verified by md5 across the whole tree: `App.tsx`, `package.json`, `BottomNav`, `QRScannerModal`, `ReceiptModal` and `NgoPreviewModal` are **byte-identical** to the version we already modelled. The entire data delta is:

@@ -21,6 +21,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
+import { Roles } from '../common/decorators/index.js';
 import { MessageResponseDto } from '../common/dto/index.js';
 import {
   CreateInvalidTokenDto,
@@ -29,6 +30,7 @@ import {
   UpdateInvalidTokenDto,
 } from './dto/index.js';
 import { InvalidTokensService } from './invalid-tokens.service.js';
+import { UserRole } from '../users/enums/user-role.enum.js';
 
 @ApiTags('invalid-tokens')
 @ApiBearerAuth()
@@ -78,6 +80,7 @@ export class InvalidTokensController {
    * @throws BadRequestException If the `jti` is already on the denylist.
    */
   @Post()
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Revoke a token' })
   @ApiBody({
     type: CreateInvalidTokenDto,
@@ -105,6 +108,7 @@ export class InvalidTokensController {
    * @throws BadRequestException If the `jti` is taken by another entry.
    */
   @Patch(':id')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Update a denylist entry' })
   @ApiParam({
     name: 'id',
@@ -135,6 +139,7 @@ export class InvalidTokensController {
    * @returns A Promise that resolves with how many entries were purged.
    */
   @Delete('expired')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({
     summary: 'Purge expired denylist entries',
     description:
@@ -155,6 +160,7 @@ export class InvalidTokensController {
    * @throws NotFoundException If the entry is not found.
    */
   @Delete(':id')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Delete a denylist entry by its ID' })
   @ApiParam({ name: 'id', description: 'Denylist entry ID', format: 'uuid' })
   @ApiOkResponse({

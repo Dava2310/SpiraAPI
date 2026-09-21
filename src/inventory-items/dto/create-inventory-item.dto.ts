@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsISO4217CurrencyCode,
@@ -10,6 +11,7 @@ import {
   IsString,
   IsUUID,
   Max,
+  MaxLength,
   Min,
 } from 'class-validator';
 
@@ -88,6 +90,57 @@ export class CreateInventoryItemDto {
   @Min(0, { message: 'The retail value cannot be negative.' })
   @Max(99999999.99, { message: 'The retail value cannot exceed 99999999.99.' })
   retailValue?: number;
+
+  @ApiPropertyOptional({
+    description: 'Retail value of a single unit.',
+    example: 1.25,
+    minimum: 0,
+  })
+  @IsOptional()
+  @IsNumber(
+    { maxDecimalPlaces: 2 },
+    {
+      message: 'The unit price must be a number with at most 2 decimal places.',
+    },
+  )
+  @Min(0, { message: 'The unit price cannot be negative.' })
+  @Max(99999999.99, { message: 'The unit price cannot exceed 99999999.99.' })
+  unitPrice?: number;
+
+  @ApiPropertyOptional({
+    description:
+      'How the unit is named to staff. Display only; `unit` stays canonical for arithmetic.',
+    example: 'bottles',
+    maxLength: 20,
+  })
+  @IsOptional()
+  @IsString({ message: 'The unit label must be a string.' })
+  @MaxLength(20, {
+    message: 'The unit label cannot be longer than 20 characters.',
+  })
+  unitLabel?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Photo of this lot, overriding the catalogue image when given.',
+    example: 'https://cdn.spira.app/lots/sourdough.jpg',
+    maxLength: 500,
+  })
+  @IsOptional()
+  @IsString({ message: 'The image URL must be a string.' })
+  @MaxLength(500, {
+    message: 'The image URL cannot be longer than 500 characters.',
+  })
+  imageUrl?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Publish the lot to the surplus shelf, where any active recipient in range can claim it.',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'The listed flag must be a boolean.' })
+  isListed?: boolean;
 
   @ApiPropertyOptional({
     description: 'Currency of the retail value, as an ISO 4217 code.',
