@@ -75,7 +75,7 @@ export class RecipientsController {
    * Creates a recipient.
    * @param createRecipientDto The data to create the recipient with.
    * @returns A Promise that resolves with the created recipient as RecipientCreatedResponseDto.
-   * @throws BadRequestException If the slug or the tax ID is already taken.
+   * @throws BadRequestException If the tax ID is already taken.
    */
   @Post()
   @ApiOperation({ summary: 'Create a new recipient' })
@@ -88,7 +88,7 @@ export class RecipientsController {
     type: RecipientCreatedResponseDto,
   })
   @ApiBadRequestResponse({
-    description: 'Invalid data — the slug or the tax ID is already taken.',
+    description: 'Invalid data — the tax ID is already taken.',
   })
   async create(
     @Body() createRecipientDto: CreateRecipientDto,
@@ -102,7 +102,7 @@ export class RecipientsController {
    * @param updateRecipientDto The new data for the recipient.
    * @returns A Promise that resolves with the updated recipient as RecipientCreatedResponseDto.
    * @throws NotFoundException If the recipient is not found.
-   * @throws BadRequestException If the slug or the tax ID is taken by another recipient.
+   * @throws BadRequestException If the tax ID is taken by another recipient.
    */
   @Patch(':id')
   @ApiOperation({ summary: 'Update a recipient' })
@@ -121,7 +121,7 @@ export class RecipientsController {
   })
   @ApiNotFoundResponse({ description: 'Recipient not found.' })
   @ApiBadRequestResponse({
-    description: 'Invalid data — the slug or the tax ID is already taken.',
+    description: 'Invalid data — the tax ID is already taken.',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -131,7 +131,7 @@ export class RecipientsController {
   }
 
   /**
-   * Soft-deletes a recipient, freeing its slug and tax ID for reuse.
+   * Soft-deletes a recipient, freeing its tax ID for reuse.
    * @param id The ID of the recipient to delete.
    * @returns A Promise that resolves with a success message as MessageResponseDto.
    * @throws NotFoundException If the recipient is not found.

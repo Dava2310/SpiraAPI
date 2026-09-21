@@ -1,10 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-import { FoodCategory } from '../../common/enums/food-category.enum.js';
 import { ProfileStatus } from '../../common/enums/profile-status.enum.js';
 import type { Retailer } from '../entities/retailer.entity.js';
 import { BusinessType } from '../enums/business-type.enum.js';
-import { DonationFrequency } from '../enums/donation-frequency.enum.js';
 
 /** API representation of a retailer. */
 export class RetailerResponseDto {
@@ -23,12 +21,6 @@ export class RetailerResponseDto {
     example: 'Real',
   })
   tradeName: string | null;
-
-  @ApiProperty({
-    description: 'URL-friendly identifier.',
-    example: 'supermercados-real',
-  })
-  slug: string;
 
   @ApiProperty({
     description: 'Government tax identifier.',
@@ -55,42 +47,6 @@ export class RetailerResponseDto {
     nullable: true,
   })
   logoUrl: string | null;
-
-  @ApiPropertyOptional({
-    description: 'Food categories typically donated.',
-    enum: FoodCategory,
-    enumName: 'FoodCategory',
-    isArray: true,
-    nullable: true,
-  })
-  foodCategories: FoodCategory[] | null;
-
-  @ApiPropertyOptional({
-    description: 'How often surplus is expected.',
-    enum: DonationFrequency,
-    enumName: 'DonationFrequency',
-    nullable: true,
-  })
-  donationFrequency: DonationFrequency | null;
-
-  @ApiProperty({
-    description: 'Whether the recipient must collect the donation.',
-    example: true,
-  })
-  requiresRecipientTransport: boolean;
-
-  @ApiPropertyOptional({
-    description: 'Lead time needed before a collection, in hours.',
-    type: Number,
-    nullable: true,
-  })
-  minPickupNoticeHours: number | null;
-
-  @ApiPropertyOptional({
-    description: 'Notes for whoever collects.',
-    nullable: true,
-  })
-  handlingInstructions: string | null;
 
   @ApiProperty({
     description: 'Lifecycle status.',
@@ -171,17 +127,11 @@ export class RetailerResponseDto {
     this.id = data.id;
     this.legalName = data.legalName;
     this.tradeName = data.tradeName;
-    this.slug = data.slug;
     this.taxId = data.taxId;
     this.businessType = data.businessType;
     this.description = data.description;
     this.website = data.website;
     this.logoUrl = data.logoUrl;
-    this.foodCategories = data.foodCategories;
-    this.donationFrequency = data.donationFrequency;
-    this.requiresRecipientTransport = data.requiresRecipientTransport;
-    this.minPickupNoticeHours = data.minPickupNoticeHours;
-    this.handlingInstructions = data.handlingInstructions;
     this.status = data.status;
     this.isVerified = data.verifiedAt != null;
     this.verifiedAt = data.verifiedAt ? data.verifiedAt.toISOString() : null;

@@ -4,6 +4,7 @@ export enum ContactType {
   OPERATIONS = 'OPERATIONS',
   LOGISTICS = 'LOGISTICS',
   BILLING = 'BILLING',
+  DRIVER = 'DRIVER',
   EMERGENCY = 'EMERGENCY',
 }
 

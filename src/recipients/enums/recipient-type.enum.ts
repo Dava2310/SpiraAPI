@@ -7,7 +7,6 @@ export enum RecipientType {
   COMMUNITY_FRIDGE = 'COMMUNITY_FRIDGE',
   CHURCH = 'CHURCH',
   SCHOOL = 'SCHOOL',
-  CERTIFIED_INDIVIDUAL = 'CERTIFIED_INDIVIDUAL',
 }
 
 export const RECIPIENT_TYPE_ENUM_NAME = 'recipient_type';

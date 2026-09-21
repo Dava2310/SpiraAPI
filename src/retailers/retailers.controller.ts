@@ -75,7 +75,7 @@ export class RetailersController {
    * Creates a retailer.
    * @param createRetailerDto The data to create the retailer with.
    * @returns A Promise that resolves with the created retailer as RetailerCreatedResponseDto.
-   * @throws BadRequestException If the slug or the tax ID is already taken.
+   * @throws BadRequestException If the tax ID is already taken.
    */
   @Post()
   @ApiOperation({ summary: 'Create a new retailer' })
@@ -88,7 +88,7 @@ export class RetailersController {
     type: RetailerCreatedResponseDto,
   })
   @ApiBadRequestResponse({
-    description: 'Invalid data — the slug or the tax ID is already taken.',
+    description: 'Invalid data — the tax ID is already taken.',
   })
   async create(
     @Body() createRetailerDto: CreateRetailerDto,
@@ -102,7 +102,7 @@ export class RetailersController {
    * @param updateRetailerDto The new data for the retailer.
    * @returns A Promise that resolves with the updated retailer as RetailerCreatedResponseDto.
    * @throws NotFoundException If the retailer is not found.
-   * @throws BadRequestException If the slug or the tax ID is taken by another retailer.
+   * @throws BadRequestException If the tax ID is taken by another retailer.
    */
   @Patch(':id')
   @ApiOperation({ summary: 'Update a retailer' })
@@ -121,7 +121,7 @@ export class RetailersController {
   })
   @ApiNotFoundResponse({ description: 'Retailer not found.' })
   @ApiBadRequestResponse({
-    description: 'Invalid data — the slug or the tax ID is already taken.',
+    description: 'Invalid data — the tax ID is already taken.',
   })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -131,7 +131,7 @@ export class RetailersController {
   }
 
   /**
-   * Soft-deletes a retailer, freeing its slug and tax ID for reuse.
+   * Soft-deletes a retailer, freeing its tax ID for reuse.
    * @param id The ID of the retailer to delete.
    * @returns A Promise that resolves with a success message as MessageResponseDto.
    * @throws NotFoundException If the retailer is not found.

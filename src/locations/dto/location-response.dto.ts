@@ -1,8 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import type { Location } from '../entities/location.entity.js';
+import type { OpeningHours } from '../entities/opening-hours.interface.js';
 import type { PickupWindow } from '../entities/pickup-window.interface.js';
 import { LocationType } from '../enums/location-type.enum.js';
+import { OpeningHoursDto } from './opening-hours.dto.js';
 import { PickupWindowDto } from './pickup-window.dto.js';
 
 /** API representation of a location. */
@@ -29,6 +31,13 @@ export class LocationResponseDto {
     example: 'Sucursal Centro',
   })
   label: string;
+
+  @ApiPropertyOptional({
+    description: 'Human-readable branch code.',
+    nullable: true,
+    example: 'WF-NYC-402',
+  })
+  code: string | null;
 
   @ApiProperty({
     description: 'What kind of site this is.',
@@ -86,6 +95,13 @@ export class LocationResponseDto {
   timezone: string;
 
   @ApiPropertyOptional({
+    description: 'Public opening hours, by weekday.',
+    type: [OpeningHoursDto],
+    nullable: true,
+  })
+  openingHours: OpeningHours[] | null;
+
+  @ApiPropertyOptional({
     description: 'Recurring collection availability, by weekday.',
     type: [PickupWindowDto],
     nullable: true,
@@ -97,13 +113,6 @@ export class LocationResponseDto {
 
   @ApiProperty({ description: 'Whether the site has a freezer.' })
   hasFreezer: boolean;
-
-  @ApiPropertyOptional({
-    description: 'How much the site can hold, in kilograms.',
-    type: Number,
-    nullable: true,
-  })
-  storageCapacityKg: number | null;
 
   @ApiPropertyOptional({
     description: 'Direct line for the site, in E.164 format.',
@@ -140,6 +149,7 @@ export class LocationResponseDto {
     this.retailerId = data.retailerId;
     this.recipientId = data.recipientId;
     this.label = data.label;
+    this.code = data.code;
     this.type = data.type;
     this.addressLine1 = data.addressLine1;
     this.addressLine2 = data.addressLine2;
@@ -150,10 +160,10 @@ export class LocationResponseDto {
     this.latitude = data.latitude;
     this.longitude = data.longitude;
     this.timezone = data.timezone;
+    this.openingHours = data.openingHours;
     this.pickupWindows = data.pickupWindows;
     this.hasColdStorage = data.hasColdStorage;
     this.hasFreezer = data.hasFreezer;
-    this.storageCapacityKg = data.storageCapacityKg;
     this.phone = data.phone;
     this.isPrimary = data.isPrimary;
     this.isActive = data.isActive;

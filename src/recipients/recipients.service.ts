@@ -79,15 +79,6 @@ export class RecipientsService implements CrudRepository<Recipient> {
   }
 
   /**
-   * Finds a recipient by slug.
-   * @param slug The slug to search for.
-   * @returns A Promise that resolves with the recipient found, or null.
-   */
-  async findOneBySlug(slug: string): Promise<Recipient | null> {
-    return await this.recipientRepository.findOne({ where: { slug } });
-  }
-
-  /**
    * Finds a recipient by tax ID.
    * @param taxId The tax ID to search for.
    * @returns A Promise that resolves with the recipient found, or null.
@@ -97,46 +88,31 @@ export class RecipientsService implements CrudRepository<Recipient> {
   }
 
   /**
-   * Finds a recipient holding either the given slug or tax ID, excluding one
-   * recipient from the search by its ID.
+   * Finds a recipient with the given tax ID, excluding one recipient from the search
+   * by its ID.
    * @param id The ID of the recipient to exclude from the search.
-   * @param slug The slug to search for, if any.
-   * @param taxId The tax ID to search for, if any.
+   * @param taxId The tax ID to search for.
    * @returns A Promise that resolves with the recipient found, or null.
    */
-  async findDuplicatedExcludingId(
+  async findOneByTaxIdNotId(
     id: string,
-    slug?: string,
-    taxId?: string,
+    taxId: string,
   ): Promise<Recipient | null> {
-    const where = [
-      ...(slug ? [{ slug, id: Not(id) }] : []),
-      ...(taxId ? [{ taxId, id: Not(id) }] : []),
-    ];
-
-    if (where.length === 0) {
-      return null;
-    }
-
-    return await this.recipientRepository.findOne({ where });
+    return await this.recipientRepository.findOne({
+      where: { taxId, id: Not(id) },
+    });
   }
 
   /**
    * Creates a recipient.
    * @param createRecipientDto The data to create the recipient with.
    * @returns A Promise that resolves with the created recipient and a success message.
-   * @throws BadRequestException If the slug or the tax ID is already taken.
+   * @throws BadRequestException If the tax ID is already taken.
    */
   async create(
     createRecipientDto: CreateRecipientDto,
   ): Promise<RecipientCreatedResponseDto> {
-    const { slug, taxId, termsAcceptedAt } = createRecipientDto;
-
-    if (await this.findOneBySlug(slug)) {
-      throw new BadRequestException(
-        `A recipient already exists with the slug: ${slug}`,
-      );
-    }
+    const { taxId, termsAcceptedAt } = createRecipientDto;
 
     if (taxId && (await this.findOneByTaxId(taxId))) {
       throw new BadRequestException(
@@ -163,41 +139,23 @@ export class RecipientsService implements CrudRepository<Recipient> {
    * @param updateRecipientDto The new data for the recipient.
    * @returns A Promise that resolves with the updated recipient and a success message.
    * @throws NotFoundException If the recipient is not found.
-   * @throws BadRequestException If the slug or the tax ID is taken by another recipient.
+   * @throws BadRequestException If the tax ID is taken by another recipient.
    */
   async update(
     id: string,
     updateRecipientDto: UpdateRecipientDto,
   ): Promise<RecipientCreatedResponseDto> {
-    const { slug, taxId, termsAcceptedAt, ...rest } = updateRecipientDto;
+    const { taxId, termsAcceptedAt, ...rest } = updateRecipientDto;
 
     const recipient = await this.findValid(id);
 
-    if (slug || taxId) {
-      const duplicated = await this.findDuplicatedExcludingId(
-        recipient.id,
-        slug,
-        taxId,
+    if (taxId && (await this.findOneByTaxIdNotId(recipient.id, taxId))) {
+      throw new BadRequestException(
+        `Another recipient is already registered with the tax ID: ${taxId}`,
       );
-
-      if (duplicated) {
-        if (slug && duplicated.slug === slug) {
-          throw new BadRequestException(
-            `Another recipient is already registered with the slug: ${slug}`,
-          );
-        }
-
-        throw new BadRequestException(
-          `Another recipient is already registered with the tax ID: ${taxId}`,
-        );
-      }
     }
 
     Object.assign(recipient, rest);
-
-    if (slug) {
-      recipient.slug = slug;
-    }
 
     if (taxId !== undefined) {
       recipient.taxId = taxId;
@@ -219,7 +177,7 @@ export class RecipientsService implements CrudRepository<Recipient> {
 
   /**
    * Soft-deletes a recipient, so the row is kept for historical records and its
-   * slug and tax ID can be reused.
+   * tax ID can be reused.
    * @param id The ID of the recipient to delete.
    * @returns A Promise that resolves with a success message.
    * @throws NotFoundException If the recipient is not found.

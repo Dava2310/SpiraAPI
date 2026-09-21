@@ -1,26 +1,18 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
-  ArrayUnique,
-  IsArray,
-  IsBoolean,
   IsDateString,
   IsEnum,
-  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUrl,
   Matches,
-  Max,
   MaxLength,
-  Min,
   MinLength,
 } from 'class-validator';
 
-import { FoodCategory } from '../../common/enums/food-category.enum.js';
 import { BusinessType } from '../enums/business-type.enum.js';
-import { DonationFrequency } from '../enums/donation-frequency.enum.js';
 
 /** Input for creating a retailer. */
 export class CreateRetailerDto {
@@ -51,22 +43,6 @@ export class CreateRetailerDto {
     message: 'The trade name cannot be longer than 200 characters.',
   })
   tradeName?: string;
-
-  @ApiProperty({
-    description: 'URL-friendly identifier. Must be unique.',
-    example: 'supermercados-real',
-    maxLength: 120,
-  })
-  @Transform(({ value }: { value: unknown }) =>
-    typeof value === 'string' ? value.trim().toLowerCase() : value,
-  )
-  @IsNotEmpty({ message: 'The slug cannot be empty.' })
-  @MaxLength(120, { message: 'The slug cannot be longer than 120 characters.' })
-  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
-    message:
-      'The slug may only contain lowercase letters, digits and single hyphens between them.',
-  })
-  slug: string;
 
   @ApiProperty({
     description: 'Government tax identifier (RUC/NIT/CIF/EIN). Must be unique.',
@@ -123,64 +99,6 @@ export class CreateRetailerDto {
     message: 'The logo URL cannot be longer than 255 characters.',
   })
   logoUrl?: string;
-
-  @ApiPropertyOptional({
-    description: 'Food categories this retailer typically donates.',
-    enum: FoodCategory,
-    enumName: 'FoodCategory',
-    isArray: true,
-    example: [FoodCategory.PRODUCE, FoodCategory.BAKERY],
-  })
-  @IsOptional()
-  @IsArray({ message: 'The food categories must be an array.' })
-  @ArrayUnique({ message: 'The food categories cannot contain duplicates.' })
-  @IsEnum(FoodCategory, {
-    each: true,
-    message: `Each food category must be one of: ${Object.values(FoodCategory).join(', ')}.`,
-  })
-  foodCategories?: FoodCategory[];
-
-  @ApiPropertyOptional({
-    description: 'How often surplus is expected.',
-    enum: DonationFrequency,
-    enumName: 'DonationFrequency',
-    example: DonationFrequency.DAILY,
-  })
-  @IsOptional()
-  @IsEnum(DonationFrequency, {
-    message: `The donation frequency must be one of: ${Object.values(DonationFrequency).join(', ')}.`,
-  })
-  donationFrequency?: DonationFrequency;
-
-  @ApiPropertyOptional({
-    description: 'Whether the recipient must collect the donation itself.',
-    default: true,
-    example: true,
-  })
-  @IsOptional()
-  @IsBoolean({ message: 'The recipient transport flag must be a boolean.' })
-  requiresRecipientTransport?: boolean;
-
-  @ApiPropertyOptional({
-    description: 'Lead time needed before a collection, in hours.',
-    example: 4,
-    minimum: 0,
-    maximum: 720,
-  })
-  @IsOptional()
-  @IsInt({ message: 'The minimum pickup notice must be an integer.' })
-  @Min(0, { message: 'The minimum pickup notice cannot be negative.' })
-  @Max(720, { message: 'The minimum pickup notice cannot exceed 720 hours.' })
-  minPickupNoticeHours?: number;
-
-  @ApiPropertyOptional({
-    description: 'Practical notes for whoever collects the donation.',
-    example:
-      'Enter through the loading dock on Calle Palma and ask for the shift manager.',
-  })
-  @IsOptional()
-  @IsString({ message: 'The handling instructions must be a string.' })
-  handlingInstructions?: string;
 
   @ApiPropertyOptional({
     description: 'Food-safety licence number.',

@@ -14,37 +14,27 @@ import {
 } from 'typeorm';
 
 import { SoftDeletableEntity } from '../../common/entities/soft-deletable.entity.js';
-import { FoodCategory } from '../../common/enums/food-category.enum.js';
 import {
   PROFILE_STATUS_ENUM_NAME,
   ProfileStatus,
 } from '../../common/enums/profile-status.enum.js';
-import { numericTransformer } from '../../common/transformers/numeric.transformer.js';
 import { Contact } from '../../contacts/entities/contact.entity.js';
 import { Location } from '../../locations/entities/location.entity.js';
+import { Partnership } from '../../partnerships/entities/partnership.entity.js';
+import { RecipientVehicle } from '../../recipient-vehicles/entities/recipient-vehicle.entity.js';
 import { User } from '../../users/entities/user.entity.js';
-import {
-  BACKGROUND_CHECK_STATUS_ENUM_NAME,
-  BackgroundCheckStatus,
-} from '../enums/background-check-status.enum.js';
-import { DietaryRestriction } from '../enums/dietary-restriction.enum.js';
 import {
   RECIPIENT_TYPE_ENUM_NAME,
   RecipientType,
 } from '../enums/recipient-type.enum.js';
 
-/** A food receiver: NGO, foodbank, soup kitchen, or certified individual. */
+/** A food receiver: NGO, foodbank, soup kitchen, shelter. */
 @Entity('recipient')
-@Index('uq_recipient_slug', ['slug'], {
-  unique: true,
-  where: 'deleted_at IS NULL',
-})
 @Index('uq_recipient_tax_id', ['taxId'], {
   unique: true,
   where: 'deleted_at IS NULL AND tax_id IS NOT NULL',
 })
 @Index('idx_recipient_status', ['status'], { where: 'deleted_at IS NULL' })
-@Index('idx_recipient_categories', ['acceptedFoodCategories'], { type: 'gin' })
 export class Recipient extends SoftDeletableEntity {
   // --- Identity ---
 
@@ -63,8 +53,7 @@ export class Recipient extends SoftDeletableEntity {
   type: RecipientType;
 
   @ApiPropertyOptional({
-    description:
-      'Registered organization name. `null` for `CERTIFIED_INDIVIDUAL`, who has no legal entity.',
+    description: 'Registered organization name.',
     maxLength: 200,
     nullable: true,
     example: 'Fundación Banco de Alimentos Paraguay',
@@ -81,14 +70,14 @@ export class Recipient extends SoftDeletableEntity {
   @Column({ name: 'display_name', type: 'varchar', length: 200 })
   displayName: string;
 
-  @ApiProperty({
-    description:
-      'URL-friendly identifier. Unique among non-deleted recipients.',
-    maxLength: 120,
-    example: 'banco-de-alimentos-py',
+  @ApiPropertyOptional({
+    description: 'Abbreviated name, used wherever the UI is short of space.',
+    maxLength: 80,
+    nullable: true,
+    example: 'Banco de Alimentos',
   })
-  @Column({ name: 'slug', type: 'varchar', length: 120 })
-  slug: string;
+  @Column({ name: 'short_name', type: 'varchar', length: 80, nullable: true })
+  shortName: string | null;
 
   @ApiPropertyOptional({
     description:
@@ -99,27 +88,6 @@ export class Recipient extends SoftDeletableEntity {
   })
   @Column({ name: 'tax_id', type: 'varchar', length: 40, nullable: true })
   taxId: string | null;
-
-  @ApiPropertyOptional({
-    description: 'Registration number proving nonprofit status.',
-    maxLength: 80,
-    nullable: true,
-  })
-  @Column({
-    name: 'nonprofit_registration_number',
-    type: 'varchar',
-    length: 80,
-    nullable: true,
-  })
-  nonprofitRegistrationNumber: string | null;
-
-  @ApiPropertyOptional({
-    description: 'National ID document. Individuals only.',
-    maxLength: 40,
-    nullable: true,
-  })
-  @Column({ name: 'national_id', type: 'varchar', length: 40, nullable: true })
-  nationalId: string | null;
 
   @ApiPropertyOptional({
     description: 'Free-text description of who they serve and how.',
@@ -144,159 +112,11 @@ export class Recipient extends SoftDeletableEntity {
   @Column({ name: 'logo_url', type: 'varchar', length: 255, nullable: true })
   logoUrl: string | null;
 
-  // --- Transport capability ---
-
-  @ApiPropertyOptional({
-    description: 'How far they are willing to travel, in kilometres.',
-    type: Number,
-    nullable: true,
-    example: 15,
-  })
-  @Column({ name: 'service_radius_km', type: 'smallint', nullable: true })
-  serviceRadiusKm: number | null;
-
-  @ApiProperty({
-    description: 'Whether they have their own vehicle for collections.',
-    default: false,
-    example: true,
-  })
-  @Column({ name: 'has_vehicle', type: 'boolean', default: false })
-  hasVehicle: boolean;
-
-  @ApiPropertyOptional({
-    description: 'How much they can carry in one trip, in kilograms.',
-    type: Number,
-    nullable: true,
-    example: 750.5,
-  })
-  @Column({
-    name: 'transport_capacity_kg',
-    type: 'numeric',
-    precision: 8,
-    scale: 2,
-    nullable: true,
-    transformer: numericTransformer,
-  })
-  transportCapacityKg: number | null;
-
-  @ApiProperty({
-    description: 'Whether their transport is refrigerated.',
-    default: false,
-    example: false,
-  })
-  @Column({
-    name: 'has_refrigerated_transport',
-    type: 'boolean',
-    default: false,
-  })
-  hasRefrigeratedTransport: boolean;
-
-  // --- Capacity & acceptance rules ---
-
-  @ApiPropertyOptional({
-    description: 'People fed per week.',
-    type: Number,
-    nullable: true,
-    example: 1200,
-  })
-  @Column({ name: 'people_served_per_week', type: 'integer', nullable: true })
-  peopleServedPerWeek: number | null;
-
-  @ApiPropertyOptional({
-    description: 'Most they can take in a single day, in kilograms.',
-    type: Number,
-    nullable: true,
-    example: 2000,
-  })
-  @Column({
-    name: 'max_daily_intake_kg',
-    type: 'numeric',
-    precision: 8,
-    scale: 2,
-    nullable: true,
-    transformer: numericTransformer,
-  })
-  maxDailyIntakeKg: number | null;
-
-  @ApiPropertyOptional({
-    description: 'Categories they will take.',
-    enum: FoodCategory,
-    enumName: 'FoodCategory',
-    isArray: true,
-    nullable: true,
-    example: [FoodCategory.PRODUCE, FoodCategory.DRY_GOODS],
-  })
-  @Column({
-    name: 'accepted_food_categories',
-    type: 'text',
-    array: true,
-    nullable: true,
-  })
-  acceptedFoodCategories: FoodCategory[] | null;
-
-  @ApiPropertyOptional({
-    description:
-      'Categories they explicitly refuse, even if otherwise eligible.',
-    enum: FoodCategory,
-    enumName: 'FoodCategory',
-    isArray: true,
-    nullable: true,
-    example: [FoodCategory.MEAT],
-  })
-  @Column({
-    name: 'excluded_food_categories',
-    type: 'text',
-    array: true,
-    nullable: true,
-  })
-  excludedFoodCategories: FoodCategory[] | null;
-
-  @ApiPropertyOptional({
-    description: 'Dietary rules their beneficiaries follow.',
-    enum: DietaryRestriction,
-    enumName: 'DietaryRestriction',
-    isArray: true,
-    nullable: true,
-    example: [DietaryRestriction.NO_PORK, DietaryRestriction.NO_ALCOHOL],
-  })
-  @Column({
-    name: 'dietary_restrictions',
-    type: 'text',
-    array: true,
-    nullable: true,
-  })
-  dietaryRestrictions: DietaryRestriction[] | null;
-
-  @ApiProperty({
-    description: 'Whether they accept food close to its expiry date.',
-    default: false,
-    example: true,
-  })
-  @Column({ name: 'accepts_near_expiry', type: 'boolean', default: false })
-  acceptsNearExpiry: boolean;
-
-  @ApiProperty({
-    description:
-      'Whether they accept already-prepared food. Carries higher liability, so it is opt-in.',
-    default: false,
-    example: false,
-  })
-  @Column({ name: 'accepts_prepared_food', type: 'boolean', default: false })
-  acceptsPreparedFood: boolean;
-
-  @ApiProperty({
-    description: 'Whether they accept frozen goods.',
-    default: false,
-    example: false,
-  })
-  @Column({ name: 'accepts_frozen', type: 'boolean', default: false })
-  acceptsFrozen: boolean;
-
   // --- Verification & compliance ---
 
   @ApiProperty({
     description:
-      'Lifecycle status. Only `ACTIVE` recipients take part in matching.',
+      'Lifecycle status. Only `ACTIVE` recipients can be offered donations.',
     enum: ProfileStatus,
     enumName: 'ProfileStatus',
     default: ProfileStatus.PENDING_VERIFICATION,
@@ -352,37 +172,6 @@ export class Recipient extends SoftDeletableEntity {
   @Column({ name: 'certification_expires_at', type: 'date', nullable: true })
   certificationExpiresAt: string | null;
 
-  @ApiProperty({
-    description:
-      'Background-check outcome. Matters most for `CERTIFIED_INDIVIDUAL`; organizations are usually `NOT_REQUIRED`.',
-    enum: BackgroundCheckStatus,
-    enumName: 'BackgroundCheckStatus',
-    default: BackgroundCheckStatus.NOT_REQUIRED,
-    example: BackgroundCheckStatus.PASSED,
-  })
-  @Column({
-    name: 'background_check_status',
-    type: 'enum',
-    enum: BackgroundCheckStatus,
-    enumName: BACKGROUND_CHECK_STATUS_ENUM_NAME,
-    default: BackgroundCheckStatus.NOT_REQUIRED,
-  })
-  backgroundCheckStatus: BackgroundCheckStatus;
-
-  @ApiPropertyOptional({
-    description:
-      'Liability insurance policy number. Required in some jurisdictions.',
-    maxLength: 80,
-    nullable: true,
-  })
-  @Column({
-    name: 'insurance_policy_number',
-    type: 'varchar',
-    length: 80,
-    nullable: true,
-  })
-  insurancePolicyNumber: string | null;
-
   @ApiPropertyOptional({
     description: 'When the recipient accepted the platform terms.',
     type: String,
@@ -424,4 +213,12 @@ export class Recipient extends SoftDeletableEntity {
   @ApiHideProperty()
   @OneToMany(() => User, (user) => user.recipient)
   users?: Relation<User>[];
+
+  @ApiHideProperty()
+  @OneToMany(() => RecipientVehicle, (vehicle) => vehicle.recipient)
+  vehicles?: Relation<RecipientVehicle>[];
+
+  @ApiHideProperty()
+  @OneToMany(() => Partnership, (partnership) => partnership.recipient)
+  partnerships?: Relation<Partnership>[];
 }

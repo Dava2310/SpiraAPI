@@ -1,26 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
-  ArrayUnique,
-  IsArray,
-  IsBoolean,
   IsDateString,
   IsEnum,
-  IsInt,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
   IsUrl,
   Matches,
-  Max,
   MaxLength,
-  Min,
   MinLength,
 } from 'class-validator';
 
-import { FoodCategory } from '../../common/enums/food-category.enum.js';
-import { DietaryRestriction } from '../enums/dietary-restriction.enum.js';
 import { RecipientType } from '../enums/recipient-type.enum.js';
 
 /** Input for creating a recipient. */
@@ -66,21 +57,17 @@ export class CreateRecipientDto {
   })
   displayName: string;
 
-  @ApiProperty({
-    description: 'URL-friendly identifier. Must be unique.',
-    example: 'banco-de-alimentos-py',
-    maxLength: 120,
+  @ApiPropertyOptional({
+    description: 'Abbreviated name, used wherever the UI is short of space.',
+    example: 'Banco de Alimentos',
+    maxLength: 80,
   })
-  @Transform(({ value }: { value: unknown }) =>
-    typeof value === 'string' ? value.trim().toLowerCase() : value,
-  )
-  @IsNotEmpty({ message: 'The slug cannot be empty.' })
-  @MaxLength(120, { message: 'The slug cannot be longer than 120 characters.' })
-  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
-    message:
-      'The slug may only contain lowercase letters, digits and single hyphens between them.',
+  @IsOptional()
+  @IsString({ message: 'The short name must be a string.' })
+  @MaxLength(80, {
+    message: 'The short name cannot be longer than 80 characters.',
   })
-  slug: string;
+  shortName?: string;
 
   @ApiPropertyOptional({
     description: 'Government tax identifier. Organizations only, and unique.',
@@ -94,29 +81,6 @@ export class CreateRecipientDto {
   @IsString({ message: 'The tax ID must be a string.' })
   @MaxLength(40, { message: 'The tax ID cannot be longer than 40 characters.' })
   taxId?: string;
-
-  @ApiPropertyOptional({
-    description: 'Registration number proving nonprofit status.',
-    maxLength: 80,
-  })
-  @IsOptional()
-  @IsString({ message: 'The nonprofit registration number must be a string.' })
-  @MaxLength(80, {
-    message:
-      'The nonprofit registration number cannot be longer than 80 characters.',
-  })
-  nonprofitRegistrationNumber?: string;
-
-  @ApiPropertyOptional({
-    description: 'National ID document. Individuals only.',
-    maxLength: 40,
-  })
-  @IsOptional()
-  @IsString({ message: 'The national ID must be a string.' })
-  @MaxLength(40, {
-    message: 'The national ID cannot be longer than 40 characters.',
-  })
-  nationalId?: string;
 
   @ApiPropertyOptional({
     description: 'Free-text description of who they serve and how.',
@@ -145,162 +109,6 @@ export class CreateRecipientDto {
   logoUrl?: string;
 
   @ApiPropertyOptional({
-    description: 'How far they are willing to travel, in kilometres.',
-    example: 15,
-    minimum: 0,
-    maximum: 5000,
-  })
-  @IsOptional()
-  @IsInt({ message: 'The service radius must be an integer.' })
-  @Min(0, { message: 'The service radius cannot be negative.' })
-  @Max(5000, { message: 'The service radius cannot exceed 5000 km.' })
-  serviceRadiusKm?: number;
-
-  @ApiPropertyOptional({
-    description: 'Whether they have their own vehicle for collections.',
-    default: false,
-  })
-  @IsOptional()
-  @IsBoolean({ message: 'The vehicle flag must be a boolean.' })
-  hasVehicle?: boolean;
-
-  @ApiPropertyOptional({
-    description: 'How much they can carry in one trip, in kilograms.',
-    example: 750.5,
-    minimum: 0,
-    maximum: 999999.99,
-  })
-  @IsOptional()
-  @IsNumber(
-    { maxDecimalPlaces: 2 },
-    {
-      message:
-        'The transport capacity must be a number with at most 2 decimal places.',
-    },
-  )
-  @Min(0, { message: 'The transport capacity cannot be negative.' })
-  @Max(999999.99, {
-    message: 'The transport capacity cannot exceed 999999.99.',
-  })
-  transportCapacityKg?: number;
-
-  @ApiPropertyOptional({
-    description: 'Whether their transport is refrigerated.',
-    default: false,
-  })
-  @IsOptional()
-  @IsBoolean({ message: 'The refrigerated transport flag must be a boolean.' })
-  hasRefrigeratedTransport?: boolean;
-
-  @ApiPropertyOptional({
-    description: 'People fed per week.',
-    example: 1200,
-    minimum: 0,
-  })
-  @IsOptional()
-  @IsInt({ message: 'The people served per week must be an integer.' })
-  @Min(0, { message: 'The people served per week cannot be negative.' })
-  peopleServedPerWeek?: number;
-
-  @ApiPropertyOptional({
-    description: 'Most they can take in a single day, in kilograms.',
-    example: 2000,
-    minimum: 0,
-    maximum: 999999.99,
-  })
-  @IsOptional()
-  @IsNumber(
-    { maxDecimalPlaces: 2 },
-    {
-      message:
-        'The maximum daily intake must be a number with at most 2 decimal places.',
-    },
-  )
-  @Min(0, { message: 'The maximum daily intake cannot be negative.' })
-  @Max(999999.99, {
-    message: 'The maximum daily intake cannot exceed 999999.99.',
-  })
-  maxDailyIntakeKg?: number;
-
-  @ApiPropertyOptional({
-    description: 'Categories they will take.',
-    enum: FoodCategory,
-    enumName: 'FoodCategory',
-    isArray: true,
-    example: [FoodCategory.PRODUCE, FoodCategory.DRY_GOODS],
-  })
-  @IsOptional()
-  @IsArray({ message: 'The accepted food categories must be an array.' })
-  @ArrayUnique({
-    message: 'The accepted food categories cannot contain duplicates.',
-  })
-  @IsEnum(FoodCategory, {
-    each: true,
-    message: `Each accepted food category must be one of: ${Object.values(FoodCategory).join(', ')}.`,
-  })
-  acceptedFoodCategories?: FoodCategory[];
-
-  @ApiPropertyOptional({
-    description: 'Categories they explicitly refuse.',
-    enum: FoodCategory,
-    enumName: 'FoodCategory',
-    isArray: true,
-    example: [FoodCategory.MEAT],
-  })
-  @IsOptional()
-  @IsArray({ message: 'The excluded food categories must be an array.' })
-  @ArrayUnique({
-    message: 'The excluded food categories cannot contain duplicates.',
-  })
-  @IsEnum(FoodCategory, {
-    each: true,
-    message: `Each excluded food category must be one of: ${Object.values(FoodCategory).join(', ')}.`,
-  })
-  excludedFoodCategories?: FoodCategory[];
-
-  @ApiPropertyOptional({
-    description: 'Dietary rules their beneficiaries follow.',
-    enum: DietaryRestriction,
-    enumName: 'DietaryRestriction',
-    isArray: true,
-    example: [DietaryRestriction.NO_PORK],
-  })
-  @IsOptional()
-  @IsArray({ message: 'The dietary restrictions must be an array.' })
-  @ArrayUnique({
-    message: 'The dietary restrictions cannot contain duplicates.',
-  })
-  @IsEnum(DietaryRestriction, {
-    each: true,
-    message: `Each dietary restriction must be one of: ${Object.values(DietaryRestriction).join(', ')}.`,
-  })
-  dietaryRestrictions?: DietaryRestriction[];
-
-  @ApiPropertyOptional({
-    description: 'Whether they accept food close to its expiry date.',
-    default: false,
-  })
-  @IsOptional()
-  @IsBoolean({ message: 'The near-expiry flag must be a boolean.' })
-  acceptsNearExpiry?: boolean;
-
-  @ApiPropertyOptional({
-    description: 'Whether they accept already-prepared food.',
-    default: false,
-  })
-  @IsOptional()
-  @IsBoolean({ message: 'The prepared-food flag must be a boolean.' })
-  acceptsPreparedFood?: boolean;
-
-  @ApiPropertyOptional({
-    description: 'Whether they accept frozen goods.',
-    default: false,
-  })
-  @IsOptional()
-  @IsBoolean({ message: 'The frozen flag must be a boolean.' })
-  acceptsFrozen?: boolean;
-
-  @ApiPropertyOptional({
     description: 'Food-handling certification number.',
     maxLength: 80,
   })
@@ -321,17 +129,6 @@ export class CreateRecipientDto {
     message: 'The certification expiry date must use the format YYYY-MM-DD.',
   })
   certificationExpiresAt?: string;
-
-  @ApiPropertyOptional({
-    description: 'Liability insurance policy number.',
-    maxLength: 80,
-  })
-  @IsOptional()
-  @IsString({ message: 'The insurance policy number must be a string.' })
-  @MaxLength(80, {
-    message: 'The insurance policy number cannot be longer than 80 characters.',
-  })
-  insurancePolicyNumber?: string;
 
   @ApiPropertyOptional({
     description: 'When the recipient accepted the platform terms.',

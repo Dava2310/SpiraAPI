@@ -13,6 +13,13 @@ import { ContactsModule } from './contacts/contacts.module.js';
 import { LocationsModule } from './locations/locations.module.js';
 import { UsersModule } from './users/users.module.js';
 import { InvalidTokensModule } from './invalid-tokens/invalid-tokens.module.js';
+import { ProductsModule } from './products/products.module.js';
+import { InventoryItemsModule } from './inventory-items/inventory-items.module.js';
+import { DonationsModule } from './donations/donations.module.js';
+import { DonationReceiptsModule } from './donation-receipts/donation-receipts.module.js';
+import { RecipientVehiclesModule } from './recipient-vehicles/recipient-vehicles.module.js';
+import { PartnershipsModule } from './partnerships/partnerships.module.js';
+import { ImpactFactorsModule } from './impact-factors/impact-factors.module.js';
 
 import configuration from './config/configuration.js';
 
@@ -41,6 +48,13 @@ import configuration from './config/configuration.js';
     LocationsModule,
     UsersModule,
     InvalidTokensModule,
+    ProductsModule,
+    InventoryItemsModule,
+    DonationsModule,
+    DonationReceiptsModule,
+    RecipientVehiclesModule,
+    PartnershipsModule,
+    ImpactFactorsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: AuthGuard }],

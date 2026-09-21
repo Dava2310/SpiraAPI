@@ -63,6 +63,13 @@ export class ContactResponseDto {
   @ApiPropertyOptional({ description: 'Internal notes.', nullable: true })
   notes: string | null;
 
+  @ApiPropertyOptional({
+    description: 'Login this person owns, when they have one.',
+    format: 'uuid',
+    nullable: true,
+  })
+  userId: string | null;
+
   @ApiProperty({
     description: 'When the contact was created (ISO 8601).',
     type: String,
@@ -93,6 +100,7 @@ export class ContactResponseDto {
     this.type = data.type;
     this.isPrimary = data.isPrimary;
     this.notes = data.notes;
+    this.userId = data.userId;
     this.createdAt = data.createdAt.toISOString();
     this.updatedAt = data.updatedAt.toISOString();
   }

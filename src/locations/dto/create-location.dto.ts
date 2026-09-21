@@ -9,19 +9,17 @@ import {
   IsLatitude,
   IsLongitude,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
   IsTimeZone,
   Matches,
-  Max,
   MaxLength,
-  Min,
   MinLength,
   ValidateNested,
 } from 'class-validator';
 
 import { LocationType } from '../enums/location-type.enum.js';
+import { OpeningHoursDto } from './opening-hours.dto.js';
 import { PickupWindowDto } from './pickup-window.dto.js';
 
 /** Input for creating a location. Exactly one owner must be given. */
@@ -61,6 +59,16 @@ export class CreateLocationDto {
     message: 'The label cannot be longer than 150 characters.',
   })
   label: string;
+
+  @ApiPropertyOptional({
+    description: 'Human-readable branch code, unique per owner.',
+    example: 'WF-NYC-402',
+    maxLength: 40,
+  })
+  @IsOptional()
+  @IsString({ message: 'The code must be a string.' })
+  @MaxLength(40, { message: 'The code cannot be longer than 40 characters.' })
+  code?: string;
 
   @ApiProperty({
     description: 'What kind of site this is.',
@@ -176,6 +184,18 @@ export class CreateLocationDto {
   timezone: string;
 
   @ApiPropertyOptional({
+    description:
+      'Public opening hours, by weekday. Distinct from `pickupWindows`, which is when collections may happen.',
+    type: [OpeningHoursDto],
+  })
+  @IsOptional()
+  @IsArray({ message: 'The opening hours must be an array.' })
+  @ArrayMaxSize(14, { message: 'At most 14 opening-hour entries are allowed.' })
+  @ValidateNested({ each: true })
+  @Type(() => OpeningHoursDto)
+  openingHours?: OpeningHoursDto[];
+
+  @ApiPropertyOptional({
     description: 'Recurring collection availability, by weekday.',
     type: [PickupWindowDto],
   })
@@ -201,24 +221,6 @@ export class CreateLocationDto {
   @IsOptional()
   @IsBoolean({ message: 'The freezer flag must be a boolean.' })
   hasFreezer?: boolean;
-
-  @ApiPropertyOptional({
-    description: 'How much the site can hold, in kilograms.',
-    example: 5000,
-    minimum: 0,
-    maximum: 999999.99,
-  })
-  @IsOptional()
-  @IsNumber(
-    { maxDecimalPlaces: 2 },
-    {
-      message:
-        'The storage capacity must be a number with at most 2 decimal places.',
-    },
-  )
-  @Min(0, { message: 'The storage capacity cannot be negative.' })
-  @Max(999999.99, { message: 'The storage capacity cannot exceed 999999.99.' })
-  storageCapacityKg?: number;
 
   @ApiPropertyOptional({
     description: 'Direct line for the site, in E.164 format.',
