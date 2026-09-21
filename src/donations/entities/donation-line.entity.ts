@@ -170,6 +170,49 @@ export class DonationLine extends SoftDeletableEntity {
   @Column({ name: 'reason_description', type: 'text', nullable: true })
   reasonDescription: string | null;
 
+  @ApiPropertyOptional({
+    description:
+      'Expiry copied from the lot at snapshot time, so a delivered donation still shows what it was carrying.',
+    type: String,
+    format: 'date-time',
+    nullable: true,
+  })
+  @Column({ name: 'expires_at', type: 'timestamptz', nullable: true })
+  expiresAt: Date | null;
+
+  @ApiPropertyOptional({
+    description: 'Retail value of a single unit at snapshot time.',
+    type: Number,
+    nullable: true,
+    example: 1.25,
+  })
+  @Column({
+    name: 'unit_price',
+    type: 'numeric',
+    precision: 10,
+    scale: 2,
+    nullable: true,
+    transformer: numericTransformer,
+  })
+  unitPrice: number | null;
+
+  @ApiPropertyOptional({
+    description: 'How the unit was named on the lot — "bottles", "trays".',
+    maxLength: 20,
+    nullable: true,
+    example: 'bottles',
+  })
+  @Column({ name: 'unit_label', type: 'varchar', length: 20, nullable: true })
+  unitLabel: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Image copied from the lot or the catalogue at snapshot time.',
+    maxLength: 500,
+    nullable: true,
+  })
+  @Column({ name: 'image_url', type: 'varchar', length: 500, nullable: true })
+  imageUrl: string | null;
+
   // --- Relations ---
 
   @ApiHideProperty()

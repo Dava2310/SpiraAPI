@@ -1,18 +1,24 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
+  IsTimeZone,
   IsUrl,
   Matches,
+  Max,
   MaxLength,
+  Min,
   MinLength,
 } from 'class-validator';
 
 import { RecipientType } from '../enums/recipient-type.enum.js';
+import { UrgencyThreshold } from '../enums/urgency-threshold.enum.js';
 
 /** Input for creating a recipient. */
 export class CreateRecipientDto {
@@ -83,11 +89,36 @@ export class CreateRecipientDto {
   taxId?: string;
 
   @ApiPropertyOptional({
+    description:
+      'Charity or non-profit registration number, distinct from the tax identifier. Unique across active recipients.',
+    example: 'G-12345678',
+    maxLength: 40,
+  })
+  @IsOptional()
+  @IsString({ message: 'The registration code must be a string.' })
+  @MaxLength(40, {
+    message: 'The registration code cannot be longer than 40 characters.',
+  })
+  registrationCode?: string;
+
+  @ApiPropertyOptional({
     description: 'Free-text description of who they serve and how.',
   })
   @IsOptional()
   @IsString({ message: 'The mission must be a string.' })
   mission?: string;
+
+  @ApiPropertyOptional({
+    description: 'Where they operate, as they describe it themselves.',
+    example: 'Metropolitan Barcelona',
+    maxLength: 120,
+  })
+  @IsOptional()
+  @IsString({ message: 'The service area must be a string.' })
+  @MaxLength(120, {
+    message: 'The service area cannot be longer than 120 characters.',
+  })
+  serviceArea?: string;
 
   @ApiPropertyOptional({ description: 'Public website.', maxLength: 255 })
   @IsOptional()
@@ -153,4 +184,61 @@ export class CreateRecipientDto {
     message: 'The terms version cannot be longer than 20 characters.',
   })
   termsVersion?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'IANA timezone the organization works in. Pickup windows and the today/upcoming split are resolved in it.',
+    default: 'Europe/Madrid',
+    example: 'Europe/Madrid',
+    maxLength: 50,
+  })
+  @IsOptional()
+  @IsTimeZone({
+    message:
+      'The timezone must be a valid IANA name, for example Europe/Madrid.',
+  })
+  @MaxLength(50, {
+    message: 'The timezone cannot be longer than 50 characters.',
+  })
+  timezone?: string;
+
+  @ApiPropertyOptional({
+    description: 'How far from their locations they are willing to collect.',
+    default: 5,
+    example: 10,
+    minimum: 1,
+    maximum: 100,
+  })
+  @IsOptional()
+  @IsNumber(
+    { maxDecimalPlaces: 1 },
+    {
+      message:
+        'The alert radius must be a number with at most 1 decimal place.',
+    },
+  )
+  @Min(1, { message: 'The alert radius must be at least 1 km.' })
+  @Max(100, { message: 'The alert radius cannot exceed 100 km.' })
+  alertRadiusKm?: number;
+
+  @ApiPropertyOptional({
+    description: 'Which surplus urgencies are worth alerting them about.',
+    enum: UrgencyThreshold,
+    enumName: 'UrgencyThreshold',
+    default: UrgencyThreshold.ALL,
+    example: UrgencyThreshold.CRITICAL_EXPIRING,
+  })
+  @IsOptional()
+  @IsEnum(UrgencyThreshold, {
+    message: `The urgency threshold must be one of: ${Object.values(UrgencyThreshold).join(', ')}.`,
+  })
+  urgencyThreshold?: UrgencyThreshold;
+
+  @ApiPropertyOptional({
+    description: 'Whether to send push notifications for new surplus.',
+    default: true,
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'The push notifications flag must be a boolean.' })
+  pushNotificationsEnabled?: boolean;
 }

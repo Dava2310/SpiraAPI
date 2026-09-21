@@ -17,6 +17,13 @@ export class PickupTokenResponseDto {
   code: string;
 
   @ApiProperty({
+    description:
+      'The same credential as a human-keyable PIN, for when the QR will not scan.',
+    example: '482913',
+  })
+  pin: string;
+
+  @ApiProperty({
     description: 'When the token stops being accepted (ISO 8601).',
     type: String,
     format: 'date-time',
@@ -52,6 +59,7 @@ export class PickupTokenResponseDto {
     this.id = data.id;
     this.donationId = data.donationId;
     this.code = data.code;
+    this.pin = data.pin;
     this.expiresAt = data.expiresAt.toISOString();
     this.isUsable =
       data.consumedAt === null && data.expiresAt.getTime() > Date.now();

@@ -28,6 +28,8 @@ import {
   LocationResponseDto,
   UpdateLocationDto,
 } from './dto/index.js';
+import { LocationPickupSlotResponseDto } from '../location-pickup-slots/dto/index.js';
+import { LocationPickupSlotsService } from '../location-pickup-slots/location-pickup-slots.service.js';
 import { LocationsService } from './locations.service.js';
 
 @ApiTags('locations')
@@ -35,7 +37,10 @@ import { LocationsService } from './locations.service.js';
 @ApiUnauthorizedResponse({ description: 'Missing, invalid or revoked token.' })
 @Controller('locations')
 export class LocationsController {
-  constructor(private readonly locationsService: LocationsService) {}
+  constructor(
+    private readonly locationsService: LocationsService,
+    private readonly locationPickupSlotsService: LocationPickupSlotsService,
+  ) {}
 
   /**
    * Retrieves every location, each mapped to a LocationResponseDto.
@@ -55,6 +60,25 @@ export class LocationsController {
    * Retrieves a location by its ID.
    * @param id The ID of the location to look up.
    * @returns A Promise that resolves with the location found as LocationResponseDto.
+   * @throws NotFoundException If the location is not found.
+   */
+  @Get(':id/pickup-slots')
+  @ApiOperation({ summary: "Get a site's offered collection windows" })
+  @ApiParam({ name: 'id', description: 'Location ID', format: 'uuid' })
+  @ApiOkResponse({
+    description: 'The active pickup slots, earliest first.',
+    type: [LocationPickupSlotResponseDto],
+  })
+  async findPickupSlots(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<LocationPickupSlotResponseDto[]> {
+    return await this.locationPickupSlotsService.findAllByLocation(id);
+  }
+
+  /**
+   * Retrieves a location with its owner, site contact and collection windows.
+   * @param id The ID of the location to look up.
+   * @returns A Promise that resolves with the location as LocationResponseDto.
    * @throws NotFoundException If the location is not found.
    */
   @Get(':id')

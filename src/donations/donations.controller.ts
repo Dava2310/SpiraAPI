@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -20,11 +22,17 @@ import {
   ApiOperation,
   ApiParam,
   ApiQuery,
+  ApiExtraModels,
   ApiTags,
   ApiUnauthorizedResponse,
+  getSchemaPath,
 } from '@nestjs/swagger';
 
-import { MessageResponseDto } from '../common/dto/index.js';
+import { Roles } from '../common/decorators/index.js';
+import {
+  MessageResponseDto,
+  PaginatedResponseDto,
+} from '../common/dto/index.js';
 import type { RequestWithUser } from '../common/interfaces/index.js';
 import { DonationReceiptCreatedResponseDto } from '../donation-receipts/dto/index.js';
 import { DonationsService } from './donations.service.js';
@@ -37,13 +45,19 @@ import {
   DeclineDonationDto,
   DonationCreatedResponseDto,
   DonationResponseDto,
+  AddLinesToOpenDonationDto,
   OfferDonationDto,
   PickupTokenResponseDto,
+  QueryDonationsDto,
   UpdateDonationDto,
+  VerifyPickupTokenDto,
+  VerifyPickupTokenResponseDto,
 } from './dto/index.js';
 import { DonationStatus } from './enums/donation-status.enum.js';
+import { UserRole } from '../users/enums/user-role.enum.js';
 
 @ApiTags('donations')
+@ApiExtraModels(PaginatedResponseDto, DonationResponseDto)
 @ApiBearerAuth()
 @ApiUnauthorizedResponse({ description: 'Missing, invalid or revoked token.' })
 @Controller('donations')
@@ -55,13 +69,79 @@ export class DonationsController {
    * @returns A Promise that resolves with an array of DonationResponseDto.
    */
   @Get()
-  @ApiOperation({ summary: 'Get all donations' })
+  @ApiOperation({ summary: 'Search and page donations' })
   @ApiOkResponse({
-    description: 'List of all donations.',
-    type: [DonationResponseDto],
+    description: 'One page of donations.',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(PaginatedResponseDto) },
+        {
+          properties: {
+            data: {
+              type: 'array',
+              items: { $ref: getSchemaPath(DonationResponseDto) },
+            },
+          },
+        },
+      ],
+    },
   })
-  async findAll(): Promise<DonationResponseDto[]> {
-    return await this.donationsService.findAll();
+  async search(
+    @Query() query: QueryDonationsDto,
+  ): Promise<PaginatedResponseDto<DonationResponseDto>> {
+    return await this.donationsService.search(query);
+  }
+
+  /**
+   * Retrieves the branch's open donation — the retailer app's "Ready" basket.
+   * @param locationId The branch to read.
+   * @returns A Promise that resolves with the open donation, or null.
+   */
+  @Get('current')
+  @ApiOperation({ summary: "Get a branch's open donation" })
+  @ApiQuery({ name: 'locationId', required: true, format: 'uuid' })
+  @ApiOkResponse({
+    description: 'The open donation, or null when nothing is staged.',
+    type: DonationResponseDto,
+  })
+  async findOpen(
+    @Query('locationId', ParseUUIDPipe) locationId: string,
+  ): Promise<DonationResponseDto | null> {
+    return await this.donationsService.findOpenForLocation(locationId);
+  }
+
+  /**
+   * Stages lots into the branch's open donation, creating it when there is none.
+   * @param addLinesToOpenDonationDto The branch, lots and optional recipient.
+   * @param request The authenticated request.
+   * @returns A Promise that resolves with the open donation and a message.
+   */
+  @Post('current/lines')
+  @Roles(UserRole.RETAILER)
+  @ApiOperation({ summary: "Stage lots into a branch's open donation" })
+  @ApiBody({
+    type: AddLinesToOpenDonationDto,
+    description: 'The branch, the lots, and optionally the recipient.',
+  })
+  @ApiCreatedResponse({
+    description: 'The open donation with the lots staged.',
+    type: DonationCreatedResponseDto,
+  })
+  @ApiNotFoundResponse({ description: 'The branch was not found.' })
+  @ApiBadRequestResponse({
+    description:
+      'A lot is unavailable or at another branch, or no active partner could be chosen.',
+  })
+  async addToOpenDonation(
+    @Body() addLinesToOpenDonationDto: AddLinesToOpenDonationDto,
+    @Req() request: RequestWithUser,
+  ): Promise<DonationCreatedResponseDto> {
+    return await this.donationsService.addToOpenDonation(
+      addLinesToOpenDonationDto.locationId,
+      addLinesToOpenDonationDto.inventoryItemIds,
+      addLinesToOpenDonationDto.recipientId,
+      request.user,
+    );
   }
 
   /**
@@ -118,6 +198,53 @@ export class DonationsController {
     @Query('status') status?: DonationStatus,
   ): Promise<DonationResponseDto[]> {
     return await this.donationsService.findAllByRecipient(recipientId, status);
+  }
+
+  /**
+   * Resolves a presented pickup credential without consuming it.
+   * @param verifyPickupTokenDto The scanned code or keyed PIN.
+   * @returns A Promise that resolves with the scanner's verdict.
+   */
+  @Post('pickup-tokens/verify')
+  @Roles(UserRole.RETAILER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify a scanned or keyed pickup credential' })
+  @ApiBody({
+    type: VerifyPickupTokenDto,
+    description: 'The scanned code, or the PIN keyed in by hand.',
+  })
+  @ApiOkResponse({
+    description:
+      'The verdict. An unusable credential returns `valid: false` with a reason, not an error.',
+    type: VerifyPickupTokenResponseDto,
+  })
+  async verifyPickupToken(
+    @Body() verifyPickupTokenDto: VerifyPickupTokenDto,
+  ): Promise<VerifyPickupTokenResponseDto> {
+    return await this.donationsService.verifyPickupToken(
+      verifyPickupTokenDto.code,
+    );
+  }
+
+  /**
+   * Retrieves the pass the recipient is currently meant to present.
+   * @param id The ID of the donation.
+   * @returns A Promise that resolves with the outstanding token.
+   */
+  @Get(':id/pickup-token')
+  @ApiOperation({ summary: 'Get the outstanding pickup pass' })
+  @ApiParam({ name: 'id', description: 'Donation ID', format: 'uuid' })
+  @ApiOkResponse({
+    description: 'The outstanding pass.',
+    type: PickupTokenResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'The donation has no outstanding pass.',
+  })
+  async findCurrentPickupToken(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<PickupTokenResponseDto> {
+    return await this.donationsService.findCurrentPickupToken(id);
   }
 
   /**
@@ -491,8 +618,13 @@ export class DonationsController {
   async cancel(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() cancelDonationDto: CancelDonationDto,
+    @Req() request: RequestWithUser,
   ): Promise<DonationCreatedResponseDto> {
-    return await this.donationsService.cancel(id, cancelDonationDto);
+    return await this.donationsService.cancel(
+      id,
+      cancelDonationDto,
+      request.user,
+    );
   }
 
   /**

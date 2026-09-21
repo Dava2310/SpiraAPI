@@ -48,8 +48,12 @@ import {
 @Index('idx_inventory_location_status', ['locationId', 'status'], {
   where: 'deleted_at IS NULL',
 })
-@Index('idx_inventory_expiry', ['expiryDate'], {
+@Index('idx_inventory_expiry', ['expiresAt'], {
   where: "deleted_at IS NULL AND status = 'IN_INVENTORY'",
+})
+// The surplus shelf query: listed, available stock at a location, soonest first.
+@Index('idx_inventory_listed', ['isListed', 'status', 'expiresAt'], {
+  where: "deleted_at IS NULL AND is_listed = true AND status = 'IN_INVENTORY'",
 })
 @Index('idx_inventory_product', ['productId'])
 @Index('idx_inventory_donation', ['donationId'])
@@ -124,26 +128,62 @@ export class InventoryItem extends SoftDeletableEntity {
   })
   retailValue: number | null;
 
+  @ApiPropertyOptional({
+    description:
+      'Retail value of a single unit, shown alongside the lot total.',
+    type: Number,
+    nullable: true,
+    example: 1.25,
+  })
+  @Column({
+    name: 'unit_price',
+    type: 'numeric',
+    precision: 10,
+    scale: 2,
+    nullable: true,
+    transformer: numericTransformer,
+  })
+  unitPrice: number | null;
+
+  @ApiPropertyOptional({
+    description:
+      'How the unit is named to staff — "bottles", "loaves", "trays". Display only; `unit` stays the canonical measure for arithmetic.',
+    maxLength: 20,
+    nullable: true,
+    example: 'bottles',
+  })
+  @Column({ name: 'unit_label', type: 'varchar', length: 20, nullable: true })
+  unitLabel: string | null;
+
+  @ApiPropertyOptional({
+    description:
+      'Photo of this particular lot, overriding the catalogue image when set.',
+    maxLength: 500,
+    nullable: true,
+  })
+  @Column({ name: 'image_url', type: 'varchar', length: 500, nullable: true })
+  imageUrl: string | null;
+
   @ApiProperty({
     description: 'Currency of `retailValue`, as an ISO 4217 code.',
     minLength: 3,
     maxLength: 3,
-    default: 'USD',
-    example: 'USD',
+    default: 'EUR',
+    example: 'EUR',
   })
-  @Column({ name: 'currency', type: 'char', length: 3, default: 'USD' })
+  @Column({ name: 'currency', type: 'char', length: 3, default: 'EUR' })
   currency: string;
 
   @ApiPropertyOptional({
     description:
-      'Best-by date. Null for non-perishables. Days remaining is derived from this, never stored.',
+      'When the lot expires, to the minute. A plain date is not enough: urgency turns on 23:59 versus 20:00 today. Hours remaining is derived from this, never stored.',
     type: String,
-    format: 'date',
+    format: 'date-time',
     nullable: true,
-    example: '2026-09-18',
+    example: '2026-09-18T23:59:00.000Z',
   })
-  @Column({ name: 'expiry_date', type: 'date', nullable: true })
-  expiryDate: string | null;
+  @Column({ name: 'expires_at', type: 'timestamptz', nullable: true })
+  expiresAt: Date | null;
 
   @ApiProperty({
     description: 'Why the lot is donatable rather than sellable.',
@@ -184,6 +224,15 @@ export class InventoryItem extends SoftDeletableEntity {
     default: InventoryItemStatus.IN_INVENTORY,
   })
   status: InventoryItemStatus;
+
+  @ApiProperty({
+    description:
+      'Whether the lot is published to the surplus shelf, where any active recipient in range can claim it.',
+    default: false,
+    example: true,
+  })
+  @Column({ name: 'is_listed', type: 'boolean', default: false })
+  isListed: boolean;
 
   @ApiPropertyOptional({
     description:

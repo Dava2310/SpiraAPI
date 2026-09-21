@@ -16,7 +16,9 @@ import {
 
 import { SoftDeletableEntity } from '../../common/entities/soft-deletable.entity.js';
 import { numericTransformer } from '../../common/transformers/numeric.transformer.js';
+import { Contact } from '../../contacts/entities/contact.entity.js';
 import { Donation } from '../../donations/entities/donation.entity.js';
+import { LocationPickupSlot } from '../../location-pickup-slots/entities/location-pickup-slot.entity.js';
 import { InventoryItem } from '../../inventory-items/entities/inventory-item.entity.js';
 import { Recipient } from '../../recipients/entities/recipient.entity.js';
 import { Retailer } from '../../retailers/entities/retailer.entity.js';
@@ -100,6 +102,16 @@ export class Location extends SoftDeletableEntity {
   })
   type: LocationType;
 
+  @ApiPropertyOptional({
+    description:
+      'How this branch describes itself, finer than the retailer-level business type.',
+    maxLength: 80,
+    nullable: true,
+    example: 'Organic Grocery & Fresh Market',
+  })
+  @Column({ name: 'store_format', type: 'varchar', length: 80, nullable: true })
+  storeFormat: string | null;
+
   // --- Address ---
 
   @ApiProperty({
@@ -131,6 +143,21 @@ export class Location extends SoftDeletableEntity {
   })
   @Column({ name: 'city', type: 'varchar', length: 100 })
   city: string;
+
+  @ApiPropertyOptional({
+    description:
+      'District or neighbourhood, finer than city and used by the recipient app to describe where a pickup is.',
+    maxLength: 120,
+    nullable: true,
+    example: 'Eixample',
+  })
+  @Column({
+    name: 'neighborhood',
+    type: 'varchar',
+    length: 120,
+    nullable: true,
+  })
+  neighborhood: string | null;
 
   @ApiPropertyOptional({
     description: 'State, region or department.',
@@ -247,6 +274,16 @@ export class Location extends SoftDeletableEntity {
   @Column({ name: 'pickup_windows', type: 'jsonb', nullable: true })
   pickupWindows: PickupWindow[] | null;
 
+  @ApiPropertyOptional({
+    description:
+      'Arrival notes for a collecting driver: loading bay, gate, buzzer, security desk.',
+    nullable: true,
+    example:
+      'Loading bay gate 2 on the side alley. Ring the Spira buzzer and show the pass at the security window.',
+  })
+  @Column({ name: 'access_instructions', type: 'text', nullable: true })
+  accessInstructions: string | null;
+
   // --- Storage capability ---
 
   @ApiProperty({
@@ -319,4 +356,12 @@ export class Location extends SoftDeletableEntity {
   @ApiHideProperty()
   @OneToMany(() => Donation, (donation) => donation.location)
   donations?: Relation<Donation>[];
+
+  @ApiHideProperty()
+  @OneToMany(() => LocationPickupSlot, (slot) => slot.location)
+  pickupSlots?: Relation<LocationPickupSlot>[];
+
+  @ApiHideProperty()
+  @OneToMany(() => Contact, (contact) => contact.location)
+  contacts?: Relation<Contact>[];
 }

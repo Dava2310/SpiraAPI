@@ -21,6 +21,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
+import { Roles } from '../common/decorators/index.js';
 import { MessageResponseDto } from '../common/dto/index.js';
 import {
   CreateUserDto,
@@ -29,6 +30,7 @@ import {
   UserResponseDto,
 } from './dto/index.js';
 import { UsersService } from './users.service.js';
+import { UserRole } from './enums/user-role.enum.js';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -79,6 +81,7 @@ export class UsersController {
    * link does not match the role.
    */
   @Post()
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Create a new user' })
   @ApiBody({
     type: CreateUserDto,
@@ -108,6 +111,7 @@ export class UsersController {
    * resulting profile link does not match the role.
    */
   @Patch(':id')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Update a user' })
   @ApiParam({
     name: 'id',
@@ -141,6 +145,7 @@ export class UsersController {
    * @throws NotFoundException If the user is not found.
    */
   @Delete(':id')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Delete a user by its ID' })
   @ApiParam({ name: 'id', description: 'User ID', format: 'uuid' })
   @ApiOkResponse({

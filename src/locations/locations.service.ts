@@ -73,7 +73,27 @@ export class LocationsService implements CrudRepository<Location> {
    * @throws NotFoundException If the location is not found.
    */
   async findOne(id: string): Promise<LocationResponseDto> {
-    const location = await this.findValid(id);
+    if (!UUID_PATTERN.test(id)) {
+      throw new NotFoundException(`Invalid Location ID: ${id}`);
+    }
+
+    // The owner, the site contact and the slots are all on the store-detail
+    // screen, so one read here saves the recipient app three round trips.
+    const location = await this.locationRepository.findOne({
+      where: { id },
+      relations: {
+        retailer: true,
+        recipient: true,
+        contacts: true,
+        pickupSlots: true,
+      },
+    });
+
+    if (!location) {
+      throw new NotFoundException(
+        `Location with ID: ${id} not found or not valid`,
+      );
+    }
 
     return new LocationResponseDto(location);
   }

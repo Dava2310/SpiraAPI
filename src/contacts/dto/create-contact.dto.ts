@@ -140,4 +140,13 @@ export class CreateContactDto {
   @IsOptional()
   @IsUUID('4', { message: 'The user ID must be a valid UUID.' })
   userId?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Branch this person works at, for a site-level contact such as a store manager. Omit for an organization-wide contact.',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID('4', { message: 'The location ID must be a valid UUID.' })
+  locationId?: string;
 }

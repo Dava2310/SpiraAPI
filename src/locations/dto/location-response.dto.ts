@@ -47,6 +47,13 @@ export class LocationResponseDto {
   })
   type: LocationType;
 
+  @ApiPropertyOptional({
+    description: 'How this branch describes itself.',
+    nullable: true,
+    example: 'Organic Grocery & Fresh Market',
+  })
+  storeFormat: string | null;
+
   @ApiProperty({ description: 'Street address, first line.' })
   addressLine1: string;
 
@@ -58,6 +65,13 @@ export class LocationResponseDto {
 
   @ApiProperty({ description: 'City.', example: 'Asunción' })
   city: string;
+
+  @ApiPropertyOptional({
+    description: 'District or neighbourhood.',
+    nullable: true,
+    example: 'Eixample',
+  })
+  neighborhood: string | null;
 
   @ApiPropertyOptional({
     description: 'State, region or department.',
@@ -108,6 +122,12 @@ export class LocationResponseDto {
   })
   pickupWindows: PickupWindow[] | null;
 
+  @ApiPropertyOptional({
+    description: 'Arrival notes for a collecting driver.',
+    nullable: true,
+  })
+  accessInstructions: string | null;
+
   @ApiProperty({ description: 'Whether the site has refrigerated storage.' })
   hasColdStorage: boolean;
 
@@ -125,6 +145,45 @@ export class LocationResponseDto {
 
   @ApiProperty({ description: 'Whether the site is accepting collections.' })
   isActive: boolean;
+
+  @ApiPropertyOptional({
+    description:
+      'Owning organization name, present when the owner relation was loaded.',
+    nullable: true,
+    example: 'Mercadona',
+  })
+  ownerName: string | null;
+
+  @ApiPropertyOptional({
+    description:
+      'Whether the owning organization is verified, when the owner was loaded.',
+    nullable: true,
+  })
+  ownerIsVerified: boolean | null;
+
+  @ApiPropertyOptional({
+    description:
+      'Name of the site-level contact to ask for, when the contacts were loaded.',
+    nullable: true,
+    example: 'Marta Ruiz',
+  })
+  managerName: string | null;
+
+  @ApiProperty({
+    description:
+      'When the site joined the platform (ISO 8601). Same as creation, named for the profile screens.',
+    type: String,
+    format: 'date-time',
+  })
+  memberSince: string;
+
+  @ApiProperty({
+    description:
+      "Today's collection windows, derived from the site's pickup slots when they were loaded.",
+    type: [String],
+    example: ['18:30 - 20:00'],
+  })
+  pickupHoursToday: string[];
 
   @ApiProperty({
     description: 'When the location was created (ISO 8601).',
@@ -153,6 +212,9 @@ export class LocationResponseDto {
     this.type = data.type;
     this.addressLine1 = data.addressLine1;
     this.addressLine2 = data.addressLine2;
+    this.storeFormat = data.storeFormat;
+    this.neighborhood = data.neighborhood;
+    this.accessInstructions = data.accessInstructions;
     this.city = data.city;
     this.state = data.state;
     this.postalCode = data.postalCode;
@@ -167,7 +229,49 @@ export class LocationResponseDto {
     this.phone = data.phone;
     this.isPrimary = data.isPrimary;
     this.isActive = data.isActive;
+    this.ownerName =
+      data.retailer?.tradeName ??
+      data.retailer?.legalName ??
+      data.recipient?.displayName ??
+      null;
+    this.ownerIsVerified =
+      data.retailer || data.recipient
+        ? ((data.retailer ?? data.recipient)?.verifiedAt ?? null) !== null
+        : null;
+    this.managerName =
+      data.contacts?.find((contact) => contact.isPrimary)?.fullName ??
+      data.contacts?.[0]?.fullName ??
+      null;
+    this.memberSince = data.createdAt.toISOString();
+    this.pickupHoursToday = LocationResponseDto.todaysWindows(data);
     this.createdAt = data.createdAt.toISOString();
     this.updatedAt = data.updatedAt.toISOString();
+  }
+
+  /**
+   * Renders the collection windows that apply today, as labels.
+   *
+   * Derived rather than stored: the demo carried a `pickupHours` string that no
+   * longer matched the slots it was written from.
+   * @param data The location, with its pickup slots loaded or not.
+   * @returns The labels for today, empty when nothing applies or none were loaded.
+   */
+  private static todaysWindows(data: Location): string[] {
+    if (!data.pickupSlots) {
+      return [];
+    }
+
+    const isoWeekday = ((new Date().getUTCDay() + 6) % 7) + 1;
+
+    return data.pickupSlots
+      .filter(
+        (slot) =>
+          slot.isActive &&
+          (slot.weekday === null || slot.weekday === isoWeekday),
+      )
+      .sort((a, b) => a.startTime.localeCompare(b.startTime))
+      .map(
+        (slot) => `${slot.startTime.slice(0, 5)} - ${slot.endTime.slice(0, 5)}`,
+      );
   }
 }

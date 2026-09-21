@@ -3,6 +3,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ProfileStatus } from '../../common/enums/profile-status.enum.js';
 import type { Recipient } from '../entities/recipient.entity.js';
 import { RecipientType } from '../enums/recipient-type.enum.js';
+import { UrgencyThreshold } from '../enums/urgency-threshold.enum.js';
 
 /** API representation of a recipient. */
 export class RecipientResponseDto {
@@ -38,8 +39,22 @@ export class RecipientResponseDto {
   })
   taxId: string | null;
 
+  @ApiPropertyOptional({
+    description: 'Charity or non-profit registration number.',
+    nullable: true,
+    example: 'G-12345678',
+  })
+  registrationCode: string | null;
+
   @ApiPropertyOptional({ description: 'Mission statement.', nullable: true })
   mission: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Where they operate, as they describe it.',
+    nullable: true,
+    example: 'Metropolitan Barcelona',
+  })
+  serviceArea: string | null;
 
   @ApiPropertyOptional({ description: 'Public website.', nullable: true })
   website: string | null;
@@ -105,6 +120,47 @@ export class RecipientResponseDto {
   termsVersion: string | null;
 
   @ApiProperty({
+    description: 'IANA timezone the organization works in.',
+    example: 'Europe/Madrid',
+  })
+  timezone: string;
+
+  @ApiProperty({
+    description: 'How far they are willing to collect, in kilometres.',
+    type: Number,
+    example: 10,
+  })
+  alertRadiusKm: number;
+
+  @ApiProperty({
+    description: 'Which surplus urgencies they want to hear about.',
+    enum: UrgencyThreshold,
+    enumName: 'UrgencyThreshold',
+    example: UrgencyThreshold.ALL,
+  })
+  urgencyThreshold: UrgencyThreshold;
+
+  @ApiProperty({
+    description: 'Whether push notifications are enabled.',
+    example: true,
+  })
+  pushNotificationsEnabled: boolean;
+
+  @ApiProperty({
+    description:
+      'Initials of the display name, derived rather than stored, for avatar placeholders.',
+    example: 'BA',
+  })
+  initials: string;
+
+  @ApiProperty({
+    description: 'When they joined the platform (ISO 8601). Same as creation.',
+    type: String,
+    format: 'date-time',
+  })
+  memberSince: string;
+
+  @ApiProperty({
     description: 'When the recipient was created (ISO 8601).',
     type: String,
     format: 'date-time',
@@ -129,7 +185,9 @@ export class RecipientResponseDto {
     this.displayName = data.displayName;
     this.shortName = data.shortName;
     this.taxId = data.taxId;
+    this.registrationCode = data.registrationCode;
     this.mission = data.mission;
+    this.serviceArea = data.serviceArea;
     this.website = data.website;
     this.logoUrl = data.logoUrl;
     this.status = data.status;
@@ -142,7 +200,35 @@ export class RecipientResponseDto {
       ? data.termsAcceptedAt.toISOString()
       : null;
     this.termsVersion = data.termsVersion;
+    this.timezone = data.timezone;
+    this.alertRadiusKm = data.alertRadiusKm;
+    this.urgencyThreshold = data.urgencyThreshold;
+    this.pushNotificationsEnabled = data.pushNotificationsEnabled;
+    this.initials = RecipientResponseDto.initialsOf(data.displayName);
+    this.memberSince = data.createdAt.toISOString();
     this.createdAt = data.createdAt.toISOString();
     this.updatedAt = data.updatedAt.toISOString();
+  }
+
+  /**
+   * Builds avatar initials from the first and last word of a name.
+   *
+   * Not the first two words: "Banc dels Aliments" would read "BD", because the
+   * second word is a preposition rather than part of the name.
+   * @param displayName The organization's public name.
+   * @returns One or two uppercase letters, empty for a blank name.
+   */
+  private static initialsOf(displayName: string): string {
+    const words = displayName.split(/\s+/).filter((word) => word.length > 0);
+
+    if (words.length === 0) {
+      return '';
+    }
+
+    const first = words[0][0].toUpperCase();
+
+    return words.length === 1
+      ? first
+      : first + words[words.length - 1][0].toUpperCase();
   }
 }

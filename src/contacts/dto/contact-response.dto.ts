@@ -70,6 +70,14 @@ export class ContactResponseDto {
   })
   userId: string | null;
 
+  @ApiPropertyOptional({
+    description:
+      'Branch this person works at. Null for an organization-wide contact.',
+    format: 'uuid',
+    nullable: true,
+  })
+  locationId: string | null;
+
   @ApiProperty({
     description: 'When the contact was created (ISO 8601).',
     type: String,
@@ -101,6 +109,7 @@ export class ContactResponseDto {
     this.isPrimary = data.isPrimary;
     this.notes = data.notes;
     this.userId = data.userId;
+    this.locationId = data.locationId;
     this.createdAt = data.createdAt.toISOString();
     this.updatedAt = data.updatedAt.toISOString();
   }

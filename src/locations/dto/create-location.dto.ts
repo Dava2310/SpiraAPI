@@ -82,6 +82,19 @@ export class CreateLocationDto {
   })
   type: LocationType;
 
+  @ApiPropertyOptional({
+    description:
+      'How this branch describes itself, finer than the retailer-level business type.',
+    example: 'Organic Grocery & Fresh Market',
+    maxLength: 80,
+  })
+  @IsOptional()
+  @IsString({ message: 'The store format must be a string.' })
+  @MaxLength(80, {
+    message: 'The store format cannot be longer than 80 characters.',
+  })
+  storeFormat?: string;
+
   @ApiProperty({
     description: 'Street address, first line.',
     example: 'Palma 456',
@@ -111,6 +124,18 @@ export class CreateLocationDto {
   @IsString({ message: 'The city must be a string.' })
   @MaxLength(100, { message: 'The city cannot be longer than 100 characters.' })
   city: string;
+
+  @ApiPropertyOptional({
+    description: 'District or neighbourhood, finer than city.',
+    example: 'Eixample',
+    maxLength: 120,
+  })
+  @IsOptional()
+  @IsString({ message: 'The neighborhood must be a string.' })
+  @MaxLength(120, {
+    message: 'The neighborhood cannot be longer than 120 characters.',
+  })
+  neighborhood?: string;
 
   @ApiPropertyOptional({
     description: 'State, region or department.',
@@ -205,6 +230,20 @@ export class CreateLocationDto {
   @ValidateNested({ each: true })
   @Type(() => PickupWindowDto)
   pickupWindows?: PickupWindowDto[];
+
+  @ApiPropertyOptional({
+    description:
+      'Arrival notes for a collecting driver: loading bay, gate, buzzer, security desk.',
+    example:
+      'Loading bay gate 2 on the side alley. Ring the Spira buzzer and show the pass at the security window.',
+    maxLength: 2000,
+  })
+  @IsOptional()
+  @IsString({ message: 'The access instructions must be a string.' })
+  @MaxLength(2000, {
+    message: 'The access instructions cannot be longer than 2000 characters.',
+  })
+  accessInstructions?: string;
 
   @ApiPropertyOptional({
     description: 'Whether the site has refrigerated storage.',

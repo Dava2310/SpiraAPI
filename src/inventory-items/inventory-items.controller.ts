@@ -20,21 +20,32 @@ import {
   ApiOperation,
   ApiParam,
   ApiQuery,
+  ApiExtraModels,
   ApiTags,
   ApiUnauthorizedResponse,
+  getSchemaPath,
 } from '@nestjs/swagger';
 
-import { MessageResponseDto } from '../common/dto/index.js';
+import { Roles } from '../common/decorators/index.js';
+import {
+  MessageResponseDto,
+  PaginatedResponseDto,
+} from '../common/dto/index.js';
+import { DonationReason } from '../common/enums/donation-reason.enum.js';
 import {
   CreateInventoryItemDto,
+  InventoryFacetsResponseDto,
   InventoryItemCreatedResponseDto,
   InventoryItemResponseDto,
+  QueryInventoryItemsDto,
   UpdateInventoryItemDto,
 } from './dto/index.js';
 import { InventoryItemStatus } from './enums/inventory-item-status.enum.js';
 import { InventoryItemsService } from './inventory-items.service.js';
+import { UserRole } from '../users/enums/user-role.enum.js';
 
 @ApiTags('inventory-items')
+@ApiExtraModels(PaginatedResponseDto, InventoryItemResponseDto)
 @ApiBearerAuth()
 @ApiUnauthorizedResponse({ description: 'Missing, invalid or revoked token.' })
 @Controller('inventory-items')
@@ -42,17 +53,110 @@ export class InventoryItemsController {
   constructor(private readonly inventoryItemsService: InventoryItemsService) {}
 
   /**
-   * Retrieves every stock lot, each mapped to an InventoryItemResponseDto.
-   * @returns A Promise that resolves with an array of InventoryItemResponseDto.
+   * Searches, filters, orders and pages the inventory list.
+   * @param query The filters, ordering and page.
+   * @returns A Promise that resolves with one page of lots and its metadata.
    */
   @Get()
-  @ApiOperation({ summary: 'Get all inventory items' })
+  @ApiOperation({ summary: 'Search and page the inventory' })
   @ApiOkResponse({
-    description: 'List of all inventory items.',
+    description: 'One page of inventory items.',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(PaginatedResponseDto) },
+        {
+          properties: {
+            data: {
+              type: 'array',
+              items: { $ref: getSchemaPath(InventoryItemResponseDto) },
+            },
+          },
+        },
+      ],
+    },
+  })
+  async search(
+    @Query() query: QueryInventoryItemsDto,
+  ): Promise<PaginatedResponseDto<InventoryItemResponseDto>> {
+    return await this.inventoryItemsService.search(query);
+  }
+
+  /**
+   * Retrieves the counts behind the inventory filter chips.
+   * @param locationId The branch to count within, when given.
+   * @param status The lifecycle state to count.
+   * @returns A Promise that resolves with the facet counts.
+   */
+  @Get('facets')
+  @ApiOperation({ summary: 'Get inventory counts per category and urgency' })
+  @ApiQuery({
+    name: 'locationId',
+    required: false,
+    format: 'uuid',
+    description: 'Branch to count within.',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: InventoryItemStatus,
+    enumName: 'InventoryItemStatus',
+    description: 'Lifecycle state to count. Defaults to IN_INVENTORY.',
+  })
+  @ApiOkResponse({
+    description: 'The facet counts.',
+    type: InventoryFacetsResponseDto,
+  })
+  async facets(
+    @Query('locationId') locationId?: string,
+    @Query('status') status?: InventoryItemStatus,
+  ): Promise<InventoryFacetsResponseDto> {
+    return await this.inventoryItemsService.facets(locationId, status);
+  }
+
+  /**
+   * Retrieves lots that are near expiry or flagged for a given reason.
+   * @param locationId The branch to look at, when given.
+   * @param withinDays How many days ahead counts as near expiry.
+   * @param includeReason A reason to include regardless of the date.
+   * @returns A Promise that resolves with an array of InventoryItemResponseDto.
+   */
+  @Get('expiring')
+  @ApiOperation({ summary: 'Get near-expiry or flagged inventory' })
+  @ApiQuery({
+    name: 'locationId',
+    required: false,
+    format: 'uuid',
+    description: 'Branch to look at.',
+  })
+  @ApiQuery({
+    name: 'withinDays',
+    required: false,
+    type: Number,
+    description: 'How many days ahead to look. Defaults to 2.',
+  })
+  @ApiQuery({
+    name: 'includeReason',
+    required: false,
+    enum: DonationReason,
+    enumName: 'DonationReason',
+    description:
+      'Include lots flagged for this reason whatever their date. ORed with the expiry window, not ANDed.',
+  })
+  @ApiOkResponse({
+    description: 'List of lots worth acting on.',
     type: [InventoryItemResponseDto],
   })
-  async findAll(): Promise<InventoryItemResponseDto[]> {
-    return await this.inventoryItemsService.findAll();
+  async findExpiringOrFlagged(
+    @Query('locationId') locationId?: string,
+    @Query('withinDays', new ParseIntPipe({ optional: true }))
+    withinDays?: number,
+    @Query('includeReason') includeReason?: DonationReason,
+  ): Promise<InventoryItemResponseDto[]> {
+    return await this.inventoryItemsService.findExpiringOrFlagged(
+      locationId,
+      withinDays,
+      includeReason,
+    );
   }
 
   /**
@@ -141,6 +245,7 @@ export class InventoryItemsController {
    * @returns A Promise that resolves with the created lot as InventoryItemCreatedResponseDto.
    */
   @Post()
+  @Roles(UserRole.RETAILER)
   @ApiOperation({ summary: 'Log a new inventory item' })
   @ApiBody({
     type: CreateInventoryItemDto,
@@ -166,6 +271,7 @@ export class InventoryItemsController {
    * @throws BadRequestException If the lot is already committed to a donation.
    */
   @Patch(':id')
+  @Roles(UserRole.RETAILER)
   @ApiOperation({ summary: 'Update an inventory item' })
   @ApiParam({
     name: 'id',
@@ -199,6 +305,7 @@ export class InventoryItemsController {
    * @throws BadRequestException If the lot is already committed to a donation.
    */
   @Delete(':id')
+  @Roles(UserRole.RETAILER)
   @ApiOperation({ summary: 'Delete an inventory item by its ID' })
   @ApiParam({ name: 'id', description: 'Inventory item ID', format: 'uuid' })
   @ApiOkResponse({

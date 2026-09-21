@@ -21,6 +21,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
+import { Roles } from '../common/decorators/index.js';
 import { MessageResponseDto } from '../common/dto/index.js';
 import {
   CreateImpactFactorDto,
@@ -29,6 +30,7 @@ import {
   UpdateImpactFactorDto,
 } from './dto/index.js';
 import { ImpactFactorsService } from './impact-factors.service.js';
+import { UserRole } from '../users/enums/user-role.enum.js';
 
 @ApiTags('impact-factors')
 @ApiBearerAuth()
@@ -78,6 +80,7 @@ export class ImpactFactorsController {
    * @throws BadRequestException If the effective period overlaps an existing set.
    */
   @Post()
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Create a new factor set' })
   @ApiBody({
     type: CreateImpactFactorDto,
@@ -106,6 +109,7 @@ export class ImpactFactorsController {
    * @throws BadRequestException If the change would overlap an existing set.
    */
   @Patch(':id')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Update a factor set' })
   @ApiParam({
     name: 'id',
@@ -139,6 +143,7 @@ export class ImpactFactorsController {
    * @throws NotFoundException If the factor set is not found.
    */
   @Delete(':id')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Delete a factor set by its ID' })
   @ApiParam({ name: 'id', description: 'ImpactFactor ID', format: 'uuid' })
   @ApiOkResponse({

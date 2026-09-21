@@ -21,6 +21,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
+import { Roles } from '../common/decorators/index.js';
 import { MessageResponseDto } from '../common/dto/index.js';
 import {
   CreatePartnershipDto,
@@ -29,6 +30,7 @@ import {
   UpdatePartnershipDto,
 } from './dto/index.js';
 import { PartnershipsService } from './partnerships.service.js';
+import { UserRole } from '../users/enums/user-role.enum.js';
 
 @ApiTags('partnerships')
 @ApiBearerAuth()
@@ -96,6 +98,7 @@ export class PartnershipsController {
    * @throws BadRequestException If these two organizations are already partnered.
    */
   @Post()
+  @Roles(UserRole.RETAILER)
   @ApiOperation({ summary: 'Create a new partnership' })
   @ApiBody({
     type: CreatePartnershipDto,
@@ -124,6 +127,7 @@ export class PartnershipsController {
    * @throws BadRequestException If the change would duplicate an existing partnership.
    */
   @Patch(':id')
+  @Roles(UserRole.RETAILER)
   @ApiOperation({ summary: 'Update a partnership' })
   @ApiParam({
     name: 'id',
@@ -157,6 +161,7 @@ export class PartnershipsController {
    * @throws NotFoundException If the partnership is not found.
    */
   @Delete(':id')
+  @Roles(UserRole.RETAILER)
   @ApiOperation({ summary: 'Delete a partnership by its ID' })
   @ApiParam({ name: 'id', description: 'Partnership ID', format: 'uuid' })
   @ApiOkResponse({

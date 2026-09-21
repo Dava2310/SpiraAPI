@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { AuthModule } from './auth/auth.module.js';
-import { AuthGuard } from './auth/guards/index.js';
+import { AuthGuard, RolesGuard } from './auth/guards/index.js';
 import { RetailersModule } from './retailers/retailers.module.js';
 import { RecipientsModule } from './recipients/recipients.module.js';
 import { ContactsModule } from './contacts/contacts.module.js';
@@ -20,6 +20,11 @@ import { DonationReceiptsModule } from './donation-receipts/donation-receipts.mo
 import { RecipientVehiclesModule } from './recipient-vehicles/recipient-vehicles.module.js';
 import { PartnershipsModule } from './partnerships/partnerships.module.js';
 import { ImpactFactorsModule } from './impact-factors/impact-factors.module.js';
+import { LocationPickupSlotsModule } from './location-pickup-slots/location-pickup-slots.module.js';
+import { ImpactModule } from './impact/impact.module.js';
+import { MeModule } from './me/me.module.js';
+import { RetailerPortalModule } from './retailer-portal/retailer-portal.module.js';
+import { RecipientPortalModule } from './recipient-portal/recipient-portal.module.js';
 
 import configuration from './config/configuration.js';
 
@@ -43,6 +48,9 @@ import configuration from './config/configuration.js';
     }),
     AuthModule,
     RetailersModule,
+    // Before RecipientsModule: Express matches in registration order, so
+    // `recipients/me/...` must be declared ahead of `recipients/:id`.
+    RecipientPortalModule,
     RecipientsModule,
     ContactsModule,
     LocationsModule,
@@ -55,8 +63,18 @@ import configuration from './config/configuration.js';
     RecipientVehiclesModule,
     PartnershipsModule,
     ImpactFactorsModule,
+    LocationPickupSlotsModule,
+    ImpactModule,
+    MeModule,
+    RetailerPortalModule,
   ],
   controllers: [AppController],
-  providers: [AppService, { provide: APP_GUARD, useClass: AuthGuard }],
+  // Guard order matters: AuthGuard resolves the caller, RolesGuard then reads
+  // the role off it.
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: AuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
+  ],
 })
 export class AppModule {}
