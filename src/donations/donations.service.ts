@@ -705,7 +705,11 @@ export class DonationsService implements CrudRepository<Donation> {
     return await this.donationReceiptsService.issueForDonation(
       loaded ?? donation,
       {
-        authorizedByName: await this.resolveUserName(caller.id),
+        authorizedByName: await this.resolveAuthorizedByName(
+          caller.id,
+          loaded ?? donation,
+          confirmDonationDto.authorizedByLabel,
+        ),
         driverName: loaded?.driverContact?.fullName ?? null,
         receivedByLabel:
           confirmDonationDto.receivedByLabel ??
@@ -1252,11 +1256,36 @@ export class DonationsService implements CrudRepository<Donation> {
    * @param userId The ID of the user.
    * @returns A Promise that resolves with the contact's name, or a fallback.
    */
-  private async resolveUserName(userId: string): Promise<string> {
-    const contact = await this.contactRepository.findOne({
+  private async resolveAuthorizedByName(
+    userId: string,
+    donation: Donation,
+    explicit?: string,
+  ): Promise<string> {
+    if (explicit) {
+      return explicit;
+    }
+
+    const linked = await this.contactRepository.findOne({
       where: { userId },
     });
 
-    return contact?.fullName ?? 'Authorised user';
+    if (linked) {
+      return linked.fullName;
+    }
+
+    // Nothing links a login to a person, so fall back to the named contact at
+    // the branch, then the retailer's. A certificate is a legal record of who
+    // released the goods: a real name from the owning organization is worth more
+    // than a placeholder, and "Authorised user" is the last resort rather than
+    // the common case.
+    const fallback = await this.contactRepository.findOne({
+      where: [
+        { locationId: donation.locationId },
+        { retailerId: donation.retailerId },
+      ],
+      order: { isPrimary: 'DESC', createdAt: 'ASC' },
+    });
+
+    return fallback?.fullName ?? 'Authorised user';
   }
 }

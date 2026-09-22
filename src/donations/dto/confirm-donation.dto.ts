@@ -23,6 +23,19 @@ export class ConfirmDonationDto {
 
   @ApiPropertyOptional({
     description:
+      'Who released the goods on the donating side. Falls back to the contact linked to the confirming login, then the branch contact, then the retailer contact.',
+    example: 'Marta Ruiz',
+    maxLength: 150,
+  })
+  @IsOptional()
+  @IsString({ message: 'The authorized-by label must be a string.' })
+  @MaxLength(150, {
+    message: 'The authorized-by label cannot be longer than 150 characters.',
+  })
+  authorizedByLabel?: string;
+
+  @ApiPropertyOptional({
+    description:
       'Who signed for the goods on the receiving side. The driver need not be a platform user, so this is free text.',
     example: 'Marta Ruiz',
     maxLength: 150,

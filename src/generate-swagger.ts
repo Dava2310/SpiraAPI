@@ -8,6 +8,10 @@ import { AppModule } from './app.module.js';
 async function generateSwagger() {
   const app = await NestFactory.create(AppModule);
 
+  // Must match main.ts. Without it every path in the spec is missing the `/api`
+  // prefix, so a client generated from this file calls `/auth/login` and 404s.
+  app.setGlobalPrefix('api');
+
   const config = new DocumentBuilder()
     .setTitle('Spira API Documentation')
     .setDescription('Spira API')

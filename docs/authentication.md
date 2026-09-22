@@ -82,7 +82,10 @@ Exactly **two** routes are public today:
 | `GET /api` | Liveness check on `AppController`. Must answer before anyone holds a token. |
 | `POST /api/auth/login` | Cannot require the token it issues. |
 
-> Note: `main.ts` mounts Swagger UI at the same `/api` path (`SwaggerModule.setup(globalPrefix, …)`), so the two overlap and the UI is what a browser gets. Worth separating — e.g. Swagger at `/api/docs`, or a dedicated `GET /api/health` — if the liveness route is meant to be reachable.
+> Swagger UI is mounted at `/docs`, deliberately not at the `/api` global prefix.
+> It used to share `/api`, where its static handler shadowed the liveness route and
+> a health check received an HTML bundle instead of a one-line answer. The raw spec
+> moved with it, to `/docs-json`.
 
 ### Swagger
 
