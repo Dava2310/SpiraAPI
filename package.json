@@ -31,7 +31,11 @@
     "migration:generate": "tsx ./node_modules/typeorm/cli.js migration:generate -d src/database/data-source.ts",
     "migration:run": "tsx ./node_modules/typeorm/cli.js migration:run -d src/database/data-source.ts",
     "migration:revert": "tsx ./node_modules/typeorm/cli.js migration:revert -d src/database/data-source.ts",
-    "migration:show": "tsx ./node_modules/typeorm/cli.js migration:show -d src/database/data-source.ts"
+    "migration:show": "tsx ./node_modules/typeorm/cli.js migration:show -d src/database/data-source.ts",
+    "migration:run:prod": "node ./node_modules/typeorm/cli.js migration:run -d dist/database/data-source.js",
+    "migration:revert:prod": "node ./node_modules/typeorm/cli.js migration:revert -d dist/database/data-source.js",
+    "migration:show:prod": "node ./node_modules/typeorm/cli.js migration:show -d dist/database/data-source.js",
+    "deploy:migrate": "nest build && pnpm run migration:run:prod"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",

@@ -1,7 +1,10 @@
+import { buildSslOptions } from '../common/database/ssl.options.js';
+
 export default () => {
   const databaseUrl = process.env.DATABASE_URL;
   const synchronize = process.env.DB_SYNCHRONIZE === 'true';
   const logging = process.env.DB_LOGGING === 'true';
+  const ssl = buildSslOptions();
 
   if (databaseUrl) {
     return {
@@ -9,6 +12,7 @@ export default () => {
         type: 'postgres' as const,
         url: databaseUrl.trim(),
         uuidExtension: 'pgcrypto' as const,
+        ssl,
         synchronize,
         logging,
       },
@@ -30,6 +34,7 @@ export default () => {
       password,
       database,
       uuidExtension: 'pgcrypto' as const,
+      ssl,
       synchronize,
       logging,
     },

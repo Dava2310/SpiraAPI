@@ -1,3 +1,4 @@
+export * from './database/index.js';
 export * from './decorators/index.js';
 export * from './dto/index.js';
 export * from './entities/index.js';
