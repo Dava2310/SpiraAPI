@@ -31,10 +31,12 @@ Then open:
 
 | URL | What |
 |---|---|
-| `http://localhost:3333/api` | Swagger UI |
-| `http://localhost:3333/api-json` | Raw OpenAPI spec (JSON) |
+| `http://localhost:3333/docs` | Swagger UI |
+| `http://localhost:3333/docs-json` | Raw OpenAPI spec (JSON) |
+| `http://localhost:3333/api` | Liveness check (returns a string) |
 
-> All routes are served under the **`/api`** global prefix.
+> All routes are served under the **`/api`** global prefix. Swagger is mounted
+> separately at `/docs` so it does not shadow the liveness route.
 
 ---
 

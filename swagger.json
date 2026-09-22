@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "paths": {
-    "/": {
+    "/api": {
       "get": {
         "operationId": "AppController_getHello",
         "parameters": [],
@@ -23,7 +23,7 @@
         ]
       }
     },
-    "/auth/login": {
+    "/api/auth/login": {
       "post": {
         "operationId": "AuthController_login",
         "parameters": [],
@@ -59,7 +59,7 @@
         ]
       }
     },
-    "/auth/logout": {
+    "/api/auth/logout": {
       "post": {
         "description": "Adds this request's token to the denylist, so it stops working immediately rather than at its natural expiry.",
         "operationId": "AuthController_logout",
@@ -90,7 +90,7 @@
         ]
       }
     },
-    "/auth/change-password": {
+    "/api/auth/change-password": {
       "patch": {
         "description": "Revokes the token used for this request, so a new sign-in is required afterwards.",
         "operationId": "AuthController_changePassword",
@@ -132,7 +132,7 @@
         ]
       }
     },
-    "/users": {
+    "/api/users": {
       "get": {
         "operationId": "UsersController_findAll",
         "parameters": [],
@@ -207,7 +207,7 @@
         ]
       }
     },
-    "/users/{id}": {
+    "/api/users/{id}": {
       "get": {
         "operationId": "UsersController_findOne",
         "parameters": [
@@ -349,7 +349,7 @@
         ]
       }
     },
-    "/invalid-tokens": {
+    "/api/invalid-tokens": {
       "get": {
         "operationId": "InvalidTokensController_findAll",
         "parameters": [],
@@ -424,7 +424,7 @@
         ]
       }
     },
-    "/invalid-tokens/{id}": {
+    "/api/invalid-tokens/{id}": {
       "get": {
         "operationId": "InvalidTokensController_findOne",
         "parameters": [
@@ -566,7 +566,7 @@
         ]
       }
     },
-    "/invalid-tokens/expired": {
+    "/api/invalid-tokens/expired": {
       "delete": {
         "description": "Removes entries past their expiry. Safe because ordinary JWT validation rejects an expired token anyway.",
         "operationId": "InvalidTokensController_purgeExpired",
@@ -597,7 +597,7 @@
         ]
       }
     },
-    "/retailers": {
+    "/api/retailers": {
       "get": {
         "operationId": "RetailersController_findAll",
         "parameters": [],
@@ -672,7 +672,7 @@
         ]
       }
     },
-    "/retailers/{id}": {
+    "/api/retailers/{id}": {
       "get": {
         "operationId": "RetailersController_findOne",
         "parameters": [
@@ -814,7 +814,7 @@
         ]
       }
     },
-    "/recipients/me": {
+    "/api/recipients/me": {
       "get": {
         "operationId": "RecipientPortalController_findProfile",
         "parameters": [],
@@ -889,7 +889,7 @@
         ]
       }
     },
-    "/recipients/me/surplus-packages": {
+    "/api/recipients/me/surplus-packages": {
       "get": {
         "operationId": "RecipientPortalController_findSurplusPackages",
         "parameters": [
@@ -1022,7 +1022,7 @@
         ]
       }
     },
-    "/recipients/me/alerts/urgent": {
+    "/api/recipients/me/alerts/urgent": {
       "get": {
         "operationId": "RecipientPortalController_findUrgentAlerts",
         "parameters": [
@@ -1080,7 +1080,7 @@
         ]
       }
     },
-    "/recipients/me/reservations": {
+    "/api/recipients/me/reservations": {
       "post": {
         "operationId": "RecipientPortalController_claim",
         "parameters": [],
@@ -1218,7 +1218,7 @@
         ]
       }
     },
-    "/recipients/me/reservations/counts": {
+    "/api/recipients/me/reservations/counts": {
       "get": {
         "operationId": "RecipientPortalController_countReservations",
         "parameters": [],
@@ -1251,7 +1251,7 @@
         ]
       }
     },
-    "/recipients/me/reservations/{id}": {
+    "/api/recipients/me/reservations/{id}": {
       "get": {
         "operationId": "RecipientPortalController_findReservation",
         "parameters": [
@@ -1298,7 +1298,7 @@
         ]
       }
     },
-    "/recipients/me/pickups": {
+    "/api/recipients/me/pickups": {
       "get": {
         "operationId": "RecipientPortalController_findPickups",
         "parameters": [
@@ -1389,7 +1389,7 @@
         ]
       }
     },
-    "/recipients/me/partner-locations": {
+    "/api/recipients/me/partner-locations": {
       "get": {
         "operationId": "RecipientPortalController_findPartnerLocations",
         "parameters": [],
@@ -1425,7 +1425,7 @@
         ]
       }
     },
-    "/recipients/me/impact": {
+    "/api/recipients/me/impact": {
       "get": {
         "operationId": "RecipientPortalController_findImpact",
         "parameters": [
@@ -1472,7 +1472,7 @@
         ]
       }
     },
-    "/recipients/me/verification-pass": {
+    "/api/recipients/me/verification-pass": {
       "get": {
         "operationId": "RecipientPortalController_findVerificationPass",
         "parameters": [],
@@ -1505,7 +1505,7 @@
         ]
       }
     },
-    "/recipients/me/contacts": {
+    "/api/recipients/me/contacts": {
       "get": {
         "operationId": "RecipientPortalController_findContacts",
         "parameters": [],
@@ -1586,7 +1586,7 @@
         ]
       }
     },
-    "/recipients/me/contacts/{id}": {
+    "/api/recipients/me/contacts/{id}": {
       "patch": {
         "operationId": "RecipientPortalController_updateContact",
         "parameters": [
@@ -1692,7 +1692,7 @@
         ]
       }
     },
-    "/recipients/me/notification-preferences": {
+    "/api/recipients/me/notification-preferences": {
       "patch": {
         "operationId": "RecipientPortalController_updateNotificationPreferences",
         "parameters": [],
@@ -1736,7 +1736,7 @@
         ]
       }
     },
-    "/impact-factors": {
+    "/api/impact-factors": {
       "get": {
         "operationId": "ImpactFactorsController_findAll",
         "parameters": [],
@@ -1811,7 +1811,7 @@
         ]
       }
     },
-    "/impact-factors/{id}": {
+    "/api/impact-factors/{id}": {
       "get": {
         "operationId": "ImpactFactorsController_findOne",
         "parameters": [
@@ -1953,7 +1953,7 @@
         ]
       }
     },
-    "/recipients": {
+    "/api/recipients": {
       "get": {
         "operationId": "RecipientsController_findAll",
         "parameters": [],
@@ -2028,7 +2028,7 @@
         ]
       }
     },
-    "/recipients/{id}": {
+    "/api/recipients/{id}": {
       "get": {
         "operationId": "RecipientsController_findOne",
         "parameters": [
@@ -2170,7 +2170,7 @@
         ]
       }
     },
-    "/contacts": {
+    "/api/contacts": {
       "get": {
         "operationId": "ContactsController_findAll",
         "parameters": [],
@@ -2245,7 +2245,7 @@
         ]
       }
     },
-    "/contacts/{id}": {
+    "/api/contacts/{id}": {
       "get": {
         "operationId": "ContactsController_findOne",
         "parameters": [
@@ -2387,7 +2387,7 @@
         ]
       }
     },
-    "/locations": {
+    "/api/locations": {
       "get": {
         "operationId": "LocationsController_findAll",
         "parameters": [],
@@ -2462,7 +2462,7 @@
         ]
       }
     },
-    "/locations/{id}/pickup-slots": {
+    "/api/locations/{id}/pickup-slots": {
       "get": {
         "operationId": "LocationsController_findPickupSlots",
         "parameters": [
@@ -2506,7 +2506,7 @@
         ]
       }
     },
-    "/locations/{id}": {
+    "/api/locations/{id}": {
       "get": {
         "operationId": "LocationsController_findOne",
         "parameters": [
@@ -2648,7 +2648,7 @@
         ]
       }
     },
-    "/location-pickup-slots": {
+    "/api/location-pickup-slots": {
       "get": {
         "operationId": "LocationPickupSlotsController_findAll",
         "parameters": [],
@@ -2726,7 +2726,7 @@
         ]
       }
     },
-    "/location-pickup-slots/by-location/{locationId}": {
+    "/api/location-pickup-slots/by-location/{locationId}": {
       "get": {
         "operationId": "LocationPickupSlotsController_findAllByLocation",
         "parameters": [
@@ -2770,7 +2770,7 @@
         ]
       }
     },
-    "/location-pickup-slots/{id}": {
+    "/api/location-pickup-slots/{id}": {
       "get": {
         "operationId": "LocationPickupSlotsController_findOne",
         "parameters": [
@@ -2918,7 +2918,7 @@
         ]
       }
     },
-    "/products": {
+    "/api/products": {
       "get": {
         "operationId": "ProductsController_findAll",
         "parameters": [],
@@ -2993,7 +2993,7 @@
         ]
       }
     },
-    "/products/by-retailer/{retailerId}": {
+    "/api/products/by-retailer/{retailerId}": {
       "get": {
         "operationId": "ProductsController_findAllByRetailer",
         "parameters": [
@@ -3037,7 +3037,7 @@
         ]
       }
     },
-    "/products/{id}": {
+    "/api/products/{id}": {
       "get": {
         "operationId": "ProductsController_findOne",
         "parameters": [
@@ -3179,7 +3179,7 @@
         ]
       }
     },
-    "/inventory-items": {
+    "/api/inventory-items": {
       "get": {
         "operationId": "InventoryItemsController_search",
         "parameters": [
@@ -3384,7 +3384,7 @@
         ]
       }
     },
-    "/inventory-items/facets": {
+    "/api/inventory-items/facets": {
       "get": {
         "operationId": "InventoryItemsController_facets",
         "parameters": [
@@ -3434,7 +3434,7 @@
         ]
       }
     },
-    "/inventory-items/expiring": {
+    "/api/inventory-items/expiring": {
       "get": {
         "operationId": "InventoryItemsController_findExpiringOrFlagged",
         "parameters": [
@@ -3496,7 +3496,7 @@
         ]
       }
     },
-    "/inventory-items/by-location/{locationId}": {
+    "/api/inventory-items/by-location/{locationId}": {
       "get": {
         "operationId": "InventoryItemsController_findAllByLocation",
         "parameters": [
@@ -3549,7 +3549,7 @@
         ]
       }
     },
-    "/inventory-items/by-location/{locationId}/expiring": {
+    "/api/inventory-items/by-location/{locationId}/expiring": {
       "get": {
         "operationId": "InventoryItemsController_findExpiringAtLocation",
         "parameters": [
@@ -3602,7 +3602,7 @@
         ]
       }
     },
-    "/inventory-items/{id}": {
+    "/api/inventory-items/{id}": {
       "get": {
         "operationId": "InventoryItemsController_findOne",
         "parameters": [
@@ -3747,7 +3747,7 @@
         ]
       }
     },
-    "/donations": {
+    "/api/donations": {
       "get": {
         "operationId": "DonationsController_search",
         "parameters": [
@@ -3922,7 +3922,7 @@
         ]
       }
     },
-    "/donations/current": {
+    "/api/donations/current": {
       "get": {
         "operationId": "DonationsController_findOpen",
         "parameters": [
@@ -3962,7 +3962,7 @@
         ]
       }
     },
-    "/donations/current/lines": {
+    "/api/donations/current/lines": {
       "post": {
         "operationId": "DonationsController_addToOpenDonation",
         "parameters": [],
@@ -4009,7 +4009,7 @@
         ]
       }
     },
-    "/donations/by-location/{locationId}": {
+    "/api/donations/by-location/{locationId}": {
       "get": {
         "operationId": "DonationsController_findAllByLocation",
         "parameters": [
@@ -4061,7 +4061,7 @@
         ]
       }
     },
-    "/donations/by-recipient/{recipientId}": {
+    "/api/donations/by-recipient/{recipientId}": {
       "get": {
         "operationId": "DonationsController_findAllByRecipient",
         "parameters": [
@@ -4113,7 +4113,7 @@
         ]
       }
     },
-    "/donations/pickup-tokens/verify": {
+    "/api/donations/pickup-tokens/verify": {
       "post": {
         "operationId": "DonationsController_verifyPickupToken",
         "parameters": [],
@@ -4154,7 +4154,7 @@
         ]
       }
     },
-    "/donations/{id}/pickup-token": {
+    "/api/donations/{id}/pickup-token": {
       "get": {
         "operationId": "DonationsController_findCurrentPickupToken",
         "parameters": [
@@ -4244,7 +4244,7 @@
         ]
       }
     },
-    "/donations/{id}": {
+    "/api/donations/{id}": {
       "get": {
         "operationId": "DonationsController_findOne",
         "parameters": [
@@ -4389,7 +4389,7 @@
         ]
       }
     },
-    "/donations/{id}/lines": {
+    "/api/donations/{id}/lines": {
       "post": {
         "operationId": "DonationsController_addLines",
         "parameters": [
@@ -4447,7 +4447,7 @@
         ]
       }
     },
-    "/donations/{id}/lines/{lineId}": {
+    "/api/donations/{id}/lines/{lineId}": {
       "delete": {
         "operationId": "DonationsController_removeLine",
         "parameters": [
@@ -4504,7 +4504,7 @@
         ]
       }
     },
-    "/donations/{id}/offer": {
+    "/api/donations/{id}/offer": {
       "patch": {
         "operationId": "DonationsController_offer",
         "parameters": [
@@ -4562,7 +4562,7 @@
         ]
       }
     },
-    "/donations/{id}/accept": {
+    "/api/donations/{id}/accept": {
       "patch": {
         "description": "Performed by the recipient.",
         "operationId": "DonationsController_accept",
@@ -4621,7 +4621,7 @@
         ]
       }
     },
-    "/donations/{id}/decline": {
+    "/api/donations/{id}/decline": {
       "patch": {
         "description": "Performed by the recipient. The reason is required so the retailer can re-offer it.",
         "operationId": "DonationsController_decline",
@@ -4680,7 +4680,7 @@
         ]
       }
     },
-    "/donations/{id}/ready-for-pickup": {
+    "/api/donations/{id}/ready-for-pickup": {
       "patch": {
         "operationId": "DonationsController_markReadyForPickup",
         "parameters": [
@@ -4727,7 +4727,7 @@
         ]
       }
     },
-    "/donations/{id}/en-route": {
+    "/api/donations/{id}/en-route": {
       "patch": {
         "description": "Performed by the recipient.",
         "operationId": "DonationsController_markDriverEnRoute",
@@ -4775,7 +4775,7 @@
         ]
       }
     },
-    "/donations/{id}/confirm": {
+    "/api/donations/{id}/confirm": {
       "post": {
         "description": "Performed by the retailer after scanning the QR code the recipient presents.",
         "operationId": "DonationsController_confirm",
@@ -4834,7 +4834,7 @@
         ]
       }
     },
-    "/donations/{id}/cancel": {
+    "/api/donations/{id}/cancel": {
       "patch": {
         "description": "Either side may cancel. Covers a driver no-show.",
         "operationId": "DonationsController_cancel",
@@ -4893,7 +4893,7 @@
         ]
       }
     },
-    "/donation-receipts": {
+    "/api/donation-receipts": {
       "get": {
         "operationId": "DonationReceiptsController_findAll",
         "parameters": [],
@@ -4926,7 +4926,7 @@
         ]
       }
     },
-    "/donation-receipts/by-number/{receiptNumber}": {
+    "/api/donation-receipts/by-number/{receiptNumber}": {
       "get": {
         "operationId": "DonationReceiptsController_findOneByNumber",
         "parameters": [
@@ -4970,7 +4970,7 @@
         ]
       }
     },
-    "/donation-receipts/export": {
+    "/api/donation-receipts/export": {
       "get": {
         "operationId": "DonationReceiptsController_export",
         "parameters": [
@@ -5059,7 +5059,7 @@
         ]
       }
     },
-    "/donation-receipts/{id}/pdf": {
+    "/api/donation-receipts/{id}/pdf": {
       "get": {
         "operationId": "DonationReceiptsController_downloadPdf",
         "parameters": [
@@ -5104,7 +5104,7 @@
         ]
       }
     },
-    "/donation-receipts/{id}": {
+    "/api/donation-receipts/{id}": {
       "get": {
         "operationId": "DonationReceiptsController_findOne",
         "parameters": [
@@ -5148,7 +5148,7 @@
         ]
       }
     },
-    "/recipient-vehicles": {
+    "/api/recipient-vehicles": {
       "get": {
         "operationId": "RecipientVehiclesController_findAll",
         "parameters": [],
@@ -5223,7 +5223,7 @@
         ]
       }
     },
-    "/recipient-vehicles/by-recipient/{recipientId}": {
+    "/api/recipient-vehicles/by-recipient/{recipientId}": {
       "get": {
         "operationId": "RecipientVehiclesController_findAllByRecipient",
         "parameters": [
@@ -5267,7 +5267,7 @@
         ]
       }
     },
-    "/recipient-vehicles/{id}": {
+    "/api/recipient-vehicles/{id}": {
       "get": {
         "operationId": "RecipientVehiclesController_findOne",
         "parameters": [
@@ -5409,7 +5409,7 @@
         ]
       }
     },
-    "/partnerships": {
+    "/api/partnerships": {
       "get": {
         "operationId": "PartnershipsController_findAll",
         "parameters": [],
@@ -5484,7 +5484,7 @@
         ]
       }
     },
-    "/partnerships/by-retailer/{retailerId}": {
+    "/api/partnerships/by-retailer/{retailerId}": {
       "get": {
         "operationId": "PartnershipsController_findAllByRetailer",
         "parameters": [
@@ -5528,7 +5528,7 @@
         ]
       }
     },
-    "/partnerships/{id}": {
+    "/api/partnerships/{id}": {
       "get": {
         "operationId": "PartnershipsController_findOne",
         "parameters": [
@@ -5670,7 +5670,7 @@
         ]
       }
     },
-    "/me": {
+    "/api/me": {
       "get": {
         "operationId": "MeController_findContext",
         "parameters": [],
@@ -5703,7 +5703,7 @@
         ]
       }
     },
-    "/retailer/dashboard": {
+    "/api/retailer/dashboard": {
       "get": {
         "operationId": "RetailerPortalController_findDashboard",
         "parameters": [
@@ -5747,7 +5747,7 @@
         ]
       }
     },
-    "/retailer/locations/{locationId}/impact": {
+    "/api/retailer/locations/{locationId}/impact": {
       "get": {
         "operationId": "RetailerPortalController_findImpact",
         "parameters": [
@@ -5804,7 +5804,7 @@
         ]
       }
     },
-    "/retailer/locations/{locationId}/partners": {
+    "/api/retailer/locations/{locationId}/partners": {
       "get": {
         "operationId": "RetailerPortalController_findPartners",
         "parameters": [
@@ -11943,6 +11943,12 @@
             "description": "Pickup token the recipient presented, as the scanned code or its PIN. Must be unconsumed, unexpired, and issued for this donation.",
             "example": "PT-7F3A9C2E4B",
             "maxLength": 60
+          },
+          "authorizedByLabel": {
+            "type": "string",
+            "description": "Who released the goods on the donating side. Falls back to the contact linked to the confirming login, then the branch contact, then the retailer contact.",
+            "example": "Marta Ruiz",
+            "maxLength": 150
           },
           "receivedByLabel": {
             "type": "string",

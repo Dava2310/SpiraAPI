@@ -57,7 +57,11 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup(globalPrefix, app, document);
+
+  // Mounted at /docs, not at the global prefix. Sharing `/api` with the route
+  // tree meant Swagger's static handler shadowed the liveness route, so a health
+  // check got an HTML bundle instead of a one-line answer.
+  SwaggerModule.setup('docs', app, document);
 
   // Port
   const port = configService.get<number>('app.port') || 5000;
