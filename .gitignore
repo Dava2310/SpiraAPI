@@ -60,3 +60,16 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Claude Code / agent tooling
+#
+# .agents/skills/ and skills-lock.json ARE committed: shared team configuration,
+# version-pinned by hash, no credentials.
+#
+# Machine-specific, by the .local convention:
+.claude/settings.local.json
+#
+# Contains the Supabase project ref. Normally this file is committed so a team
+# shares the MCP server, but this repository is public and the ref identifies
+# the production database, so it is kept out. Delete this line to share it.
+.mcp.json
