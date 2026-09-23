@@ -8,8 +8,10 @@ import {
   Req,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
@@ -21,12 +23,75 @@ import { Public } from '../common/decorators/index.js';
 import { MessageResponseDto } from '../common/dto/index.js';
 import type { RequestWithUser } from '../common/interfaces/index.js';
 import { AuthService } from './auth.service.js';
-import { ChangePasswordDto, LoginDto, LoginResponseDto } from './dto/index.js';
+import {
+  ChangePasswordDto,
+  LoginDto,
+  LoginResponseDto,
+  RegisterRecipientDto,
+  RegisterRetailerDto,
+} from './dto/index.js';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  /**
+   * Registers a retailer and its first login, then signs it in.
+   * @param registerRetailerDto The account, the company and the person's name.
+   * @returns A Promise that resolves with an access token as LoginResponseDto.
+   * @throws ConflictException If the email or tax ID is already registered.
+   */
+  @Post('register/retailer')
+  @Public()
+  @ApiOperation({ summary: 'Register a retailer' })
+  @ApiBody({
+    type: RegisterRetailerDto,
+    description: 'The company, the first account, and who is registering.',
+  })
+  @ApiCreatedResponse({
+    description:
+      'Registered and signed in. The organization starts unverified, which is a badge rather than a restriction.',
+    type: LoginResponseDto,
+  })
+  @ApiBadRequestResponse({ description: 'A field failed validation.' })
+  @ApiConflictResponse({
+    description: 'The email or the tax ID is already registered.',
+  })
+  async registerRetailer(
+    @Body() registerRetailerDto: RegisterRetailerDto,
+  ): Promise<LoginResponseDto> {
+    return await this.authService.registerRetailer(registerRetailerDto);
+  }
+
+  /**
+   * Registers an NGO or foodbank and its first login, then signs it in.
+   * @param registerRecipientDto The account, the organization and the person's name.
+   * @returns A Promise that resolves with an access token as LoginResponseDto.
+   * @throws ConflictException If the email, tax ID or registration code is taken.
+   */
+  @Post('register/recipient')
+  @Public()
+  @ApiOperation({ summary: 'Register an NGO or foodbank' })
+  @ApiBody({
+    type: RegisterRecipientDto,
+    description: 'The organization, the first account, and who is registering.',
+  })
+  @ApiCreatedResponse({
+    description:
+      'Registered and signed in. The organization starts unverified, which is a badge rather than a restriction.',
+    type: LoginResponseDto,
+  })
+  @ApiBadRequestResponse({ description: 'A field failed validation.' })
+  @ApiConflictResponse({
+    description:
+      'The email, tax ID or registration code is already registered.',
+  })
+  async registerRecipient(
+    @Body() registerRecipientDto: RegisterRecipientDto,
+  ): Promise<LoginResponseDto> {
+    return await this.authService.registerRecipient(registerRecipientDto);
+  }
 
   /**
    * Signs in with an email and password.

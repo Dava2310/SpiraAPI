@@ -23,6 +23,84 @@
         ]
       }
     },
+    "/api/auth/register/retailer": {
+      "post": {
+        "operationId": "AuthController_registerRetailer",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "The company, the first account, and who is registering.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRetailerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Registered and signed in. The organization starts unverified, which is a badge rather than a restriction.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A field failed validation."
+          },
+          "409": {
+            "description": "The email or the tax ID is already registered."
+          }
+        },
+        "summary": "Register a retailer",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/register/recipient": {
+      "post": {
+        "operationId": "AuthController_registerRecipient",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "The organization, the first account, and who is registering.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRecipientDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Registered and signed in. The organization starts unverified, which is a badge rather than a restriction.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A field failed validation."
+          },
+          "409": {
+            "description": "The email, tax ID or registration code is already registered."
+          }
+        },
+        "summary": "Register an NGO or foodbank",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/api/auth/login": {
       "post": {
         "operationId": "AuthController_login",
@@ -5874,25 +5952,89 @@
       }
     },
     "schemas": {
-      "LoginDto": {
+      "BusinessType": {
+        "type": "string",
+        "enum": [
+          "SUPERMARKET",
+          "HYPERMARKET",
+          "RESTAURANT",
+          "HOTEL",
+          "BAKERY",
+          "CATERING",
+          "DISTRIBUTOR",
+          "MANUFACTURER",
+          "FARM",
+          "CORPORATE_CAFETERIA",
+          "CONVENIENCE_STORE",
+          "OTHER"
+        ],
+        "description": "Kind of business, which shapes expected volume and logistics."
+      },
+      "RegisterRetailerDto": {
         "type": "object",
         "properties": {
           "email": {
             "type": "string",
-            "description": "Login email. Matched case-insensitively.",
-            "example": "boss@real.com.py",
+            "description": "Sign-in address. Must not already be registered.",
+            "example": "ops@mercadona.es",
             "maxLength": 255
           },
           "password": {
             "type": "string",
-            "description": "Account password.",
+            "description": "Plain-text password. Hashed before storage, never returned.",
             "example": "Str0ng-P4ssw0rd",
+            "minLength": 12,
             "maxLength": 72
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Name of the person registering. Becomes the primary contact for the organization and the signatory on its certificates.",
+            "example": "Marta Ruiz",
+            "minLength": 2,
+            "maxLength": 150
+          },
+          "phone": {
+            "type": "string",
+            "description": "Contact phone in E.164 format.",
+            "example": "+34931234567",
+            "maxLength": 30
+          },
+          "legalName": {
+            "type": "string",
+            "description": "Registered company name.",
+            "example": "Mercadona S.A.",
+            "minLength": 2,
+            "maxLength": 200
+          },
+          "tradeName": {
+            "type": "string",
+            "description": "Public brand, when it differs from the legal name.",
+            "example": "Mercadona",
+            "maxLength": 200
+          },
+          "taxId": {
+            "type": "string",
+            "description": "Government tax identifier (NIF/CIF/VAT). Must not already be registered.",
+            "example": "A46103834",
+            "maxLength": 40
+          },
+          "businessType": {
+            "description": "Kind of business, which shapes expected volume and logistics.",
+            "example": "SUPERMARKET",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BusinessType"
+              }
+            ]
           }
         },
         "required": [
           "email",
-          "password"
+          "password",
+          "fullName",
+          "legalName",
+          "taxId",
+          "businessType"
         ]
       },
       "UserRole": {
@@ -5928,14 +6070,14 @@
             ]
           },
           "retailerId": {
-            "type": "object",
+            "type": "string",
             "description": "Linked retailer, when `role` is `RETAILER`.",
             "format": "uuid",
             "nullable": true,
             "example": null
           },
           "recipientId": {
-            "type": "object",
+            "type": "string",
             "description": "Linked recipient, when `role` is `RECIPIENT`.",
             "format": "uuid",
             "nullable": true,
@@ -6027,6 +6169,125 @@
           "expiresAt",
           "user",
           "message"
+        ]
+      },
+      "RecipientType": {
+        "type": "string",
+        "enum": [
+          "NGO",
+          "FOOD_BANK",
+          "SOUP_KITCHEN",
+          "SHELTER",
+          "COMMUNITY_FRIDGE",
+          "CHURCH",
+          "SCHOOL"
+        ],
+        "description": "What kind of receiver this is."
+      },
+      "RegisterRecipientDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Sign-in address. Must not already be registered.",
+            "example": "ops@mercadona.es",
+            "maxLength": 255
+          },
+          "password": {
+            "type": "string",
+            "description": "Plain-text password. Hashed before storage, never returned.",
+            "example": "Str0ng-P4ssw0rd",
+            "minLength": 12,
+            "maxLength": 72
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Name of the person registering. Becomes the primary contact for the organization and the signatory on its certificates.",
+            "example": "Marta Ruiz",
+            "minLength": 2,
+            "maxLength": 150
+          },
+          "phone": {
+            "type": "string",
+            "description": "Contact phone in E.164 format.",
+            "example": "+34931234567",
+            "maxLength": 30
+          },
+          "displayName": {
+            "type": "string",
+            "description": "The organization's public name.",
+            "example": "Banc dels Aliments",
+            "minLength": 2,
+            "maxLength": 200
+          },
+          "type": {
+            "description": "What kind of receiver this is.",
+            "example": "FOOD_BANK",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecipientType"
+              }
+            ]
+          },
+          "legalName": {
+            "type": "string",
+            "description": "Registered organization name, when it differs.",
+            "example": "Fundació Banc dels Aliments",
+            "maxLength": 200
+          },
+          "taxId": {
+            "type": "string",
+            "description": "Government tax identifier. Must not already be registered when given.",
+            "example": "G12345678",
+            "maxLength": 40
+          },
+          "registrationCode": {
+            "type": "string",
+            "description": "Charity or non-profit registration number. Must not already be registered when given.",
+            "example": "G-12345678",
+            "maxLength": 40
+          },
+          "serviceArea": {
+            "type": "string",
+            "description": "Where they operate, as they describe it.",
+            "example": "Metropolitan Barcelona",
+            "maxLength": 120
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone. Pickup windows and the today/upcoming split are resolved in it.",
+            "default": "Europe/Madrid",
+            "example": "Europe/Madrid",
+            "maxLength": 50
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "fullName",
+          "displayName",
+          "type"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Login email. Matched case-insensitively.",
+            "example": "boss@real.com.py",
+            "maxLength": 255
+          },
+          "password": {
+            "type": "string",
+            "description": "Account password.",
+            "example": "Str0ng-P4ssw0rd",
+            "maxLength": 72
+          }
+        },
+        "required": [
+          "email",
+          "password"
         ]
       },
       "MessageResponseDto": {
@@ -6132,14 +6393,14 @@
             ]
           },
           "retailerId": {
-            "type": "object",
+            "type": "string",
             "description": "Linked retailer, when `role` is `RETAILER`.",
             "format": "uuid",
             "nullable": true,
             "example": null
           },
           "recipientId": {
-            "type": "object",
+            "type": "string",
             "description": "Linked recipient, when `role` is `RECIPIENT`.",
             "format": "uuid",
             "nullable": true,
@@ -6441,24 +6702,6 @@
           }
         }
       },
-      "BusinessType": {
-        "type": "string",
-        "enum": [
-          "SUPERMARKET",
-          "HYPERMARKET",
-          "RESTAURANT",
-          "HOTEL",
-          "BAKERY",
-          "CATERING",
-          "DISTRIBUTOR",
-          "MANUFACTURER",
-          "FARM",
-          "CORPORATE_CAFETERIA",
-          "CONVENIENCE_STORE",
-          "OTHER"
-        ],
-        "description": "Kind of business."
-      },
       "ProfileStatus": {
         "type": "string",
         "enum": [
@@ -6483,7 +6726,7 @@
             "example": "Supermercados Real S.A."
           },
           "tradeName": {
-            "type": "object",
+            "type": "string",
             "description": "Public brand.",
             "nullable": true,
             "example": "Real"
@@ -6503,17 +6746,17 @@
             ]
           },
           "description": {
-            "type": "object",
+            "type": "string",
             "description": "Company description.",
             "nullable": true
           },
           "website": {
-            "type": "object",
+            "type": "string",
             "description": "Public website.",
             "nullable": true
           },
           "logoUrl": {
-            "type": "object",
+            "type": "string",
             "description": "Absolute URL of the logo.",
             "nullable": true
           },
@@ -6538,13 +6781,13 @@
             "nullable": true
           },
           "verifiedById": {
-            "type": "object",
+            "type": "string",
             "description": "ID of the admin who verified this retailer.",
             "format": "uuid",
             "nullable": true
           },
           "foodSafetyLicenseNumber": {
-            "type": "object",
+            "type": "string",
             "description": "Food-safety licence number.",
             "nullable": true
           },
@@ -6561,7 +6804,7 @@
             "nullable": true
           },
           "termsVersion": {
-            "type": "object",
+            "type": "string",
             "description": "Version of the terms accepted.",
             "nullable": true
           },
@@ -6678,7 +6921,7 @@
             "example": "Supermercados Real S.A."
           },
           "tradeName": {
-            "type": "object",
+            "type": "string",
             "description": "Public brand.",
             "nullable": true,
             "example": "Real"
@@ -6698,17 +6941,17 @@
             ]
           },
           "description": {
-            "type": "object",
+            "type": "string",
             "description": "Company description.",
             "nullable": true
           },
           "website": {
-            "type": "object",
+            "type": "string",
             "description": "Public website.",
             "nullable": true
           },
           "logoUrl": {
-            "type": "object",
+            "type": "string",
             "description": "Absolute URL of the logo.",
             "nullable": true
           },
@@ -6733,13 +6976,13 @@
             "nullable": true
           },
           "verifiedById": {
-            "type": "object",
+            "type": "string",
             "description": "ID of the admin who verified this retailer.",
             "format": "uuid",
             "nullable": true
           },
           "foodSafetyLicenseNumber": {
-            "type": "object",
+            "type": "string",
             "description": "Food-safety licence number.",
             "nullable": true
           },
@@ -6756,7 +6999,7 @@
             "nullable": true
           },
           "termsVersion": {
-            "type": "object",
+            "type": "string",
             "description": "Version of the terms accepted.",
             "nullable": true
           },
@@ -6872,7 +7115,7 @@
             "description": "How many records this page holds."
           },
           "nextCursor": {
-            "type": "object",
+            "type": "string",
             "description": "Pass as `cursor` to fetch the next page. Null on the last page.",
             "nullable": true
           }
@@ -6975,7 +7218,7 @@
             "format": "uuid"
           },
           "inventoryItemId": {
-            "type": "object",
+            "type": "string",
             "description": "Stock lot this line came from.",
             "format": "uuid",
             "nullable": true
@@ -6985,12 +7228,12 @@
             "description": "Product name as it was at handover."
           },
           "brand": {
-            "type": "object",
+            "type": "string",
             "description": "Brand as it was.",
             "nullable": true
           },
           "barcode": {
-            "type": "object",
+            "type": "string",
             "description": "Barcode as it was.",
             "nullable": true
           },
@@ -7032,13 +7275,13 @@
             "example": 1.25
           },
           "unitLabel": {
-            "type": "object",
+            "type": "string",
             "description": "How the unit was named on the lot.",
             "nullable": true,
             "example": "bottles"
           },
           "imageUrl": {
-            "type": "object",
+            "type": "string",
             "description": "Image snapshotted from the lot or the catalogue.",
             "nullable": true
           },
@@ -7080,7 +7323,7 @@
             ]
           },
           "reasonDescription": {
-            "type": "object",
+            "type": "string",
             "description": "Condition notes.",
             "nullable": true
           }
@@ -7185,12 +7428,12 @@
             "description": "Street address of the store."
           },
           "neighborhood": {
-            "type": "object",
+            "type": "string",
             "description": "District or neighbourhood.",
             "nullable": true
           },
           "accessInstructions": {
-            "type": "object",
+            "type": "string",
             "description": "Arrival notes for the driver.",
             "nullable": true
           },
@@ -7200,17 +7443,17 @@
             "example": "Mercadona"
           },
           "logoUrl": {
-            "type": "object",
+            "type": "string",
             "description": "Retailer logo.",
             "nullable": true
           },
           "storeContactName": {
-            "type": "object",
+            "type": "string",
             "description": "Name of the store contact to ask for.",
             "nullable": true
           },
           "storePhone": {
-            "type": "object",
+            "type": "string",
             "description": "Phone of the store.",
             "nullable": true
           },
@@ -7227,7 +7470,7 @@
             "nullable": true
           },
           "pickupWindowLabel": {
-            "type": "object",
+            "type": "string",
             "description": "The window as one label, in the recipient’s timezone.",
             "nullable": true,
             "example": "Today, 18:30 - 20:00"
@@ -7339,7 +7582,7 @@
             "description": "Donor legal name."
           },
           "retailerTaxId": {
-            "type": "object",
+            "type": "string",
             "description": "Donor tax identifier.",
             "nullable": true
           },
@@ -7348,7 +7591,7 @@
             "description": "Branch name."
           },
           "locationCode": {
-            "type": "object",
+            "type": "string",
             "description": "Branch code.",
             "nullable": true
           },
@@ -7365,28 +7608,28 @@
             "description": "Recipient legal name."
           },
           "recipientTaxId": {
-            "type": "object",
+            "type": "string",
             "description": "Recipient tax identifier.",
             "nullable": true
           },
           "driverName": {
-            "type": "object",
+            "type": "string",
             "description": "Who collected.",
             "nullable": true
           },
           "vehiclePlate": {
-            "type": "object",
+            "type": "string",
             "description": "Plate of the collecting vehicle.",
             "nullable": true
           },
           "receivedByLabel": {
-            "type": "object",
+            "type": "string",
             "description": "Who signed for the goods on the receiving side, as free text.",
             "nullable": true,
             "example": "Marta Ruiz"
           },
           "handoverPin": {
-            "type": "object",
+            "type": "string",
             "description": "PIN of the pickup token that released the goods.",
             "nullable": true,
             "example": "482913"
@@ -7424,18 +7667,18 @@
             "nullable": true
           },
           "impactFactorId": {
-            "type": "object",
+            "type": "string",
             "description": "Which conversion factors produced the impact figures.",
             "format": "uuid",
             "nullable": true
           },
           "legalReference": {
-            "type": "object",
+            "type": "string",
             "description": "Statute the certificate is issued under.",
             "nullable": true
           },
           "verificationCode": {
-            "type": "object",
+            "type": "string",
             "description": "The consumed pickup token, retained as evidence of handover.",
             "nullable": true
           },
@@ -7461,19 +7704,6 @@
           "currency",
           "createdAt"
         ]
-      },
-      "RecipientType": {
-        "type": "string",
-        "enum": [
-          "NGO",
-          "FOOD_BANK",
-          "SOUP_KITCHEN",
-          "SHELTER",
-          "COMMUNITY_FRIDGE",
-          "CHURCH",
-          "SCHOOL"
-        ],
-        "description": "What kind of receiver this is."
       },
       "UrgencyThreshold": {
         "type": "string",
@@ -7502,7 +7732,7 @@
             ]
           },
           "legalName": {
-            "type": "object",
+            "type": "string",
             "description": "Registered organization name.",
             "nullable": true
           },
@@ -7512,39 +7742,39 @@
             "example": "Banco de Alimentos Paraguay"
           },
           "shortName": {
-            "type": "object",
+            "type": "string",
             "description": "Abbreviated name.",
             "nullable": true
           },
           "taxId": {
-            "type": "object",
+            "type": "string",
             "description": "Government tax identifier.",
             "nullable": true
           },
           "registrationCode": {
-            "type": "object",
+            "type": "string",
             "description": "Charity or non-profit registration number.",
             "nullable": true,
             "example": "G-12345678"
           },
           "mission": {
-            "type": "object",
+            "type": "string",
             "description": "Mission statement.",
             "nullable": true
           },
           "serviceArea": {
-            "type": "object",
+            "type": "string",
             "description": "Where they operate, as they describe it.",
             "nullable": true,
             "example": "Metropolitan Barcelona"
           },
           "website": {
-            "type": "object",
+            "type": "string",
             "description": "Public website.",
             "nullable": true
           },
           "logoUrl": {
-            "type": "object",
+            "type": "string",
             "description": "Absolute URL of the logo.",
             "nullable": true
           },
@@ -7568,13 +7798,13 @@
             "nullable": true
           },
           "verifiedById": {
-            "type": "object",
+            "type": "string",
             "description": "ID of the admin who verified this recipient.",
             "format": "uuid",
             "nullable": true
           },
           "foodHandlingCertificationNumber": {
-            "type": "object",
+            "type": "string",
             "description": "Food-handling certification number.",
             "nullable": true
           },
@@ -7591,7 +7821,7 @@
             "nullable": true
           },
           "termsVersion": {
-            "type": "object",
+            "type": "string",
             "description": "Version of the terms accepted.",
             "nullable": true
           },
@@ -7807,18 +8037,18 @@
             "example": "Mercadona"
           },
           "logoUrl": {
-            "type": "object",
+            "type": "string",
             "description": "Retailer logo.",
             "nullable": true
           },
           "storeFormat": {
-            "type": "object",
+            "type": "string",
             "description": "How the branch describes itself.",
             "nullable": true,
             "example": "Organic Grocery & Fresh Market"
           },
           "neighborhood": {
-            "type": "object",
+            "type": "string",
             "description": "District or neighbourhood.",
             "nullable": true,
             "example": "Eixample"
@@ -7833,7 +8063,7 @@
             "description": "Street address."
           },
           "phone": {
-            "type": "object",
+            "type": "string",
             "description": "Store phone.",
             "nullable": true
           },
@@ -7965,7 +8195,7 @@
             "description": "Stores matching the filters."
           },
           "nextCursor": {
-            "type": "object",
+            "type": "string",
             "description": "Pass as `cursor` for the next page.",
             "nullable": true
           },
@@ -8121,7 +8351,7 @@
             "example": "Mercadona"
           },
           "neighborhood": {
-            "type": "object",
+            "type": "string",
             "description": "District or neighbourhood.",
             "nullable": true
           },
@@ -8234,7 +8464,7 @@
             "example": "Banc dels Aliments"
           },
           "registrationCode": {
-            "type": "object",
+            "type": "string",
             "description": "Charity registration number, shown as the organization ID.",
             "nullable": true,
             "example": "G-12345678"
@@ -8283,13 +8513,13 @@
             "format": "uuid"
           },
           "retailerId": {
-            "type": "object",
+            "type": "string",
             "description": "Owning retailer. Exactly one owner is set.",
             "format": "uuid",
             "nullable": true
           },
           "recipientId": {
-            "type": "object",
+            "type": "string",
             "description": "Owning recipient. Exactly one owner is set.",
             "format": "uuid",
             "nullable": true
@@ -8300,22 +8530,22 @@
             "example": "María González"
           },
           "email": {
-            "type": "object",
+            "type": "string",
             "description": "Email address.",
             "nullable": true
           },
           "phone": {
-            "type": "object",
+            "type": "string",
             "description": "Phone number in E.164 format.",
             "nullable": true
           },
           "secondaryPhone": {
-            "type": "object",
+            "type": "string",
             "description": "Alternate phone number in E.164 format.",
             "nullable": true
           },
           "jobTitle": {
-            "type": "object",
+            "type": "string",
             "description": "Role inside the organization.",
             "nullable": true
           },
@@ -8333,18 +8563,18 @@
             "description": "Whether this is the main contact."
           },
           "notes": {
-            "type": "object",
+            "type": "string",
             "description": "Internal notes.",
             "nullable": true
           },
           "userId": {
-            "type": "object",
+            "type": "string",
             "description": "Login this person owns, when they have one.",
             "format": "uuid",
             "nullable": true
           },
           "locationId": {
-            "type": "object",
+            "type": "string",
             "description": "Branch this person works at. Null for an organization-wide contact.",
             "format": "uuid",
             "nullable": true
@@ -8887,7 +9117,7 @@
             ]
           },
           "legalName": {
-            "type": "object",
+            "type": "string",
             "description": "Registered organization name.",
             "nullable": true
           },
@@ -8897,39 +9127,39 @@
             "example": "Banco de Alimentos Paraguay"
           },
           "shortName": {
-            "type": "object",
+            "type": "string",
             "description": "Abbreviated name.",
             "nullable": true
           },
           "taxId": {
-            "type": "object",
+            "type": "string",
             "description": "Government tax identifier.",
             "nullable": true
           },
           "registrationCode": {
-            "type": "object",
+            "type": "string",
             "description": "Charity or non-profit registration number.",
             "nullable": true,
             "example": "G-12345678"
           },
           "mission": {
-            "type": "object",
+            "type": "string",
             "description": "Mission statement.",
             "nullable": true
           },
           "serviceArea": {
-            "type": "object",
+            "type": "string",
             "description": "Where they operate, as they describe it.",
             "nullable": true,
             "example": "Metropolitan Barcelona"
           },
           "website": {
-            "type": "object",
+            "type": "string",
             "description": "Public website.",
             "nullable": true
           },
           "logoUrl": {
-            "type": "object",
+            "type": "string",
             "description": "Absolute URL of the logo.",
             "nullable": true
           },
@@ -8953,13 +9183,13 @@
             "nullable": true
           },
           "verifiedById": {
-            "type": "object",
+            "type": "string",
             "description": "ID of the admin who verified this recipient.",
             "format": "uuid",
             "nullable": true
           },
           "foodHandlingCertificationNumber": {
-            "type": "object",
+            "type": "string",
             "description": "Food-handling certification number.",
             "nullable": true
           },
@@ -8976,7 +9206,7 @@
             "nullable": true
           },
           "termsVersion": {
-            "type": "object",
+            "type": "string",
             "description": "Version of the terms accepted.",
             "nullable": true
           },
@@ -9056,13 +9286,13 @@
             "format": "uuid"
           },
           "retailerId": {
-            "type": "object",
+            "type": "string",
             "description": "Owning retailer. Exactly one owner is set.",
             "format": "uuid",
             "nullable": true
           },
           "recipientId": {
-            "type": "object",
+            "type": "string",
             "description": "Owning recipient. Exactly one owner is set.",
             "format": "uuid",
             "nullable": true
@@ -9073,22 +9303,22 @@
             "example": "María González"
           },
           "email": {
-            "type": "object",
+            "type": "string",
             "description": "Email address.",
             "nullable": true
           },
           "phone": {
-            "type": "object",
+            "type": "string",
             "description": "Phone number in E.164 format.",
             "nullable": true
           },
           "secondaryPhone": {
-            "type": "object",
+            "type": "string",
             "description": "Alternate phone number in E.164 format.",
             "nullable": true
           },
           "jobTitle": {
-            "type": "object",
+            "type": "string",
             "description": "Role inside the organization.",
             "nullable": true
           },
@@ -9106,18 +9336,18 @@
             "description": "Whether this is the main contact."
           },
           "notes": {
-            "type": "object",
+            "type": "string",
             "description": "Internal notes.",
             "nullable": true
           },
           "userId": {
-            "type": "object",
+            "type": "string",
             "description": "Login this person owns, when they have one.",
             "format": "uuid",
             "nullable": true
           },
           "locationId": {
-            "type": "object",
+            "type": "string",
             "description": "Branch this person works at. Null for an organization-wide contact.",
             "format": "uuid",
             "nullable": true
@@ -9229,13 +9459,13 @@
             "format": "uuid"
           },
           "retailerId": {
-            "type": "object",
+            "type": "string",
             "description": "Owning retailer. Exactly one owner is set.",
             "format": "uuid",
             "nullable": true
           },
           "recipientId": {
-            "type": "object",
+            "type": "string",
             "description": "Owning recipient. Exactly one owner is set.",
             "format": "uuid",
             "nullable": true
@@ -9246,7 +9476,7 @@
             "example": "Sucursal Centro"
           },
           "code": {
-            "type": "object",
+            "type": "string",
             "description": "Human-readable branch code.",
             "nullable": true,
             "example": "WF-NYC-402"
@@ -9261,7 +9491,7 @@
             ]
           },
           "storeFormat": {
-            "type": "object",
+            "type": "string",
             "description": "How this branch describes itself.",
             "nullable": true,
             "example": "Organic Grocery & Fresh Market"
@@ -9271,7 +9501,7 @@
             "description": "Street address, first line."
           },
           "addressLine2": {
-            "type": "object",
+            "type": "string",
             "description": "Street address, second line.",
             "nullable": true
           },
@@ -9281,18 +9511,18 @@
             "example": "Asunción"
           },
           "neighborhood": {
-            "type": "object",
+            "type": "string",
             "description": "District or neighbourhood.",
             "nullable": true,
             "example": "Eixample"
           },
           "state": {
-            "type": "object",
+            "type": "string",
             "description": "State, region or department.",
             "nullable": true
           },
           "postalCode": {
-            "type": "object",
+            "type": "string",
             "description": "Postal code.",
             "nullable": true
           },
@@ -9333,7 +9563,7 @@
             }
           },
           "accessInstructions": {
-            "type": "object",
+            "type": "string",
             "description": "Arrival notes for a collecting driver.",
             "nullable": true
           },
@@ -9346,7 +9576,7 @@
             "description": "Whether the site has a freezer."
           },
           "phone": {
-            "type": "object",
+            "type": "string",
             "description": "Direct line for the site, in E.164 format.",
             "nullable": true
           },
@@ -9359,18 +9589,18 @@
             "description": "Whether the site is accepting collections."
           },
           "ownerName": {
-            "type": "object",
+            "type": "string",
             "description": "Owning organization name, present when the owner relation was loaded.",
             "nullable": true,
             "example": "Mercadona"
           },
           "ownerIsVerified": {
-            "type": "object",
+            "type": "boolean",
             "description": "Whether the owning organization is verified, when the owner was loaded.",
             "nullable": true
           },
           "managerName": {
-            "type": "object",
+            "type": "string",
             "description": "Name of the site-level contact to ask for, when the contacts were loaded.",
             "nullable": true,
             "example": "Marta Ruiz"
@@ -9650,13 +9880,13 @@
             "format": "uuid"
           },
           "retailerId": {
-            "type": "object",
+            "type": "string",
             "description": "Owning retailer. Exactly one owner is set.",
             "format": "uuid",
             "nullable": true
           },
           "recipientId": {
-            "type": "object",
+            "type": "string",
             "description": "Owning recipient. Exactly one owner is set.",
             "format": "uuid",
             "nullable": true
@@ -9667,7 +9897,7 @@
             "example": "Sucursal Centro"
           },
           "code": {
-            "type": "object",
+            "type": "string",
             "description": "Human-readable branch code.",
             "nullable": true,
             "example": "WF-NYC-402"
@@ -9682,7 +9912,7 @@
             ]
           },
           "storeFormat": {
-            "type": "object",
+            "type": "string",
             "description": "How this branch describes itself.",
             "nullable": true,
             "example": "Organic Grocery & Fresh Market"
@@ -9692,7 +9922,7 @@
             "description": "Street address, first line."
           },
           "addressLine2": {
-            "type": "object",
+            "type": "string",
             "description": "Street address, second line.",
             "nullable": true
           },
@@ -9702,18 +9932,18 @@
             "example": "Asunción"
           },
           "neighborhood": {
-            "type": "object",
+            "type": "string",
             "description": "District or neighbourhood.",
             "nullable": true,
             "example": "Eixample"
           },
           "state": {
-            "type": "object",
+            "type": "string",
             "description": "State, region or department.",
             "nullable": true
           },
           "postalCode": {
-            "type": "object",
+            "type": "string",
             "description": "Postal code.",
             "nullable": true
           },
@@ -9754,7 +9984,7 @@
             }
           },
           "accessInstructions": {
-            "type": "object",
+            "type": "string",
             "description": "Arrival notes for a collecting driver.",
             "nullable": true
           },
@@ -9767,7 +9997,7 @@
             "description": "Whether the site has a freezer."
           },
           "phone": {
-            "type": "object",
+            "type": "string",
             "description": "Direct line for the site, in E.164 format.",
             "nullable": true
           },
@@ -9780,18 +10010,18 @@
             "description": "Whether the site is accepting collections."
           },
           "ownerName": {
-            "type": "object",
+            "type": "string",
             "description": "Owning organization name, present when the owner relation was loaded.",
             "nullable": true,
             "example": "Mercadona"
           },
           "ownerIsVerified": {
-            "type": "object",
+            "type": "boolean",
             "description": "Whether the owning organization is verified, when the owner was loaded.",
             "nullable": true
           },
           "managerName": {
-            "type": "object",
+            "type": "string",
             "description": "Name of the site-level contact to ask for, when the contacts were loaded.",
             "nullable": true,
             "example": "Marta Ruiz"
@@ -10157,7 +10387,7 @@
             "format": "uuid"
           },
           "barcode": {
-            "type": "object",
+            "type": "string",
             "description": "Barcode.",
             "nullable": true
           },
@@ -10166,12 +10396,12 @@
             "description": "Product name."
           },
           "brand": {
-            "type": "object",
+            "type": "string",
             "description": "Manufacturer brand.",
             "nullable": true
           },
           "defaultDepartment": {
-            "type": "object",
+            "type": "string",
             "description": "Store department.",
             "nullable": true
           },
@@ -10185,7 +10415,7 @@
             ]
           },
           "imageUrl": {
-            "type": "object",
+            "type": "string",
             "description": "Product photo URL.",
             "nullable": true
           },
@@ -10307,7 +10537,7 @@
             "format": "uuid"
           },
           "barcode": {
-            "type": "object",
+            "type": "string",
             "description": "Barcode.",
             "nullable": true
           },
@@ -10316,12 +10546,12 @@
             "description": "Product name."
           },
           "brand": {
-            "type": "object",
+            "type": "string",
             "description": "Manufacturer brand.",
             "nullable": true
           },
           "defaultDepartment": {
-            "type": "object",
+            "type": "string",
             "description": "Store department.",
             "nullable": true
           },
@@ -10335,7 +10565,7 @@
             ]
           },
           "imageUrl": {
-            "type": "object",
+            "type": "string",
             "description": "Product photo URL.",
             "nullable": true
           },
@@ -10458,12 +10688,12 @@
             "example": "Sourdough Loaf"
           },
           "brand": {
-            "type": "object",
+            "type": "string",
             "description": "Brand.",
             "nullable": true
           },
           "barcode": {
-            "type": "object",
+            "type": "string",
             "description": "Barcode.",
             "nullable": true
           },
@@ -10476,7 +10706,7 @@
             ]
           },
           "imageUrl": {
-            "type": "object",
+            "type": "string",
             "description": "Catalogue image, used when the lot has none of its own.",
             "nullable": true
           }
@@ -10527,7 +10757,7 @@
             ]
           },
           "displayImageUrl": {
-            "type": "object",
+            "type": "string",
             "description": "The image to render: the lot’s own photo, falling back to the catalogue image.",
             "nullable": true
           },
@@ -10562,13 +10792,13 @@
             "example": 1.25
           },
           "unitLabel": {
-            "type": "object",
+            "type": "string",
             "description": "How the unit is named to staff.",
             "nullable": true,
             "example": "bottles"
           },
           "imageUrl": {
-            "type": "object",
+            "type": "string",
             "description": "Photo of this lot, overriding the catalogue image.",
             "nullable": true
           },
@@ -10615,7 +10845,7 @@
             ]
           },
           "reasonDescription": {
-            "type": "object",
+            "type": "string",
             "description": "Condition notes.",
             "nullable": true
           },
@@ -10634,7 +10864,7 @@
             "example": true
           },
           "donationId": {
-            "type": "object",
+            "type": "string",
             "description": "Donation this lot is committed to.",
             "format": "uuid",
             "nullable": true
@@ -10853,7 +11083,7 @@
             ]
           },
           "displayImageUrl": {
-            "type": "object",
+            "type": "string",
             "description": "The image to render: the lot’s own photo, falling back to the catalogue image.",
             "nullable": true
           },
@@ -10888,13 +11118,13 @@
             "example": 1.25
           },
           "unitLabel": {
-            "type": "object",
+            "type": "string",
             "description": "How the unit is named to staff.",
             "nullable": true,
             "example": "bottles"
           },
           "imageUrl": {
-            "type": "object",
+            "type": "string",
             "description": "Photo of this lot, overriding the catalogue image.",
             "nullable": true
           },
@@ -10941,7 +11171,7 @@
             ]
           },
           "reasonDescription": {
-            "type": "object",
+            "type": "string",
             "description": "Condition notes.",
             "nullable": true
           },
@@ -10960,7 +11190,7 @@
             "example": true
           },
           "donationId": {
-            "type": "object",
+            "type": "string",
             "description": "Donation this lot is committed to.",
             "format": "uuid",
             "nullable": true
@@ -11169,19 +11399,19 @@
             ]
           },
           "recipientVehicleId": {
-            "type": "object",
+            "type": "string",
             "description": "Vehicle that will collect.",
             "format": "uuid",
             "nullable": true
           },
           "driverContactId": {
-            "type": "object",
+            "type": "string",
             "description": "Person who will collect.",
             "format": "uuid",
             "nullable": true
           },
           "createdByUserId": {
-            "type": "object",
+            "type": "string",
             "description": "Retailer-side user who created it.",
             "format": "uuid",
             "nullable": true
@@ -11193,7 +11423,7 @@
             "nullable": true
           },
           "acceptedByUserId": {
-            "type": "object",
+            "type": "string",
             "description": "Recipient-side user who accepted.",
             "format": "uuid",
             "nullable": true
@@ -11211,7 +11441,7 @@
             "nullable": true
           },
           "declineReason": {
-            "type": "object",
+            "type": "string",
             "description": "Why the recipient declined.",
             "nullable": true
           },
@@ -11228,13 +11458,13 @@
             "nullable": true
           },
           "pickupSlotId": {
-            "type": "object",
+            "type": "string",
             "description": "Named branch slot the window was reserved against.",
             "format": "uuid",
             "nullable": true
           },
           "confirmedByUserId": {
-            "type": "object",
+            "type": "string",
             "description": "Retailer-side user who confirmed the handover.",
             "format": "uuid",
             "nullable": true
@@ -11252,7 +11482,7 @@
             "nullable": true
           },
           "cancellationReason": {
-            "type": "object",
+            "type": "string",
             "description": "Why it was called off.",
             "nullable": true
           },
@@ -11294,7 +11524,7 @@
             "example": 36.6
           },
           "impactFactorId": {
-            "type": "object",
+            "type": "string",
             "description": "The factor row the two figures above were computed from.",
             "format": "uuid",
             "nullable": true
@@ -11309,7 +11539,7 @@
             ]
           },
           "cancelledByUserId": {
-            "type": "object",
+            "type": "string",
             "description": "User who cancelled, whichever side they belong to.",
             "format": "uuid",
             "nullable": true
@@ -11431,19 +11661,19 @@
             ]
           },
           "recipientVehicleId": {
-            "type": "object",
+            "type": "string",
             "description": "Vehicle that will collect.",
             "format": "uuid",
             "nullable": true
           },
           "driverContactId": {
-            "type": "object",
+            "type": "string",
             "description": "Person who will collect.",
             "format": "uuid",
             "nullable": true
           },
           "createdByUserId": {
-            "type": "object",
+            "type": "string",
             "description": "Retailer-side user who created it.",
             "format": "uuid",
             "nullable": true
@@ -11455,7 +11685,7 @@
             "nullable": true
           },
           "acceptedByUserId": {
-            "type": "object",
+            "type": "string",
             "description": "Recipient-side user who accepted.",
             "format": "uuid",
             "nullable": true
@@ -11473,7 +11703,7 @@
             "nullable": true
           },
           "declineReason": {
-            "type": "object",
+            "type": "string",
             "description": "Why the recipient declined.",
             "nullable": true
           },
@@ -11490,13 +11720,13 @@
             "nullable": true
           },
           "pickupSlotId": {
-            "type": "object",
+            "type": "string",
             "description": "Named branch slot the window was reserved against.",
             "format": "uuid",
             "nullable": true
           },
           "confirmedByUserId": {
-            "type": "object",
+            "type": "string",
             "description": "Retailer-side user who confirmed the handover.",
             "format": "uuid",
             "nullable": true
@@ -11514,7 +11744,7 @@
             "nullable": true
           },
           "cancellationReason": {
-            "type": "object",
+            "type": "string",
             "description": "Why it was called off.",
             "nullable": true
           },
@@ -11556,7 +11786,7 @@
             "example": 36.6
           },
           "impactFactorId": {
-            "type": "object",
+            "type": "string",
             "description": "The factor row the two figures above were computed from.",
             "format": "uuid",
             "nullable": true
@@ -11571,7 +11801,7 @@
             ]
           },
           "cancelledByUserId": {
-            "type": "object",
+            "type": "string",
             "description": "User who cancelled, whichever side they belong to.",
             "format": "uuid",
             "nullable": true
@@ -11644,7 +11874,7 @@
             "description": "Public name."
           },
           "shortName": {
-            "type": "object",
+            "type": "string",
             "description": "Abbreviated name.",
             "nullable": true
           },
@@ -11653,22 +11883,22 @@
             "description": "Whether an admin has verified them."
           },
           "logoUrl": {
-            "type": "object",
+            "type": "string",
             "description": "Logo URL.",
             "nullable": true
           },
           "contactPerson": {
-            "type": "object",
+            "type": "string",
             "description": "Who is collecting, when recorded.",
             "nullable": true
           },
           "phone": {
-            "type": "object",
+            "type": "string",
             "description": "Their phone.",
             "nullable": true
           },
           "vehiclePlate": {
-            "type": "object",
+            "type": "string",
             "description": "Plate of the collecting vehicle.",
             "nullable": true
           }
@@ -11725,19 +11955,19 @@
             "description": "Whether the credential may be accepted."
           },
           "message": {
-            "type": "object",
+            "type": "string",
             "description": "Why it was rejected. Null when valid.",
             "nullable": true,
             "example": "This pickup token has expired."
           },
           "donationId": {
-            "type": "object",
+            "type": "string",
             "description": "The donation it releases. Null when invalid.",
             "format": "uuid",
             "nullable": true
           },
           "code": {
-            "type": "object",
+            "type": "string",
             "description": "Reference shown to both parties. Null when invalid.",
             "nullable": true
           },
@@ -11989,7 +12219,7 @@
             "description": "Donor legal name."
           },
           "retailerTaxId": {
-            "type": "object",
+            "type": "string",
             "description": "Donor tax identifier.",
             "nullable": true
           },
@@ -11998,7 +12228,7 @@
             "description": "Branch name."
           },
           "locationCode": {
-            "type": "object",
+            "type": "string",
             "description": "Branch code.",
             "nullable": true
           },
@@ -12015,28 +12245,28 @@
             "description": "Recipient legal name."
           },
           "recipientTaxId": {
-            "type": "object",
+            "type": "string",
             "description": "Recipient tax identifier.",
             "nullable": true
           },
           "driverName": {
-            "type": "object",
+            "type": "string",
             "description": "Who collected.",
             "nullable": true
           },
           "vehiclePlate": {
-            "type": "object",
+            "type": "string",
             "description": "Plate of the collecting vehicle.",
             "nullable": true
           },
           "receivedByLabel": {
-            "type": "object",
+            "type": "string",
             "description": "Who signed for the goods on the receiving side, as free text.",
             "nullable": true,
             "example": "Marta Ruiz"
           },
           "handoverPin": {
-            "type": "object",
+            "type": "string",
             "description": "PIN of the pickup token that released the goods.",
             "nullable": true,
             "example": "482913"
@@ -12074,18 +12304,18 @@
             "nullable": true
           },
           "impactFactorId": {
-            "type": "object",
+            "type": "string",
             "description": "Which conversion factors produced the impact figures.",
             "format": "uuid",
             "nullable": true
           },
           "legalReference": {
-            "type": "object",
+            "type": "string",
             "description": "Statute the certificate is issued under.",
             "nullable": true
           },
           "verificationCode": {
-            "type": "object",
+            "type": "string",
             "description": "The consumed pickup token, retained as evidence of handover.",
             "nullable": true
           },
@@ -12161,7 +12391,7 @@
             "example": "NYC-882-FD"
           },
           "description": {
-            "type": "object",
+            "type": "string",
             "description": "Vehicle description.",
             "nullable": true
           },
@@ -12260,7 +12490,7 @@
             "example": "NYC-882-FD"
           },
           "description": {
-            "type": "object",
+            "type": "string",
             "description": "Vehicle description.",
             "nullable": true
           },
@@ -12646,7 +12876,7 @@
             ]
           },
           "primaryContactName": {
-            "type": "object",
+            "type": "string",
             "description": "Name of the primary contact, shown on the handover screens.",
             "nullable": true,
             "example": "Marta Ruiz"
@@ -12706,12 +12936,12 @@
             "description": "Who is collecting."
           },
           "contactPerson": {
-            "type": "object",
+            "type": "string",
             "description": "Named contact on the collecting side.",
             "nullable": true
           },
           "vehiclePlate": {
-            "type": "object",
+            "type": "string",
             "description": "Plate of the collecting vehicle.",
             "nullable": true
           },
@@ -12809,7 +13039,7 @@
             "example": "Banc dels Aliments"
           },
           "shortName": {
-            "type": "object",
+            "type": "string",
             "description": "Abbreviated name, for tight layouts.",
             "nullable": true
           },
@@ -12822,7 +13052,7 @@
             ]
           },
           "logoUrl": {
-            "type": "object",
+            "type": "string",
             "description": "Logo URL.",
             "nullable": true
           },
@@ -12843,17 +13073,17 @@
             "description": "Whether this partner is preferred."
           },
           "contactPerson": {
-            "type": "object",
+            "type": "string",
             "description": "Named contact on their side.",
             "nullable": true
           },
           "phone": {
-            "type": "object",
+            "type": "string",
             "description": "Their phone.",
             "nullable": true
           },
           "vehiclePlate": {
-            "type": "object",
+            "type": "string",
             "description": "Plate of their usual vehicle.",
             "nullable": true
           },
