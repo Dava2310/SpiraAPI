@@ -13,6 +13,7 @@ import {
   PaginatedResponseDto,
 } from '../common/dto/index.js';
 import type { AuthenticatedUser } from '../common/interfaces/index.js';
+import { pickupWindowLabel } from '../common/pickup/pickup-window.view.js';
 import { DonationLineResponseDto } from '../donations/dto/donation-line-response.dto.js';
 import { PickupTokenResponseDto } from '../donations/dto/pickup-token-response.dto.js';
 import { DonationLine } from '../donations/entities/donation-line.entity.js';
@@ -587,7 +588,11 @@ export class ReservationsService {
       pickupWindowEnd: donation.pickupWindowEnd
         ? donation.pickupWindowEnd.toISOString()
         : null,
-      pickupWindowLabel: this.windowLabel(donation, recipient, window),
+      pickupWindowLabel: pickupWindowLabel(
+        donation.pickupWindowStart,
+        donation.pickupWindowEnd,
+        recipient.timezone,
+      ),
       window,
       lineCount: donation.lineCount,
       totalQuantity: donation.totalQuantity,
@@ -609,39 +614,6 @@ export class ReservationsService {
    * @param window Which bucket it falls in.
    * @returns The label, or null without a window.
    */
-  private windowLabel(
-    donation: Donation,
-    recipient: Recipient,
-    window: ReservationWindow,
-  ): string | null {
-    if (!donation.pickupWindowStart) {
-      return null;
-    }
-
-    const time = (value: Date): string =>
-      new Intl.DateTimeFormat('en-GB', {
-        timeZone: recipient.timezone,
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      }).format(value);
-
-    const day =
-      window === ReservationWindow.TODAY
-        ? 'Today'
-        : new Intl.DateTimeFormat('en-GB', {
-            timeZone: recipient.timezone,
-            weekday: 'short',
-            day: 'numeric',
-            month: 'short',
-          }).format(donation.pickupWindowStart);
-
-    const range = donation.pickupWindowEnd
-      ? `${time(donation.pickupWindowStart)} - ${time(donation.pickupWindowEnd)}`
-      : time(donation.pickupWindowStart);
-
-    return `${day}, ${range}`;
-  }
 
   /**
    * Allocates the next human-readable donation reference.

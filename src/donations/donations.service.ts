@@ -50,6 +50,19 @@ import { DonationStatus } from './enums/donation-status.enum.js';
 
 const PICKUP_TOKEN_TTL_HOURS = 6;
 
+/**
+ * What a donation needs loaded to be displayable.
+ *
+ * Every list on both sides names who is collecting, from where, and in which
+ * window, so each of these would otherwise be a request per row.
+ */
+const DISPLAY_RELATIONS = {
+  recipient: true,
+  location: true,
+  recipientVehicle: true,
+  driverContact: true,
+} as const;
+
 /** Statuses in which a branch's donation is still accepting more stock. */
 const OPEN_BASKET_STATUSES = [
   DonationStatus.DRAFT,
@@ -148,6 +161,7 @@ export class DonationsService implements CrudRepository<Donation> {
    */
   async findAll(): Promise<DonationResponseDto[]> {
     const donations = await this.donationRepository.find({
+      relations: DISPLAY_RELATIONS,
       order: { createdAt: 'DESC' },
     });
 
@@ -178,6 +192,7 @@ export class DonationsService implements CrudRepository<Donation> {
   ): Promise<DonationResponseDto[]> {
     const donations = await this.donationRepository.find({
       where: status ? { locationId, status } : { locationId },
+      relations: DISPLAY_RELATIONS,
       order: { createdAt: 'DESC' },
     });
 
@@ -196,6 +211,7 @@ export class DonationsService implements CrudRepository<Donation> {
   ): Promise<DonationResponseDto[]> {
     const donations = await this.donationRepository.find({
       where: status ? { recipientId, status } : { recipientId },
+      relations: DISPLAY_RELATIONS,
       order: { createdAt: 'DESC' },
     });
 
@@ -784,7 +800,7 @@ export class DonationsService implements CrudRepository<Donation> {
 
     const donation = await this.donationRepository.findOne({
       where: { id },
-      relations: { lines: true },
+      relations: { ...DISPLAY_RELATIONS, lines: true },
     });
 
     if (!donation) {
@@ -921,10 +937,16 @@ export class DonationsService implements CrudRepository<Donation> {
 
     const builder = this.donationRepository
       .createQueryBuilder('donation')
+      .leftJoinAndSelect('donation.recipient', 'recipient')
+      .leftJoinAndSelect('donation.location', 'location')
+      .leftJoinAndSelect('donation.recipientVehicle', 'recipientVehicle')
+      .leftJoinAndSelect('donation.driverContact', 'driverContact')
       .where('donation.deleted_at IS NULL');
 
-    if (query.status) {
-      builder.andWhere('donation.status = :status', { status: query.status });
+    if (query.status && query.status.length > 0) {
+      builder.andWhere('donation.status IN (:...statuses)', {
+        statuses: query.status,
+      });
     }
 
     if (query.origin) {
@@ -987,7 +1009,7 @@ export class DonationsService implements CrudRepository<Donation> {
   ): Promise<DonationResponseDto | null> {
     const donation = await this.donationRepository.findOne({
       where: { locationId, status: In(OPEN_BASKET_STATUSES) },
-      relations: { lines: true },
+      relations: { ...DISPLAY_RELATIONS, lines: true },
       order: { createdAt: 'DESC' },
     });
 
