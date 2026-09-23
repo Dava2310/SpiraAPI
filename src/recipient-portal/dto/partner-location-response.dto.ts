@@ -17,6 +17,7 @@ export class PartnerLocationResponseDto {
   retailerName: string;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'District or neighbourhood.',
     nullable: true,
   })

@@ -16,6 +16,7 @@ export class RetailerResponseDto {
   legalName: string;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Public brand.',
     nullable: true,
     example: 'Real',
@@ -36,13 +37,22 @@ export class RetailerResponseDto {
   })
   businessType: BusinessType;
 
-  @ApiPropertyOptional({ description: 'Company description.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Company description.',
+    nullable: true,
+  })
   description: string | null;
 
-  @ApiPropertyOptional({ description: 'Public website.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Public website.',
+    nullable: true,
+  })
   website: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Absolute URL of the logo.',
     nullable: true,
   })
@@ -71,6 +81,7 @@ export class RetailerResponseDto {
   verifiedAt: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'ID of the admin who verified this retailer.',
     format: 'uuid',
     nullable: true,
@@ -78,6 +89,7 @@ export class RetailerResponseDto {
   verifiedById: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Food-safety licence number.',
     nullable: true,
   })
@@ -100,6 +112,7 @@ export class RetailerResponseDto {
   termsAcceptedAt: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Version of the terms accepted.',
     nullable: true,
   })

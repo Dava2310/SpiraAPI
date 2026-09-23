@@ -13,6 +13,7 @@ export class LocationResponseDto {
   id: string;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Owning retailer. Exactly one owner is set.',
     format: 'uuid',
     nullable: true,
@@ -20,6 +21,7 @@ export class LocationResponseDto {
   retailerId: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Owning recipient. Exactly one owner is set.',
     format: 'uuid',
     nullable: true,
@@ -33,6 +35,7 @@ export class LocationResponseDto {
   label: string;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Human-readable branch code.',
     nullable: true,
     example: 'WF-NYC-402',
@@ -48,16 +51,21 @@ export class LocationResponseDto {
   type: LocationType;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'How this branch describes itself.',
     nullable: true,
     example: 'Organic Grocery & Fresh Market',
   })
   storeFormat: string | null;
 
-  @ApiProperty({ description: 'Street address, first line.' })
+  @ApiProperty({
+    type: String,
+    description: 'Street address, first line.',
+  })
   addressLine1: string;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Street address, second line.',
     nullable: true,
   })
@@ -67,6 +75,7 @@ export class LocationResponseDto {
   city: string;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'District or neighbourhood.',
     nullable: true,
     example: 'Eixample',
@@ -74,12 +83,17 @@ export class LocationResponseDto {
   neighborhood: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'State, region or department.',
     nullable: true,
   })
   state: string | null;
 
-  @ApiPropertyOptional({ description: 'Postal code.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Postal code.',
+    nullable: true,
+  })
   postalCode: string | null;
 
   @ApiProperty({
@@ -123,6 +137,7 @@ export class LocationResponseDto {
   pickupWindows: PickupWindow[] | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Arrival notes for a collecting driver.',
     nullable: true,
   })
@@ -135,6 +150,7 @@ export class LocationResponseDto {
   hasFreezer: boolean;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Direct line for the site, in E.164 format.',
     nullable: true,
   })
@@ -147,6 +163,7 @@ export class LocationResponseDto {
   isActive: boolean;
 
   @ApiPropertyOptional({
+    type: String,
     description:
       'Owning organization name, present when the owner relation was loaded.',
     nullable: true,
@@ -155,6 +172,7 @@ export class LocationResponseDto {
   ownerName: string | null;
 
   @ApiPropertyOptional({
+    type: Boolean,
     description:
       'Whether the owning organization is verified, when the owner was loaded.',
     nullable: true,
@@ -162,6 +180,7 @@ export class LocationResponseDto {
   ownerIsVerified: boolean | null;
 
   @ApiPropertyOptional({
+    type: String,
     description:
       'Name of the site-level contact to ask for, when the contacts were loaded.',
     nullable: true,

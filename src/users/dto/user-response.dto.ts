@@ -13,6 +13,7 @@ import { UserRole } from '../enums/user-role.enum.js';
 /** API representation of a user. Never carries the password hash. */
 export class UserResponseDto {
   @ApiProperty({
+    type: String,
     description: 'Unique user ID.',
     format: 'uuid',
     example: '3f2c1b8e-9a4d-4c7f-8b1e-2d6a5c9f0e11',
@@ -38,6 +39,7 @@ export class UserResponseDto {
   role: UserRole;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Linked retailer, when `role` is `RETAILER`.',
     format: 'uuid',
     nullable: true,
@@ -46,6 +48,7 @@ export class UserResponseDto {
   retailerId: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Linked recipient, when `role` is `RECIPIENT`.',
     format: 'uuid',
     nullable: true,

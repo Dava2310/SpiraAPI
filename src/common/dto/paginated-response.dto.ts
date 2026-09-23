@@ -15,6 +15,7 @@ export class PageMetaDto {
   count: number;
 
   @ApiPropertyOptional({
+    type: String,
     description:
       'Pass as `cursor` to fetch the next page. Null on the last page.',
     nullable: true,

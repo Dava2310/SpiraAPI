@@ -25,10 +25,15 @@ export class SurplusPackageResponseDto {
   @ApiProperty({ description: 'Retailer brand.', example: 'Mercadona' })
   retailerName: string;
 
-  @ApiPropertyOptional({ description: 'Retailer logo.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Retailer logo.',
+    nullable: true,
+  })
   logoUrl: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'How the branch describes itself.',
     nullable: true,
     example: 'Organic Grocery & Fresh Market',
@@ -36,6 +41,7 @@ export class SurplusPackageResponseDto {
   storeFormat: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'District or neighbourhood.',
     nullable: true,
     example: 'Eixample',
@@ -48,7 +54,11 @@ export class SurplusPackageResponseDto {
   @ApiProperty({ description: 'Street address.' })
   address: string;
 
-  @ApiPropertyOptional({ description: 'Store phone.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Store phone.',
+    nullable: true,
+  })
   phone: string | null;
 
   @ApiPropertyOptional({
@@ -171,6 +181,7 @@ export class SurplusPackagesMetaDto {
   total: number;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Pass as `cursor` for the next page.',
     nullable: true,
   })

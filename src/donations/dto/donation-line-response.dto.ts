@@ -13,6 +13,7 @@ export class DonationLineResponseDto {
   id: string;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Stock lot this line came from.',
     format: 'uuid',
     nullable: true,
@@ -22,10 +23,18 @@ export class DonationLineResponseDto {
   @ApiProperty({ description: 'Product name as it was at handover.' })
   productName: string;
 
-  @ApiPropertyOptional({ description: 'Brand as it was.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Brand as it was.',
+    nullable: true,
+  })
   brand: string | null;
 
-  @ApiPropertyOptional({ description: 'Barcode as it was.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Barcode as it was.',
+    nullable: true,
+  })
   barcode: string | null;
 
   @ApiProperty({
@@ -66,6 +75,7 @@ export class DonationLineResponseDto {
   unitPrice: number | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'How the unit was named on the lot.',
     nullable: true,
     example: 'bottles',
@@ -73,6 +83,7 @@ export class DonationLineResponseDto {
   unitLabel: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Image snapshotted from the lot or the catalogue.',
     nullable: true,
   })
@@ -119,7 +130,11 @@ export class DonationLineResponseDto {
   })
   reason: DonationReason;
 
-  @ApiPropertyOptional({ description: 'Condition notes.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Condition notes.',
+    nullable: true,
+  })
   reasonDescription: string | null;
 
   /**

@@ -95,6 +95,7 @@ export class MeResponseDto {
   primaryLocation: LocationResponseDto | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Name of the primary contact, shown on the handover screens.',
     nullable: true,
     example: 'Marta Ruiz',

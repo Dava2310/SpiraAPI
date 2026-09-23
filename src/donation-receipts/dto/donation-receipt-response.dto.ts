@@ -31,13 +31,21 @@ export class DonationReceiptResponseDto {
   @ApiProperty({ description: 'Donor legal name.' })
   retailerLegalName: string;
 
-  @ApiPropertyOptional({ description: 'Donor tax identifier.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Donor tax identifier.',
+    nullable: true,
+  })
   retailerTaxId: string | null;
 
   @ApiProperty({ description: 'Branch name.' })
   locationLabel: string;
 
-  @ApiPropertyOptional({ description: 'Branch code.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Branch code.',
+    nullable: true,
+  })
   locationCode: string | null;
 
   @ApiProperty({ description: 'Branch address.' })
@@ -50,21 +58,28 @@ export class DonationReceiptResponseDto {
   recipientLegalName: string;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Recipient tax identifier.',
     nullable: true,
   })
   recipientTaxId: string | null;
 
-  @ApiPropertyOptional({ description: 'Who collected.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Who collected.',
+    nullable: true,
+  })
   driverName: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Plate of the collecting vehicle.',
     nullable: true,
   })
   vehiclePlate: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description:
       'Who signed for the goods on the receiving side, as free text.',
     nullable: true,
@@ -73,6 +88,7 @@ export class DonationReceiptResponseDto {
   receivedByLabel: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'PIN of the pickup token that released the goods.',
     nullable: true,
     example: '482913',
@@ -113,6 +129,7 @@ export class DonationReceiptResponseDto {
   co2AvoidedKg: number | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Which conversion factors produced the impact figures.',
     format: 'uuid',
     nullable: true,
@@ -120,12 +137,14 @@ export class DonationReceiptResponseDto {
   impactFactorId: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Statute the certificate is issued under.',
     nullable: true,
   })
   legalReference: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'The consumed pickup token, retained as evidence of handover.',
     nullable: true,
   })

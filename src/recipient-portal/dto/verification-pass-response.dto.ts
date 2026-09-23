@@ -15,6 +15,7 @@ export class VerificationPassResponseDto {
   displayName: string;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Charity registration number, shown as the organization ID.',
     nullable: true,
     example: 'G-12345678',
