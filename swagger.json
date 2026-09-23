@@ -7657,7 +7657,7 @@
           "currency": {
             "type": "string",
             "description": "Currency of the totals.",
-            "example": "USD"
+            "example": "EUR"
           },
           "estimatedMeals": {
             "type": "number",
@@ -11024,8 +11024,8 @@
           "currency": {
             "type": "string",
             "description": "Currency of the retail value, as an ISO 4217 code.",
-            "default": "USD",
-            "example": "USD"
+            "default": "EUR",
+            "example": "EUR"
           },
           "expiresAt": {
             "type": "string",
@@ -11308,8 +11308,8 @@
           "currency": {
             "type": "string",
             "description": "Currency of the retail value, as an ISO 4217 code.",
-            "default": "USD",
-            "example": "USD"
+            "default": "EUR",
+            "example": "EUR"
           },
           "expiresAt": {
             "type": "string",
@@ -12472,7 +12472,7 @@
           "currency": {
             "type": "string",
             "description": "Currency of the totals.",
-            "example": "USD"
+            "example": "EUR"
           },
           "estimatedMeals": {
             "type": "number",
