@@ -11352,6 +11352,102 @@
         ],
         "description": "Cancellation reason as a fixed code."
       },
+      "DonationRecipientDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The receiving organization.",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Name to show.",
+            "example": "Banc dels Aliments"
+          },
+          "shortName": {
+            "type": "string",
+            "description": "Abbreviated name, for tight rows.",
+            "nullable": true
+          },
+          "type": {
+            "description": "What kind of organization it is.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecipientType"
+              }
+            ]
+          },
+          "isVerified": {
+            "type": "boolean",
+            "description": "Whether an admin has verified it."
+          },
+          "logoUrl": {
+            "type": "string",
+            "description": "Logo, when one was uploaded.",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "type",
+          "isVerified"
+        ]
+      },
+      "DonationVehicleDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The vehicle.",
+            "format": "uuid"
+          },
+          "plate": {
+            "type": "string",
+            "description": "Registration plate.",
+            "example": "1234 ABC"
+          },
+          "description": {
+            "type": "string",
+            "description": "How the driver describes it, for recognising it on arrival.",
+            "nullable": true
+          },
+          "isRefrigerated": {
+            "type": "boolean",
+            "description": "Whether it is refrigerated."
+          }
+        },
+        "required": [
+          "id",
+          "plate",
+          "isRefrigerated"
+        ]
+      },
+      "DonationDriverDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The driver contact.",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Name to ask for.",
+            "example": "Jordi Puig"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone to call on arrival.",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "fullName"
+        ]
+      },
       "DonationResponseDto": {
         "type": "object",
         "properties": {
@@ -11543,6 +11639,47 @@
             "description": "User who cancelled, whichever side they belong to.",
             "format": "uuid",
             "nullable": true
+          },
+          "recipient": {
+            "description": "The receiving organization, when the relation was loaded.",
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DonationRecipientDto"
+              }
+            ]
+          },
+          "vehicle": {
+            "description": "The collecting vehicle, when one is assigned and loaded.",
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DonationVehicleDto"
+              }
+            ]
+          },
+          "driver": {
+            "description": "The driver collecting, when one is named and loaded.",
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DonationDriverDto"
+              }
+            ]
+          },
+          "locationLabel": {
+            "type": "string",
+            "description": "Label of the branch collected from, when it was loaded.",
+            "nullable": true
+          },
+          "pickupWindowLabel": {
+            "type": "string",
+            "description": "The collection window in the branch's own timezone, such as `Today, 18:00 - 20:00`. Null until a window is agreed, or when the branch was not loaded.",
+            "nullable": true,
+            "example": "Today, 18:00 - 20:00"
           },
           "lines": {
             "description": "The lines, when they were loaded with the donation.",
@@ -11805,6 +11942,47 @@
             "description": "User who cancelled, whichever side they belong to.",
             "format": "uuid",
             "nullable": true
+          },
+          "recipient": {
+            "description": "The receiving organization, when the relation was loaded.",
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DonationRecipientDto"
+              }
+            ]
+          },
+          "vehicle": {
+            "description": "The collecting vehicle, when one is assigned and loaded.",
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DonationVehicleDto"
+              }
+            ]
+          },
+          "driver": {
+            "description": "The driver collecting, when one is named and loaded.",
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DonationDriverDto"
+              }
+            ]
+          },
+          "locationLabel": {
+            "type": "string",
+            "description": "Label of the branch collected from, when it was loaded.",
+            "nullable": true
+          },
+          "pickupWindowLabel": {
+            "type": "string",
+            "description": "The collection window in the branch's own timezone, such as `Today, 18:00 - 20:00`. Null until a window is agreed, or when the branch was not loaded.",
+            "nullable": true,
+            "example": "Today, 18:00 - 20:00"
           },
           "lines": {
             "description": "The lines, when they were loaded with the donation.",
