@@ -1,4 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsDateString, IsEnum, IsOptional, IsUUID } from 'class-validator';
 
 import { PaginationQueryDto } from '../../common/dto/index.js';
@@ -12,18 +13,39 @@ export enum DonationSort {
   PICKUP_WINDOW_ASC = 'pickupWindowStart:asc',
 }
 
+/**
+ * Normalises a status query parameter into an array.
+ *
+ * Accepts `?status=A&status=B` and `?status=A,B` alike, because the two are
+ * indistinguishable to someone reading the docs and both are common in the wild.
+ * @param value The raw query value.
+ * @returns The statuses, or the value untouched when there is nothing to split.
+ */
+function toStatusArray(value: unknown): unknown {
+  const parts = (Array.isArray(value) ? value : [value])
+    .flatMap((entry) => (typeof entry === 'string' ? entry.split(',') : entry))
+    .map((entry) => (typeof entry === 'string' ? entry.trim() : entry))
+    .filter((entry) => entry !== '');
+
+  return parts.length > 0 ? parts : undefined;
+}
+
 /** Filters for the donation list, used by both apps' history screens. */
 export class QueryDonationsDto extends PaginationQueryDto {
   @ApiPropertyOptional({
-    description: 'Narrow to one lifecycle state.',
+    description:
+      'Narrow to one or more lifecycle states. Repeat the parameter or give a comma-separated list — the retailer queue is several states at once, since a batch being staged, offered and awaiting collection is one list to the shop.',
     enum: DonationStatus,
     enumName: 'DonationStatus',
+    isArray: true,
   })
   @IsOptional()
+  @Transform(({ value }: { value: unknown }) => toStatusArray(value))
   @IsEnum(DonationStatus, {
-    message: `The status must be one of: ${Object.values(DonationStatus).join(', ')}.`,
+    each: true,
+    message: `Each status must be one of: ${Object.values(DonationStatus).join(', ')}.`,
   })
-  status?: DonationStatus;
+  status?: DonationStatus[];
 
   @ApiPropertyOptional({
     description: 'Narrow to one side having started it.',

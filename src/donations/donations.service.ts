@@ -943,8 +943,10 @@ export class DonationsService implements CrudRepository<Donation> {
       .leftJoinAndSelect('donation.driverContact', 'driverContact')
       .where('donation.deleted_at IS NULL');
 
-    if (query.status) {
-      builder.andWhere('donation.status = :status', { status: query.status });
+    if (query.status && query.status.length > 0) {
+      builder.andWhere('donation.status IN (:...statuses)', {
+        statuses: query.status,
+      });
     }
 
     if (query.origin) {

@@ -3854,9 +3854,12 @@
             "name": "status",
             "required": false,
             "in": "query",
-            "description": "Narrow to one lifecycle state.",
+            "description": "Narrow to one or more lifecycle states. Repeat the parameter or give a comma-separated list — the retailer queue is several states at once, since a batch being staged, offered and awaiting collection is one list to the shop.",
             "schema": {
-              "$ref": "#/components/schemas/DonationStatus"
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DonationStatus"
+              }
             }
           },
           {
