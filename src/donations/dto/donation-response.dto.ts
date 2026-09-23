@@ -44,6 +44,7 @@ export class DonationResponseDto {
   origin: DonationOrigin;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Vehicle that will collect.',
     format: 'uuid',
     nullable: true,
@@ -51,6 +52,7 @@ export class DonationResponseDto {
   recipientVehicleId: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Person who will collect.',
     format: 'uuid',
     nullable: true,
@@ -58,6 +60,7 @@ export class DonationResponseDto {
   driverContactId: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Retailer-side user who created it.',
     format: 'uuid',
     nullable: true,
@@ -73,6 +76,7 @@ export class DonationResponseDto {
   offeredAt: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Recipient-side user who accepted.',
     format: 'uuid',
     nullable: true,
@@ -96,6 +100,7 @@ export class DonationResponseDto {
   declinedAt: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Why the recipient declined.',
     nullable: true,
   })
@@ -118,6 +123,7 @@ export class DonationResponseDto {
   pickupWindowEnd: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Named branch slot the window was reserved against.',
     format: 'uuid',
     nullable: true,
@@ -125,6 +131,7 @@ export class DonationResponseDto {
   pickupSlotId: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Retailer-side user who confirmed the handover.',
     format: 'uuid',
     nullable: true,
@@ -148,6 +155,7 @@ export class DonationResponseDto {
   cancelledAt: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Why it was called off.',
     nullable: true,
   })
@@ -198,6 +206,7 @@ export class DonationResponseDto {
   co2AvoidedKg: number | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'The factor row the two figures above were computed from.',
     format: 'uuid',
     nullable: true,
@@ -213,6 +222,7 @@ export class DonationResponseDto {
   cancellationReasonCode: CancellationReasonCode | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'User who cancelled, whichever side they belong to.',
     format: 'uuid',
     nullable: true,

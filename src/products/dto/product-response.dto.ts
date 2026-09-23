@@ -12,16 +12,28 @@ export class ProductResponseDto {
   @ApiProperty({ description: 'Owning retailer.', format: 'uuid' })
   retailerId: string;
 
-  @ApiPropertyOptional({ description: 'Barcode.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Barcode.',
+    nullable: true,
+  })
   barcode: string | null;
 
   @ApiProperty({ description: 'Product name.' })
   name: string;
 
-  @ApiPropertyOptional({ description: 'Manufacturer brand.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Manufacturer brand.',
+    nullable: true,
+  })
   brand: string | null;
 
-  @ApiPropertyOptional({ description: 'Store department.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Store department.',
+    nullable: true,
+  })
   defaultDepartment: string | null;
 
   @ApiProperty({
@@ -32,7 +44,11 @@ export class ProductResponseDto {
   })
   category: ProductCategory;
 
-  @ApiPropertyOptional({ description: 'Product photo URL.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Product photo URL.',
+    nullable: true,
+  })
   imageUrl: string | null;
 
   @ApiPropertyOptional({

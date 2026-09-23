@@ -2,7 +2,12 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule, type JwtSignOptions } from '@nestjs/jwt';
 
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { Contact } from '../contacts/entities/contact.entity.js';
 import { InvalidTokensModule } from '../invalid-tokens/invalid-tokens.module.js';
+import { Recipient } from '../recipients/entities/recipient.entity.js';
+import { Retailer } from '../retailers/entities/retailer.entity.js';
 import { UsersModule } from '../users/users.module.js';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
@@ -22,6 +27,7 @@ import { AuthGuard } from './guards/index.js';
         },
       }),
     }),
+    TypeOrmModule.forFeature([Retailer, Recipient, Contact]),
     UsersModule,
     InvalidTokensModule,
   ],

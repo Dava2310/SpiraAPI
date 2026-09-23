@@ -35,12 +35,14 @@ export class NextPickupDto {
   recipientName: string;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Named contact on the collecting side.',
     nullable: true,
   })
   contactPerson: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Plate of the collecting vehicle.',
     nullable: true,
   })

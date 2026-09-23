@@ -9,6 +9,7 @@ export class ContactResponseDto {
   id: string;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Owning retailer. Exactly one owner is set.',
     format: 'uuid',
     nullable: true,
@@ -16,6 +17,7 @@ export class ContactResponseDto {
   retailerId: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Owning recipient. Exactly one owner is set.',
     format: 'uuid',
     nullable: true,
@@ -28,22 +30,29 @@ export class ContactResponseDto {
   })
   fullName: string;
 
-  @ApiPropertyOptional({ description: 'Email address.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Email address.',
+    nullable: true,
+  })
   email: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Phone number in E.164 format.',
     nullable: true,
   })
   phone: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Alternate phone number in E.164 format.',
     nullable: true,
   })
   secondaryPhone: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Role inside the organization.',
     nullable: true,
   })
@@ -60,10 +69,15 @@ export class ContactResponseDto {
   @ApiProperty({ description: 'Whether this is the main contact.' })
   isPrimary: boolean;
 
-  @ApiPropertyOptional({ description: 'Internal notes.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Internal notes.',
+    nullable: true,
+  })
   notes: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Login this person owns, when they have one.',
     format: 'uuid',
     nullable: true,
@@ -71,6 +85,7 @@ export class ContactResponseDto {
   userId: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description:
       'Branch this person works at. Null for an organization-wide contact.',
     format: 'uuid',

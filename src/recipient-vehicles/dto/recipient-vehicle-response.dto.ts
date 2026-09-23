@@ -13,7 +13,11 @@ export class RecipientVehicleResponseDto {
   @ApiProperty({ description: 'Registration plate.', example: 'NYC-882-FD' })
   plate: string;
 
-  @ApiPropertyOptional({ description: 'Vehicle description.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Vehicle description.',
+    nullable: true,
+  })
   description: string | null;
 
   @ApiProperty({ description: 'Whether the load space is refrigerated.' })

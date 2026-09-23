@@ -45,12 +45,14 @@ export class ReservationResponseDto {
   locationAddress: string;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'District or neighbourhood.',
     nullable: true,
   })
   neighborhood: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Arrival notes for the driver.',
     nullable: true,
   })
@@ -59,16 +61,22 @@ export class ReservationResponseDto {
   @ApiProperty({ description: 'Retailer brand.', example: 'Mercadona' })
   retailerName: string;
 
-  @ApiPropertyOptional({ description: 'Retailer logo.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Retailer logo.',
+    nullable: true,
+  })
   logoUrl: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Name of the store contact to ask for.',
     nullable: true,
   })
   storeContactName: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Phone of the store.',
     nullable: true,
   })
@@ -91,6 +99,7 @@ export class ReservationResponseDto {
   pickupWindowEnd: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'The window as one label, in the recipient’s timezone.',
     nullable: true,
     example: 'Today, 18:30 - 20:00',

@@ -22,10 +22,18 @@ export class InventoryItemProductDto {
   @ApiProperty({ description: 'Product name.', example: 'Sourdough Loaf' })
   name: string;
 
-  @ApiPropertyOptional({ description: 'Brand.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Brand.',
+    nullable: true,
+  })
   brand: string | null;
 
-  @ApiPropertyOptional({ description: 'Barcode.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Barcode.',
+    nullable: true,
+  })
   barcode: string | null;
 
   @ApiProperty({
@@ -36,6 +44,7 @@ export class InventoryItemProductDto {
   category: ProductCategory;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Catalogue image, used when the lot has none of its own.',
     nullable: true,
   })
@@ -71,6 +80,7 @@ export class InventoryItemResponseDto {
   product: InventoryItemProductDto | null;
 
   @ApiPropertyOptional({
+    type: String,
     description:
       'The image to render: the lot\u2019s own photo, falling back to the catalogue image.',
     nullable: true,
@@ -111,6 +121,7 @@ export class InventoryItemResponseDto {
   unitPrice: number | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'How the unit is named to staff.',
     nullable: true,
     example: 'bottles',
@@ -118,6 +129,7 @@ export class InventoryItemResponseDto {
   unitLabel: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Photo of this lot, overriding the catalogue image.',
     nullable: true,
   })
@@ -170,7 +182,11 @@ export class InventoryItemResponseDto {
   })
   reason: DonationReason;
 
-  @ApiPropertyOptional({ description: 'Condition notes.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Condition notes.',
+    nullable: true,
+  })
   reasonDescription: string | null;
 
   @ApiProperty({
@@ -188,6 +204,7 @@ export class InventoryItemResponseDto {
   isListed: boolean;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Donation this lot is committed to.',
     format: 'uuid',
     nullable: true,

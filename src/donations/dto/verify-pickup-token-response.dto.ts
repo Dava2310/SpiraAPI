@@ -8,25 +8,39 @@ export class VerifiedRecipientDto {
   @ApiProperty({ description: 'Public name.' })
   displayName: string;
 
-  @ApiPropertyOptional({ description: 'Abbreviated name.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Abbreviated name.',
+    nullable: true,
+  })
   shortName: string | null;
 
   @ApiProperty({ description: 'Whether an admin has verified them.' })
   isVerified: boolean;
 
-  @ApiPropertyOptional({ description: 'Logo URL.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Logo URL.',
+    nullable: true,
+  })
   logoUrl: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Who is collecting, when recorded.',
     nullable: true,
   })
   contactPerson: string | null;
 
-  @ApiPropertyOptional({ description: 'Their phone.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Their phone.',
+    nullable: true,
+  })
   phone: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Plate of the collecting vehicle.',
     nullable: true,
   })
@@ -78,6 +92,7 @@ export class VerifyPickupTokenResponseDto {
   valid: boolean;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Why it was rejected. Null when valid.',
     nullable: true,
     example: 'This pickup token has expired.',
@@ -85,6 +100,7 @@ export class VerifyPickupTokenResponseDto {
   message: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'The donation it releases. Null when invalid.',
     format: 'uuid',
     nullable: true,
@@ -92,6 +108,7 @@ export class VerifyPickupTokenResponseDto {
   donationId: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Reference shown to both parties. Null when invalid.',
     nullable: true,
   })

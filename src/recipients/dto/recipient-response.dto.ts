@@ -19,6 +19,7 @@ export class RecipientResponseDto {
   type: RecipientType;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Registered organization name.',
     nullable: true,
   })
@@ -30,36 +31,52 @@ export class RecipientResponseDto {
   })
   displayName: string;
 
-  @ApiPropertyOptional({ description: 'Abbreviated name.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Abbreviated name.',
+    nullable: true,
+  })
   shortName: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Government tax identifier.',
     nullable: true,
   })
   taxId: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Charity or non-profit registration number.',
     nullable: true,
     example: 'G-12345678',
   })
   registrationCode: string | null;
 
-  @ApiPropertyOptional({ description: 'Mission statement.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Mission statement.',
+    nullable: true,
+  })
   mission: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Where they operate, as they describe it.',
     nullable: true,
     example: 'Metropolitan Barcelona',
   })
   serviceArea: string | null;
 
-  @ApiPropertyOptional({ description: 'Public website.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Public website.',
+    nullable: true,
+  })
   website: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Absolute URL of the logo.',
     nullable: true,
   })
@@ -85,6 +102,7 @@ export class RecipientResponseDto {
   verifiedAt: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'ID of the admin who verified this recipient.',
     format: 'uuid',
     nullable: true,
@@ -92,6 +110,7 @@ export class RecipientResponseDto {
   verifiedById: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Food-handling certification number.',
     nullable: true,
   })
@@ -114,6 +133,7 @@ export class RecipientResponseDto {
   termsAcceptedAt: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Version of the terms accepted.',
     nullable: true,
   })

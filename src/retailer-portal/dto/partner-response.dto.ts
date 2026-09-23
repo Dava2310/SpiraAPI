@@ -21,6 +21,7 @@ export class PartnerResponseDto {
   displayName: string;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Abbreviated name, for tight layouts.',
     nullable: true,
   })
@@ -33,7 +34,11 @@ export class PartnerResponseDto {
   })
   type: RecipientType;
 
-  @ApiPropertyOptional({ description: 'Logo URL.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Logo URL.',
+    nullable: true,
+  })
   logoUrl: string | null;
 
   @ApiProperty({ description: 'Whether an admin has verified them.' })
@@ -50,15 +55,21 @@ export class PartnerResponseDto {
   isPreferred: boolean;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Named contact on their side.',
     nullable: true,
   })
   contactPerson: string | null;
 
-  @ApiPropertyOptional({ description: 'Their phone.', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Their phone.',
+    nullable: true,
+  })
   phone: string | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Plate of their usual vehicle.',
     nullable: true,
   })
