@@ -144,15 +144,15 @@ export class CreateInventoryItemDto {
 
   @ApiPropertyOptional({
     description: 'Currency of the retail value, as an ISO 4217 code.',
-    default: 'USD',
-    example: 'USD',
+    default: 'EUR',
+    example: 'EUR',
   })
   @IsOptional()
   @Transform(({ value }: { value: unknown }) =>
     typeof value === 'string' ? value.trim().toUpperCase() : value,
   )
   @IsISO4217CurrencyCode({
-    message: 'The currency must be a valid ISO 4217 code, for example USD.',
+    message: 'The currency must be a valid ISO 4217 code, for example EUR.',
   })
   currency?: string;
 
