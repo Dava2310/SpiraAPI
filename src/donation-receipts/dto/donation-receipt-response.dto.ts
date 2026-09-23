@@ -111,7 +111,7 @@ export class DonationReceiptResponseDto {
   })
   totalRetailValue: number | null;
 
-  @ApiProperty({ description: 'Currency of the totals.', example: 'USD' })
+  @ApiProperty({ description: 'Currency of the totals.', example: 'EUR' })
   currency: string;
 
   @ApiPropertyOptional({
