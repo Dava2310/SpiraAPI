@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { DonationReceiptsController } from './donation-receipts.controller.js';
 import { DonationReceiptsService } from './donation-receipts.service.js';
+import { ReceiptExportService } from './receipt-export.service.js';
 
 describe('DonationReceiptsController', () => {
   let controller: DonationReceiptsController;
@@ -9,7 +10,10 @@ describe('DonationReceiptsController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [DonationReceiptsController],
-      providers: [{ provide: DonationReceiptsService, useValue: {} }],
+      providers: [
+        { provide: DonationReceiptsService, useValue: {} },
+        { provide: ReceiptExportService, useValue: {} },
+      ],
     }).compile();
 
     controller = module.get<DonationReceiptsController>(

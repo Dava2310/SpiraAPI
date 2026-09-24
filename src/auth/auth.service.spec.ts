@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { DataSource } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 
 import { InvalidTokensService } from '../invalid-tokens/invalid-tokens.service.js';
@@ -15,6 +16,7 @@ describe('AuthService', () => {
         { provide: JwtService, useValue: {} },
         { provide: UsersService, useValue: {} },
         { provide: InvalidTokensService, useValue: {} },
+        { provide: DataSource, useValue: {} },
       ],
     }).compile();
 
