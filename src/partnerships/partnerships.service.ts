@@ -11,7 +11,7 @@ import type { CrudRepository } from '../common/use-case/index.js';
 import { UUID_PATTERN } from '../common/validation/index.js';
 import type { AuthenticatedUser } from '../common/interfaces/index.js';
 import {
-  assertCanCreateFor,
+  assertDonationParty,
   assertOwn,
   ownScopeWhere,
 } from '../common/scoping/org-scope.js';
@@ -134,7 +134,13 @@ export class PartnershipsService implements CrudRepository<Partnership> {
     createPartnershipDto: CreatePartnershipDto,
     caller: AuthenticatedUser,
   ): Promise<PartnershipCreatedResponseDto> {
-    assertCanCreateFor(caller, createPartnershipDto);
+    // A partnership is *between* two organizations, so one side is always somebody
+    // else. The rule is that the caller must be one of the two, not that it owns
+    // both — which is what a single-owner check would demand.
+    assertDonationParty(caller, {
+      retailerId: createPartnershipDto.retailerId,
+      recipientId: createPartnershipDto.recipientId,
+    });
 
     const { retailerId, recipientId, isPreferred, startedAt } =
       createPartnershipDto;

@@ -256,6 +256,13 @@ export class DonationsService implements CrudRepository<Donation> {
       inventoryItemIds,
     } = createDonationDto;
 
+    // A donation is two-sided like a partnership, so the rule is the same: the
+    // caller must be one of the parties, not the owner of both. Without this a
+    // retailer could file a donation under a competitor's name.
+    if (caller) {
+      assertDonationParty(caller, { retailerId, recipientId });
+    }
+
     await this.assertActivePartnership(retailerId, recipientId);
 
     const donation = await this.donationRepository.save(
