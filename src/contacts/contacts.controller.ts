@@ -6,6 +6,7 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
+  Req,
   Post,
 } from '@nestjs/common';
 import {
@@ -29,6 +30,7 @@ import {
   UpdateContactDto,
 } from './dto/index.js';
 import { ContactsService } from './contacts.service.js';
+import type { RequestWithUser } from '../common/interfaces/index.js';
 
 @ApiTags('contacts')
 @ApiBearerAuth()
@@ -47,8 +49,10 @@ export class ContactsController {
     description: 'List of all contacts.',
     type: [ContactResponseDto],
   })
-  async findAll(): Promise<ContactResponseDto[]> {
-    return await this.contactsService.findAll();
+  async findAll(
+    @Req() request: RequestWithUser,
+  ): Promise<ContactResponseDto[]> {
+    return await this.contactsService.findAll(request.user);
   }
 
   /**
@@ -66,9 +70,10 @@ export class ContactsController {
   })
   @ApiNotFoundResponse({ description: 'Contact not found.' })
   async findOne(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<ContactResponseDto> {
-    return await this.contactsService.findOne(id);
+    return await this.contactsService.findOne(id, request.user);
   }
 
   /**
@@ -92,9 +97,10 @@ export class ContactsController {
       'Invalid data — owner is not exactly one of retailer/recipient, or the owner already has a primary contact.',
   })
   async create(
+    @Req() request: RequestWithUser,
     @Body() createContactDto: CreateContactDto,
   ): Promise<ContactCreatedResponseDto> {
-    return await this.contactsService.create(createContactDto);
+    return await this.contactsService.create(createContactDto, request.user);
   }
 
   /**
@@ -126,10 +132,11 @@ export class ContactsController {
       'Invalid data — owner is not exactly one of retailer/recipient, or the owner already has a primary contact.',
   })
   async update(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateContactDto: UpdateContactDto,
   ): Promise<ContactCreatedResponseDto> {
-    return await this.contactsService.update(id, updateContactDto);
+    return await this.contactsService.update(id, updateContactDto, request.user);
   }
 
   /**
@@ -147,8 +154,9 @@ export class ContactsController {
   })
   @ApiNotFoundResponse({ description: 'Contact not found.' })
   async remove(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<MessageResponseDto> {
-    return await this.contactsService.remove(id);
+    return await this.contactsService.remove(id, request.user);
   }
 }

@@ -9,6 +9,12 @@ import { Not, Repository } from 'typeorm';
 import { MessageResponseDto } from '../common/dto/index.js';
 import type { CrudRepository } from '../common/use-case/index.js';
 import { UUID_PATTERN } from '../common/validation/index.js';
+import type { AuthenticatedUser } from '../common/interfaces/index.js';
+import {
+  assertCanCreateFor,
+  assertOwn,
+  ownScopeWhere,
+} from '../common/scoping/org-scope.js';
 import {
   CreateProductDto,
   ProductCreatedResponseDto,
@@ -58,8 +64,9 @@ export class ProductsService implements CrudRepository<Product> {
    * Retrieves every product that is not soft-deleted.
    * @returns A Promise that resolves with all products mapped to ProductResponseDto.
    */
-  async findAll(): Promise<ProductResponseDto[]> {
+  async findAll(caller: AuthenticatedUser): Promise<ProductResponseDto[]> {
     const products = await this.productRepository.find({
+      where: ownScopeWhere(caller, { retailer: "retailerId" }) ?? undefined,
       order: { name: 'ASC' },
     });
 
@@ -72,8 +79,10 @@ export class ProductsService implements CrudRepository<Product> {
    * @returns A Promise that resolves with the product mapped to ProductResponseDto.
    * @throws NotFoundException If the product is not found.
    */
-  async findOne(id: string): Promise<ProductResponseDto> {
+  async findOne(id: string, caller: AuthenticatedUser): Promise<ProductResponseDto> {
     const product = await this.findValid(id);
+
+    assertOwn(caller, product, 'Product');
 
     return new ProductResponseDto(product);
   }
@@ -133,7 +142,10 @@ export class ProductsService implements CrudRepository<Product> {
    */
   async create(
     createProductDto: CreateProductDto,
+    caller: AuthenticatedUser,
   ): Promise<ProductCreatedResponseDto> {
+    assertCanCreateFor(caller, createProductDto);
+
     const { retailerId, barcode } = createProductDto;
 
     if (barcode && (await this.findOneByBarcode(retailerId, barcode))) {
@@ -163,8 +175,11 @@ export class ProductsService implements CrudRepository<Product> {
   async update(
     id: string,
     updateProductDto: UpdateProductDto,
+    caller: AuthenticatedUser,
   ): Promise<ProductCreatedResponseDto> {
     const product = await this.findValid(id);
+
+    assertOwn(caller, product, 'Product');
     const { barcode } = updateProductDto;
 
     if (
@@ -197,8 +212,13 @@ export class ProductsService implements CrudRepository<Product> {
    * @returns A Promise that resolves with a success message.
    * @throws NotFoundException If the product is not found.
    */
-  async remove(id: string): Promise<MessageResponseDto> {
+  async remove(
+    id: string,
+    caller: AuthenticatedUser,
+  ): Promise<MessageResponseDto> {
     const product = await this.findValid(id);
+
+    assertOwn(caller, product, 'Product');
 
     await this.productRepository.softRemove(product);
 

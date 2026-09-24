@@ -87,9 +87,10 @@ export class DonationsController {
     },
   })
   async search(
+    @Req() request: RequestWithUser,
     @Query() query: QueryDonationsDto,
   ): Promise<PaginatedResponseDto<DonationResponseDto>> {
-    return await this.donationsService.search(query);
+    return await this.donationsService.search(query, request.user);
   }
 
   /**
@@ -259,9 +260,10 @@ export class DonationsController {
   @ApiOkResponse({ description: 'Donation found.', type: DonationResponseDto })
   @ApiNotFoundResponse({ description: 'Donation not found.' })
   async findOne(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<DonationResponseDto> {
-    return await this.donationsService.findOne(id);
+    return await this.donationsService.findOne(id, request.user);
   }
 
   /**

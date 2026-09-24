@@ -8,6 +8,10 @@ import { randomInt, randomUUID } from 'node:crypto';
 import { In, IsNull, QueryFailedError, Repository } from 'typeorm';
 
 import type { AuthenticatedUser } from '../common/interfaces/index.js';
+import {
+  assertDonationParty,
+  resolveScope,
+} from '../common/scoping/org-scope.js';
 import { MessageResponseDto } from '../common/dto/index.js';
 import type { CrudRepository } from '../common/use-case/index.js';
 import { UUID_PATTERN } from '../common/validation/index.js';
@@ -159,8 +163,15 @@ export class DonationsService implements CrudRepository<Donation> {
    * Retrieves every donation, newest first, without their lines.
    * @returns A Promise that resolves with all donations mapped to DonationResponseDto.
    */
-  async findAll(): Promise<DonationResponseDto[]> {
+  async findAll(caller: AuthenticatedUser): Promise<DonationResponseDto[]> {
+    const scope = resolveScope(caller);
+
     const donations = await this.donationRepository.find({
+      where: scope.isAdmin
+        ? {}
+        : scope.retailerId
+          ? { retailerId: scope.retailerId }
+          : { recipientId: scope.recipientId ?? undefined },
       relations: DISPLAY_RELATIONS,
       order: { createdAt: 'DESC' },
     });
@@ -174,8 +185,13 @@ export class DonationsService implements CrudRepository<Donation> {
    * @returns A Promise that resolves with the donation mapped to DonationResponseDto.
    * @throws NotFoundException If the donation is not found.
    */
-  async findOne(id: string): Promise<DonationResponseDto> {
+  async findOne(
+    id: string,
+    caller: AuthenticatedUser,
+  ): Promise<DonationResponseDto> {
     const donation = await this.findValidWithLines(id);
+
+    assertDonationParty(caller, donation);
 
     return new DonationResponseDto(donation);
   }
@@ -931,6 +947,7 @@ export class DonationsService implements CrudRepository<Donation> {
    */
   async search(
     query: QueryDonationsDto,
+    caller: AuthenticatedUser,
   ): Promise<PaginatedResponseDto<DonationResponseDto>> {
     const limit = query.limit ?? DEFAULT_PAGE_SIZE;
     const offset = this.decodeCursor(query.cursor);
@@ -942,6 +959,18 @@ export class DonationsService implements CrudRepository<Donation> {
       .leftJoinAndSelect('donation.recipientVehicle', 'recipientVehicle')
       .leftJoinAndSelect('donation.driverContact', 'driverContact')
       .where('donation.deleted_at IS NULL');
+
+    const scope = resolveScope(caller);
+
+    if (scope.retailerId) {
+      builder.andWhere('donation.retailer_id = :scopeRetailerId', {
+        scopeRetailerId: scope.retailerId,
+      });
+    } else if (scope.recipientId) {
+      builder.andWhere('donation.recipient_id = :scopeRecipientId', {
+        scopeRecipientId: scope.recipientId,
+      });
+    }
 
     if (query.status && query.status.length > 0) {
       builder.andWhere('donation.status IN (:...statuses)', {

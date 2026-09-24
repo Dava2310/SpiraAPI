@@ -9,6 +9,12 @@ import { Not, Repository } from 'typeorm';
 import { MessageResponseDto } from '../common/dto/index.js';
 import type { CrudRepository } from '../common/use-case/index.js';
 import { UUID_PATTERN } from '../common/validation/index.js';
+import type { AuthenticatedUser } from '../common/interfaces/index.js';
+import {
+  assertCanCreateFor,
+  assertOwn,
+  ownScopeWhere,
+} from '../common/scoping/org-scope.js';
 import {
   CreatePartnershipDto,
   PartnershipCreatedResponseDto,
@@ -60,8 +66,9 @@ export class PartnershipsService implements CrudRepository<Partnership> {
    * Retrieves every partnership that is not soft-deleted.
    * @returns A Promise that resolves with all partnerships mapped to PartnershipResponseDto.
    */
-  async findAll(): Promise<PartnershipResponseDto[]> {
+  async findAll(caller: AuthenticatedUser): Promise<PartnershipResponseDto[]> {
     const partnerships = await this.partnershipRepository.find({
+      where: ownScopeWhere(caller, { retailer: "retailerId", recipient: "recipientId" }) ?? undefined,
       order: { createdAt: 'DESC' },
     });
 
@@ -76,8 +83,10 @@ export class PartnershipsService implements CrudRepository<Partnership> {
    * @returns A Promise that resolves with the partnership mapped to PartnershipResponseDto.
    * @throws NotFoundException If the partnership is not found.
    */
-  async findOne(id: string): Promise<PartnershipResponseDto> {
+  async findOne(id: string, caller: AuthenticatedUser): Promise<PartnershipResponseDto> {
     const partnership = await this.findValid(id);
+
+    assertOwn(caller, partnership, 'Partnership');
 
     return new PartnershipResponseDto(partnership);
   }
@@ -123,7 +132,10 @@ export class PartnershipsService implements CrudRepository<Partnership> {
    */
   async create(
     createPartnershipDto: CreatePartnershipDto,
+    caller: AuthenticatedUser,
   ): Promise<PartnershipCreatedResponseDto> {
+    assertCanCreateFor(caller, createPartnershipDto);
+
     const { retailerId, recipientId, isPreferred, startedAt } =
       createPartnershipDto;
 
@@ -161,8 +173,11 @@ export class PartnershipsService implements CrudRepository<Partnership> {
   async update(
     id: string,
     updatePartnershipDto: UpdatePartnershipDto,
+    caller: AuthenticatedUser,
   ): Promise<PartnershipCreatedResponseDto> {
     const partnership = await this.findValid(id);
+
+    assertOwn(caller, partnership, 'Partnership');
     const { retailerId, recipientId, isPreferred, startedAt, ...rest } =
       updatePartnershipDto;
 
@@ -219,8 +234,13 @@ export class PartnershipsService implements CrudRepository<Partnership> {
    * @returns A Promise that resolves with a success message.
    * @throws NotFoundException If the partnership is not found.
    */
-  async remove(id: string): Promise<MessageResponseDto> {
+  async remove(
+    id: string,
+    caller: AuthenticatedUser,
+  ): Promise<MessageResponseDto> {
     const partnership = await this.findValid(id);
+
+    assertOwn(caller, partnership, 'Partnership');
 
     await this.partnershipRepository.softRemove(partnership);
 

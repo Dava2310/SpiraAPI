@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
 import type { AuthenticatedUser } from '../interfaces/request-with-user.interface.js';
 import { UserRole } from '../../users/enums/user-role.enum.js';
@@ -117,4 +117,104 @@ export function assertDonationParty(
   throw new ForbiddenException(
     'This donation belongs to another organization.',
   );
+}
+
+/**
+ * The `where` fragment that limits a query to the caller's own organization.
+ *
+ * For an entity owned by one side, pass only that side's column name. For one that
+ * can belong to either — a contact, a location — pass both, and a caller matching
+ * either is allowed.
+ * @param caller The authenticated caller.
+ * @returns An array of `where` fragments to OR together, or null for unrestricted
+ * access.
+ */
+export function ownScopeWhere(
+  caller: AuthenticatedUser,
+  columns: { retailer?: string; recipient?: string },
+): Record<string, string>[] | null {
+  const scope = resolveScope(caller);
+
+  if (scope.isAdmin) {
+    return null;
+  }
+
+  const fragments: Record<string, string>[] = [];
+
+  if (scope.retailerId && columns.retailer) {
+    fragments.push({ [columns.retailer]: scope.retailerId });
+  }
+
+  if (scope.recipientId && columns.recipient) {
+    fragments.push({ [columns.recipient]: scope.recipientId });
+  }
+
+  // No fragment means the caller's side has no column on this entity, so nothing
+  // here is theirs. An impossible condition is safer than an unfiltered read.
+  return fragments.length > 0 ? fragments : [{ id: IMPOSSIBLE_ID }];
+}
+
+/** A UUID no row will ever carry, used to force an empty result. */
+const IMPOSSIBLE_ID = '00000000-0000-0000-0000-000000000000';
+
+/**
+ * Asserts a row belongs to the caller's own organization.
+ *
+ * Throws "not found" rather than "forbidden", so a route cannot be used to confirm
+ * that an id exists in another organization.
+ * @param caller The authenticated caller.
+ * @param row The row's ownership columns, as loaded.
+ * @param label What to name in the error.
+ * @throws NotFoundException If the row belongs to another organization.
+ */
+export function assertOwn(
+  caller: AuthenticatedUser,
+  row: { retailerId?: string | null; recipientId?: string | null },
+  label: string,
+): void {
+  const scope = resolveScope(caller);
+
+  if (scope.isAdmin) {
+    return;
+  }
+
+  const mine =
+    (scope.retailerId !== null && row.retailerId === scope.retailerId) ||
+    (scope.recipientId !== null && row.recipientId === scope.recipientId);
+
+  if (!mine) {
+    throw new NotFoundException(`${label} not found`);
+  }
+}
+
+/**
+ * Asserts a caller may create a row under the given owner.
+ *
+ * Creation is the other half of ownership: without this a caller can file records
+ * under another organization even when it cannot read them back.
+ * @param caller The authenticated caller.
+ * @param owner The retailer or recipient the new row would belong to.
+ * @throws ForbiddenException If the owner is another organization.
+ */
+export function assertCanCreateFor(
+  caller: AuthenticatedUser,
+  owner: { retailerId?: string | null; recipientId?: string | null },
+): void {
+  const scope = resolveScope(caller);
+
+  if (scope.isAdmin) {
+    return;
+  }
+
+  if (owner.retailerId && owner.retailerId !== scope.retailerId) {
+    throw new ForbiddenException(
+      'You cannot file records under another organization.',
+    );
+  }
+
+  if (owner.recipientId && owner.recipientId !== scope.recipientId) {
+    throw new ForbiddenException(
+      'You cannot file records under another organization.',
+    );
+  }
 }

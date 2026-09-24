@@ -29,6 +29,8 @@ import {
   UpdateRecipientDto,
 } from './dto/index.js';
 import { RecipientsService } from './recipients.service.js';
+import { Roles } from '../common/decorators/index.js';
+import { UserRole } from '../users/enums/user-role.enum.js';
 
 @ApiTags('recipients')
 @ApiBearerAuth()
@@ -42,6 +44,7 @@ export class RecipientsController {
    * @returns A Promise that resolves with an array of RecipientResponseDto.
    */
   @Get()
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Get all recipients' })
   @ApiOkResponse({
     description: 'List of all recipients.',
@@ -58,6 +61,7 @@ export class RecipientsController {
    * @throws NotFoundException If the recipient is not found.
    */
   @Get(':id')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Get a single recipient' })
   @ApiParam({ name: 'id', description: 'Recipient ID', format: 'uuid' })
   @ApiOkResponse({

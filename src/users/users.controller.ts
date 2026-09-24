@@ -44,6 +44,7 @@ export class UsersController {
    * @returns A Promise that resolves with an array of UserResponseDto.
    */
   @Get()
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Get all users' })
   @ApiOkResponse({
     description: 'List of all users.',
@@ -60,6 +61,7 @@ export class UsersController {
    * @throws NotFoundException If the user is not found.
    */
   @Get(':id')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Get a single user' })
   @ApiParam({ name: 'id', description: 'User ID', format: 'uuid' })
   @ApiOkResponse({

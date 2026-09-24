@@ -6,6 +6,7 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
+  Req,
   Post,
 } from '@nestjs/common';
 import {
@@ -31,6 +32,7 @@ import {
 import { LocationPickupSlotResponseDto } from '../location-pickup-slots/dto/index.js';
 import { LocationPickupSlotsService } from '../location-pickup-slots/location-pickup-slots.service.js';
 import { LocationsService } from './locations.service.js';
+import type { RequestWithUser } from '../common/interfaces/index.js';
 
 @ApiTags('locations')
 @ApiBearerAuth()
@@ -52,8 +54,10 @@ export class LocationsController {
     description: 'List of all locations.',
     type: [LocationResponseDto],
   })
-  async findAll(): Promise<LocationResponseDto[]> {
-    return await this.locationsService.findAll();
+  async findAll(
+    @Req() request: RequestWithUser,
+  ): Promise<LocationResponseDto[]> {
+    return await this.locationsService.findAll(request.user);
   }
 
   /**
@@ -90,9 +94,10 @@ export class LocationsController {
   })
   @ApiNotFoundResponse({ description: 'Location not found.' })
   async findOne(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<LocationResponseDto> {
-    return await this.locationsService.findOne(id);
+    return await this.locationsService.findOne(id, request.user);
   }
 
   /**
@@ -116,9 +121,10 @@ export class LocationsController {
       'Invalid data — owner is not exactly one of retailer/recipient, or the owner already has a primary location.',
   })
   async create(
+    @Req() request: RequestWithUser,
     @Body() createLocationDto: CreateLocationDto,
   ): Promise<LocationCreatedResponseDto> {
-    return await this.locationsService.create(createLocationDto);
+    return await this.locationsService.create(createLocationDto, request.user);
   }
 
   /**
@@ -150,10 +156,11 @@ export class LocationsController {
       'Invalid data — owner is not exactly one of retailer/recipient, or the owner already has a primary location.',
   })
   async update(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateLocationDto: UpdateLocationDto,
   ): Promise<LocationCreatedResponseDto> {
-    return await this.locationsService.update(id, updateLocationDto);
+    return await this.locationsService.update(id, updateLocationDto, request.user);
   }
 
   /**
@@ -171,8 +178,9 @@ export class LocationsController {
   })
   @ApiNotFoundResponse({ description: 'Location not found.' })
   async remove(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<MessageResponseDto> {
-    return await this.locationsService.remove(id);
+    return await this.locationsService.remove(id, request.user);
   }
 }

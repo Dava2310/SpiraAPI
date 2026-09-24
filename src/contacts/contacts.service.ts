@@ -9,6 +9,12 @@ import { IsNull, Not, Repository } from 'typeorm';
 import { MessageResponseDto } from '../common/dto/index.js';
 import type { CrudRepository } from '../common/use-case/index.js';
 import { assertSingleOwner, UUID_PATTERN } from '../common/validation/index.js';
+import type { AuthenticatedUser } from '../common/interfaces/index.js';
+import {
+  assertCanCreateFor,
+  assertOwn,
+  ownScopeWhere,
+} from '../common/scoping/org-scope.js';
 import {
   ContactCreatedResponseDto,
   ContactResponseDto,
@@ -58,8 +64,9 @@ export class ContactsService implements CrudRepository<Contact> {
    * Retrieves every contact that is not soft-deleted.
    * @returns A Promise that resolves with all contacts mapped to ContactResponseDto.
    */
-  async findAll(): Promise<ContactResponseDto[]> {
+  async findAll(caller: AuthenticatedUser): Promise<ContactResponseDto[]> {
     const contacts = await this.contactRepository.find({
+      where: ownScopeWhere(caller, { retailer: "retailerId", recipient: "recipientId" }) ?? undefined,
       order: { createdAt: 'DESC' },
     });
 
@@ -72,8 +79,10 @@ export class ContactsService implements CrudRepository<Contact> {
    * @returns A Promise that resolves with the contact mapped to ContactResponseDto.
    * @throws NotFoundException If the contact is not found.
    */
-  async findOne(id: string): Promise<ContactResponseDto> {
+  async findOne(id: string, caller: AuthenticatedUser): Promise<ContactResponseDto> {
     const contact = await this.findValid(id);
+
+    assertOwn(caller, contact, 'Contact');
 
     return new ContactResponseDto(contact);
   }
@@ -115,7 +124,10 @@ export class ContactsService implements CrudRepository<Contact> {
    */
   async create(
     createContactDto: CreateContactDto,
+    caller: AuthenticatedUser,
   ): Promise<ContactCreatedResponseDto> {
+    assertCanCreateFor(caller, createContactDto);
+
     const { retailerId, recipientId, isPrimary } = createContactDto;
 
     assertSingleOwner('contact', retailerId, recipientId);
@@ -150,10 +162,13 @@ export class ContactsService implements CrudRepository<Contact> {
   async update(
     id: string,
     updateContactDto: UpdateContactDto,
+    caller: AuthenticatedUser,
   ): Promise<ContactCreatedResponseDto> {
     const { retailerId, recipientId, ...rest } = updateContactDto;
 
     const contact = await this.findValid(id);
+
+    assertOwn(caller, contact, 'Contact');
 
     Object.assign(contact, rest);
 
@@ -189,8 +204,13 @@ export class ContactsService implements CrudRepository<Contact> {
    * @returns A Promise that resolves with a success message.
    * @throws NotFoundException If the contact is not found.
    */
-  async remove(id: string): Promise<MessageResponseDto> {
+  async remove(
+    id: string,
+    caller: AuthenticatedUser,
+  ): Promise<MessageResponseDto> {
     const contact = await this.findValid(id);
+
+    assertOwn(caller, contact, 'Contact');
 
     await this.contactRepository.softRemove(contact);
 

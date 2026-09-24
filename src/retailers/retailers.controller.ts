@@ -29,6 +29,8 @@ import {
   UpdateRetailerDto,
 } from './dto/index.js';
 import { RetailersService } from './retailers.service.js';
+import { Roles } from '../common/decorators/index.js';
+import { UserRole } from '../users/enums/user-role.enum.js';
 
 @ApiTags('retailers')
 @ApiBearerAuth()
@@ -42,6 +44,7 @@ export class RetailersController {
    * @returns A Promise that resolves with an array of RetailerResponseDto.
    */
   @Get()
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Get all retailers' })
   @ApiOkResponse({
     description: 'List of all retailers.',
@@ -58,6 +61,7 @@ export class RetailersController {
    * @throws NotFoundException If the retailer is not found.
    */
   @Get(':id')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Get a single retailer' })
   @ApiParam({ name: 'id', description: 'Retailer ID', format: 'uuid' })
   @ApiOkResponse({

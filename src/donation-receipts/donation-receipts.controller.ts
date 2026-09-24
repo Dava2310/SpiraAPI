@@ -6,6 +6,7 @@ import {
   Param,
   ParseUUIDPipe,
   Query,
+  Req,
   Res,
 } from '@nestjs/common';
 import {
@@ -19,6 +20,8 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import type { Response } from 'express';
+
+import type { RequestWithUser } from '../common/interfaces/index.js';
 
 import { DonationReceiptsService } from './donation-receipts.service.js';
 import { DonationReceiptResponseDto } from './dto/index.js';
@@ -51,8 +54,10 @@ export class DonationReceiptsController {
     description: 'List of all certificates.',
     type: [DonationReceiptResponseDto],
   })
-  async findAll(): Promise<DonationReceiptResponseDto[]> {
-    return await this.donationReceiptsService.findAll();
+  async findAll(
+    @Req() request: RequestWithUser,
+  ): Promise<DonationReceiptResponseDto[]> {
+    return await this.donationReceiptsService.findAll(request.user);
   }
 
   /**
@@ -74,9 +79,13 @@ export class DonationReceiptsController {
   })
   @ApiNotFoundResponse({ description: 'Certificate not found.' })
   async findOneByNumber(
+    @Req() request: RequestWithUser,
     @Param('receiptNumber') receiptNumber: string,
   ): Promise<DonationReceiptResponseDto> {
-    return await this.donationReceiptsService.findOneByNumber(receiptNumber);
+    return await this.donationReceiptsService.findOneByNumber(
+      receiptNumber,
+      request.user,
+    );
   }
 
   /**
@@ -108,6 +117,7 @@ export class DonationReceiptsController {
     description: 'No certificate matched, so there is nothing to export.',
   })
   async export(
+    @Req() request: RequestWithUser,
     @Res() response: Response,
     @Query('from') from?: string,
     @Query('to') to?: string,
@@ -116,6 +126,7 @@ export class DonationReceiptsController {
     @Query('format') format?: string,
   ): Promise<void> {
     const receipts = await this.donationReceiptsService.findForExport(
+      request.user,
       from,
       to,
       recipientId,
@@ -169,10 +180,14 @@ export class DonationReceiptsController {
   })
   @ApiNotFoundResponse({ description: 'Certificate not found.' })
   async downloadPdf(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Res() response: Response,
   ): Promise<void> {
-    const receipt = await this.donationReceiptsService.findValid(id);
+    const receipt = await this.donationReceiptsService.findValidForParty(
+      id,
+      request.user,
+    );
     const pdf = await this.receiptExportService.toPdf(receipt);
 
     response
@@ -200,8 +215,9 @@ export class DonationReceiptsController {
   })
   @ApiNotFoundResponse({ description: 'Certificate not found.' })
   async findOne(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<DonationReceiptResponseDto> {
-    return await this.donationReceiptsService.findOne(id);
+    return await this.donationReceiptsService.findOne(id, request.user);
   }
 }

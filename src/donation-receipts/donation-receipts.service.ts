@@ -1,9 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, type SelectQueryBuilder } from 'typeorm';
 
 import type { CrudRepository } from '../common/use-case/index.js';
 import { UUID_PATTERN } from '../common/validation/index.js';
+import type { AuthenticatedUser } from '../common/interfaces/index.js';
+import { resolveScope } from '../common/scoping/org-scope.js';
 import type { Donation } from '../donations/entities/donation.entity.js';
 import { ImpactFactorsService } from '../impact-factors/impact-factors.service.js';
 import {
@@ -75,13 +77,103 @@ export class DonationReceiptsService implements CrudRepository<DonationReceipt> 
   }
 
   /**
-   * Retrieves every certificate, newest first.
-   * @returns A Promise that resolves with all certificates mapped to DonationReceiptResponseDto.
+   * Narrows a certificate query to the caller's own side of the handover.
+   *
+   * A certificate names both organizations, their tax IDs and the branch address, so
+   * it is readable only by the two parties to it. The link is through the donation,
+   * since the certificate snapshots names rather than holding foreign keys to them.
+   * @param builder The query to narrow, aliased `receipt`, joined to `donation`.
+   * @param caller The authenticated caller.
    */
-  async findAll(): Promise<DonationReceiptResponseDto[]> {
-    const receipts = await this.receiptRepository.find({
-      order: { issuedAt: 'DESC' },
+  private scopeToParty(
+    builder: SelectQueryBuilder<DonationReceipt>,
+    caller: AuthenticatedUser,
+  ): void {
+    const scope = resolveScope(caller);
+
+    if (scope.isAdmin) {
+      return;
+    }
+
+    if (scope.retailerId) {
+      builder.andWhere('donation.retailer_id = :scopeRetailerId', {
+        scopeRetailerId: scope.retailerId,
+      });
+
+      return;
+    }
+
+    builder.andWhere('donation.recipient_id = :scopeRecipientId', {
+      scopeRecipientId: scope.recipientId,
     });
+  }
+
+  /**
+   * Reads one certificate entity the caller is party to, for the PDF route.
+   * @param id The certificate.
+   * @param caller The authenticated caller.
+   * @returns A Promise that resolves with the certificate.
+   * @throws NotFoundException If it does not exist or belongs to other
+   * organizations.
+   */
+  async findValidForParty(
+    id: string,
+    caller: AuthenticatedUser,
+  ): Promise<DonationReceipt> {
+    const receipt = await this.findForParty({ id }, caller);
+
+    if (!receipt) {
+      throw new NotFoundException(`DonationReceipt with ID ${id} not found`);
+    }
+
+    return receipt;
+  }
+
+  /**
+   * Reads one certificate the caller is party to.
+   * @param where How to identify it.
+   * @param caller The authenticated caller.
+   * @returns A Promise that resolves with the certificate, or null when it does not
+   * exist or belongs to other organizations.
+   */
+  private async findForParty(
+    where: { id: string } | { receiptNumber: string },
+    caller: AuthenticatedUser,
+  ): Promise<DonationReceipt | null> {
+    const builder = this.receiptRepository
+      .createQueryBuilder('receipt')
+      .innerJoin('receipt.donation', 'donation');
+
+    if ('id' in where) {
+      builder.where('receipt.id = :id', { id: where.id });
+    } else {
+      builder.where('receipt.receipt_number = :number', {
+        number: where.receiptNumber,
+      });
+    }
+
+    this.scopeToParty(builder, caller);
+
+    return await builder.getOne();
+  }
+
+  /**
+   * Retrieves the certificates the caller is party to, newest first.
+   * @param caller The authenticated caller.
+   * @returns A Promise that resolves with the certificates mapped to DonationReceiptResponseDto.
+   */
+  async findAll(
+    caller: AuthenticatedUser,
+  ): Promise<DonationReceiptResponseDto[]> {
+    const builder = this.receiptRepository
+      .createQueryBuilder('receipt')
+      .innerJoin('receipt.donation', 'donation');
+
+    this.scopeToParty(builder, caller);
+
+    const receipts = await builder
+      .orderBy('receipt.issued_at', 'DESC')
+      .getMany();
 
     return receipts.map((receipt) => new DonationReceiptResponseDto(receipt));
   }
@@ -92,8 +184,15 @@ export class DonationReceiptsService implements CrudRepository<DonationReceipt> 
    * @returns A Promise that resolves with the certificate mapped to DonationReceiptResponseDto.
    * @throws NotFoundException If the certificate is not found.
    */
-  async findOne(id: string): Promise<DonationReceiptResponseDto> {
-    const receipt = await this.findValid(id);
+  async findOne(
+    id: string,
+    caller: AuthenticatedUser,
+  ): Promise<DonationReceiptResponseDto> {
+    const receipt = await this.findForParty({ id }, caller);
+
+    if (!receipt) {
+      throw new NotFoundException(`DonationReceipt with ID ${id} not found`);
+    }
 
     return new DonationReceiptResponseDto(receipt);
   }
@@ -107,10 +206,9 @@ export class DonationReceiptsService implements CrudRepository<DonationReceipt> 
    */
   async findOneByNumber(
     receiptNumber: string,
+    caller: AuthenticatedUser,
   ): Promise<DonationReceiptResponseDto> {
-    const receipt = await this.receiptRepository.findOne({
-      where: { receiptNumber },
-    });
+    const receipt = await this.findForParty({ receiptNumber }, caller);
 
     if (!receipt) {
       throw new NotFoundException(
@@ -150,6 +248,7 @@ export class DonationReceiptsService implements CrudRepository<DonationReceipt> 
    * @returns A Promise that resolves with the matching certificates, oldest first.
    */
   async findForExport(
+    caller: AuthenticatedUser,
     from?: string,
     to?: string,
     recipientId?: string,
@@ -175,6 +274,8 @@ export class DonationReceiptsService implements CrudRepository<DonationReceipt> 
     if (retailerId) {
       builder.andWhere('donation.retailer_id = :retailerId', { retailerId });
     }
+
+    this.scopeToParty(builder, caller);
 
     return await builder.orderBy('receipt.issued_at', 'ASC').getMany();
   }

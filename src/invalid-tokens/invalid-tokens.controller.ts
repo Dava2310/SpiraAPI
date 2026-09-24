@@ -44,6 +44,7 @@ export class InvalidTokensController {
    * @returns A Promise that resolves with an array of InvalidTokenResponseDto.
    */
   @Get()
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Get all denylist entries' })
   @ApiOkResponse({
     description: 'List of all denylist entries.',
@@ -60,6 +61,7 @@ export class InvalidTokensController {
    * @throws NotFoundException If the entry is not found.
    */
   @Get(':id')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Get a single denylist entry' })
   @ApiParam({ name: 'id', description: 'Denylist entry ID', format: 'uuid' })
   @ApiOkResponse({
