@@ -25,6 +25,10 @@ import {
   UNIT_OF_MEASURE_ENUM_NAME,
   UnitOfMeasure,
 } from '../../common/enums/unit-of-measure.enum.js';
+import {
+  EXPIRY_KIND_ENUM_NAME,
+  ExpiryKind,
+} from '../../common/enums/expiry-kind.enum.js';
 import { numericTransformer } from '../../common/transformers/numeric.transformer.js';
 import { InventoryItem } from '../../inventory-items/entities/inventory-item.entity.js';
 import { Donation } from './donation.entity.js';
@@ -179,6 +183,23 @@ export class DonationLine extends SoftDeletableEntity {
   })
   @Column({ name: 'expires_at', type: 'timestamptz', nullable: true })
   expiresAt: Date | null;
+
+  @ApiPropertyOptional({
+    description:
+      'Which kind of date `expiresAt` was, snapshotted with it. The certificate is the record of what was handed over, and whether the date was a quality one or a safety one is the part that would matter if anyone ever asked.',
+    enum: ExpiryKind,
+    enumName: 'ExpiryKind',
+    nullable: true,
+    example: ExpiryKind.BEST_BEFORE,
+  })
+  @Column({
+    name: 'expiry_kind',
+    type: 'enum',
+    enum: ExpiryKind,
+    enumName: EXPIRY_KIND_ENUM_NAME,
+    nullable: true,
+  })
+  expiryKind: ExpiryKind | null;
 
   @ApiPropertyOptional({
     description: 'Retail value of a single unit at snapshot time.',

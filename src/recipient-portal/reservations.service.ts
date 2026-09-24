@@ -13,6 +13,7 @@ import {
   PaginatedResponseDto,
 } from '../common/dto/index.js';
 import type { AuthenticatedUser } from '../common/interfaces/index.js';
+import { isPastUseBy } from '../common/expiry/expiry.view.js';
 import { pickupWindowLabel } from '../common/pickup/pickup-window.view.js';
 import { DonationLineResponseDto } from '../donations/dto/donation-line-response.dto.js';
 import { PickupTokenResponseDto } from '../donations/dto/pickup-token-response.dto.js';
@@ -185,6 +186,7 @@ export class ReservationsService {
               unitLabel: item.unitLabel,
               imageUrl: item.imageUrl ?? item.product?.imageUrl ?? null,
               expiresAt: item.expiresAt,
+              expiryKind: item.expiryKind,
               reason: item.reason,
               reasonDescription: item.reasonDescription,
             }),
@@ -354,7 +356,10 @@ export class ReservationsService {
         !item ||
         !item.isListed ||
         item.locationId !== locationId ||
-        item.status !== InventoryItemStatus.IN_INVENTORY
+        item.status !== InventoryItemStatus.IN_INVENTORY ||
+        // Checked here too, not only on the shelf: the shelf is a read taken some
+        // time ago, and a use-by date can pass between browsing and claiming.
+        isPastUseBy(item)
       );
     });
   }

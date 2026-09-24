@@ -19,6 +19,10 @@ import {
   DonationReason,
 } from '../../common/enums/donation-reason.enum.js';
 import {
+  EXPIRY_KIND_ENUM_NAME,
+  ExpiryKind,
+} from '../../common/enums/expiry-kind.enum.js';
+import {
   UNIT_OF_MEASURE_ENUM_NAME,
   UnitOfMeasure,
 } from '../../common/enums/unit-of-measure.enum.js';
@@ -184,6 +188,23 @@ export class InventoryItem extends SoftDeletableEntity {
   })
   @Column({ name: 'expires_at', type: 'timestamptz', nullable: true })
   expiresAt: Date | null;
+
+  @ApiPropertyOptional({
+    description:
+      'Which kind of date `expiresAt` is. A best-before lot stays donatable after it passes; a use-by lot does not, and leaves the shelf. Null only when there is no expiry at all.',
+    enum: ExpiryKind,
+    enumName: 'ExpiryKind',
+    nullable: true,
+    example: ExpiryKind.BEST_BEFORE,
+  })
+  @Column({
+    name: 'expiry_kind',
+    type: 'enum',
+    enum: ExpiryKind,
+    enumName: EXPIRY_KIND_ENUM_NAME,
+    nullable: true,
+  })
+  expiryKind: ExpiryKind | null;
 
   @ApiProperty({
     description: 'Why the lot is donatable rather than sellable.',
