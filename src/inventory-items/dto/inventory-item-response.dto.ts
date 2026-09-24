@@ -4,7 +4,8 @@ import { DonationReason } from '../../common/enums/donation-reason.enum.js';
 import { ProductCategory } from '../../common/enums/product-category.enum.js';
 import { SurplusUrgency } from '../../common/enums/surplus-urgency.enum.js';
 import { UnitOfMeasure } from '../../common/enums/unit-of-measure.enum.js';
-import { expiryView } from '../../common/expiry/expiry.view.js';
+import { ExpiryKind } from '../../common/enums/expiry-kind.enum.js';
+import { expiryView, isPastUseBy } from '../../common/expiry/expiry.view.js';
 import type { InventoryItem } from '../entities/inventory-item.entity.js';
 import { InventoryItemStatus } from '../enums/inventory-item-status.enum.js';
 
@@ -148,6 +149,22 @@ export class InventoryItemResponseDto {
 
   @ApiPropertyOptional({
     description:
+      'Which kind of date `expiresAt` is. Best-before is a quality date and the lot stays donatable past it; use-by is a safety date and the lot does not.',
+    enum: ExpiryKind,
+    enumName: 'ExpiryKind',
+    nullable: true,
+  })
+  expiryKind: ExpiryKind | null;
+
+  @ApiProperty({
+    description:
+      'True once a use-by date has passed, in which case the lot may no longer be offered or collected. Always false for a best-before lot, however long ago it passed.',
+    type: Boolean,
+  })
+  isPastUseBy: boolean;
+
+  @ApiPropertyOptional({
+    description:
       'Hours until expiry, derived rather than stored. Negative once past, null when there is no expiry.',
     type: Number,
     nullable: true,
@@ -266,6 +283,8 @@ export class InventoryItemResponseDto {
     this.retailValue = data.retailValue;
     this.currency = data.currency;
     this.expiresAt = data.expiresAt ? data.expiresAt.toISOString() : null;
+    this.expiryKind = data.expiryKind;
+    this.isPastUseBy = isPastUseBy(data);
 
     const expiry = expiryView(data.expiresAt);
 

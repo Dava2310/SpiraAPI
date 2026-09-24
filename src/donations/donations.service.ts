@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { randomInt, randomUUID } from 'node:crypto';
 import { In, IsNull, QueryFailedError, Repository } from 'typeorm';
 
+import { isPastUseBy } from '../common/expiry/expiry.view.js';
 import type { AuthenticatedUser } from '../common/interfaces/index.js';
 import {
   assertDonationParty,
@@ -898,6 +899,15 @@ export class DonationsService implements CrudRepository<Donation> {
           `Inventory item ${item.id} is not available; its status is ${item.status}.`,
         );
       }
+
+      // Stopped on the retailer's own side too, not just the recipient's: the shop
+      // must not be able to hand over food past a use-by date either, and a
+      // certificate saying it did is exactly the record nobody wants.
+      if (isPastUseBy(item)) {
+        throw new BadRequestException(
+          `Inventory item ${item.id} is past its use-by date and cannot be donated. Dispose of it instead.`,
+        );
+      }
     }
 
     const queuedAt = new Date();
@@ -919,6 +929,7 @@ export class DonationsService implements CrudRepository<Donation> {
           unitLabel: item.unitLabel,
           imageUrl: item.imageUrl ?? item.product?.imageUrl ?? null,
           expiresAt: item.expiresAt,
+          expiryKind: item.expiryKind,
           reason: item.reason,
           reasonDescription: item.reasonDescription,
         }),

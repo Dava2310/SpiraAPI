@@ -261,6 +261,12 @@ export class SurplusService {
       ])
       .where('item.deleted_at IS NULL')
       .andWhere('item.is_listed = true')
+      // A passed use-by date closes a lot: it may not be given away at all, so it
+      // leaves the shelf rather than merely being labelled. A passed best-before
+      // stays, which is most of what the shelf is for.
+      .andWhere(
+        `(item.expiry_kind IS DISTINCT FROM 'USE_BY' OR item.expires_at > now())`,
+      )
       .andWhere('item.status = :status', {
         status: InventoryItemStatus.IN_INVENTORY,
       })

@@ -1,3 +1,4 @@
+import { ExpiryKind } from '../enums/expiry-kind.enum.js';
 import {
   CRITICAL_HOURS_THRESHOLD,
   EXPIRING_HOURS_THRESHOLD,
@@ -59,4 +60,25 @@ export function urgencyOf(
   }
 
   return SurplusUrgency.STANDARD;
+}
+
+/**
+ * Whether a lot is past a *use by* date and therefore may not be donated.
+ *
+ * Only a use-by date closes a lot. Past its best-before a lot is still good to give
+ * away, which is most of what surplus recovery is for, so the two must not share a
+ * rule. Derived per request like everything else here: a stored flag would be true
+ * or false depending on when it was last written.
+ * @param lot The lot's expiry and which kind of date it is.
+ * @returns True when the lot must no longer be offered or collected.
+ */
+export function isPastUseBy(lot: {
+  expiresAt: Date | null | undefined;
+  expiryKind: ExpiryKind | null | undefined;
+}): boolean {
+  if (!lot.expiresAt || lot.expiryKind !== ExpiryKind.USE_BY) {
+    return false;
+  }
+
+  return lot.expiresAt.getTime() <= Date.now();
 }

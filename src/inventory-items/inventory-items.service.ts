@@ -26,7 +26,7 @@ import {
   EXPIRING_HOURS_THRESHOLD,
   SurplusUrgency,
 } from '../common/enums/surplus-urgency.enum.js';
-import { expiryView } from '../common/expiry/expiry.view.js';
+import { expiryView, isPastUseBy } from '../common/expiry/expiry.view.js';
 import type { AuthenticatedUser } from '../common/interfaces/index.js';
 import { resolveScope } from '../common/scoping/org-scope.js';
 import { Location } from '../locations/entities/location.entity.js';
@@ -162,7 +162,14 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
       return;
     }
 
-    builder.andWhere('item.is_listed = true');
+    // Listed, and not past a use-by date. A recipient must not be offered food it
+    // may not legally accept, whichever route it asks through — the shelf applies the
+    // same rule, and this is the route that lists one shop's individual lots.
+    builder
+      .andWhere('item.is_listed = true')
+      .andWhere(
+        `(item.expiry_kind IS DISTINCT FROM 'USE_BY' OR item.expires_at > now())`,
+      );
   }
 
   /**
@@ -212,7 +219,7 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
       return;
     }
 
-    if (!item.isListed) {
+    if (!item.isListed || isPastUseBy(item)) {
       throw new NotFoundException(`InventoryItem with ID ${item.id} not found`);
     }
   }
@@ -676,10 +683,38 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
 
     const { expiresAt, ...rest } = updateInventoryItemDto;
 
+    // Restating the kind is required whenever the date changes. `PartialType` adds
+    // `@IsOptional()` to every inherited property, which overrides the DTO's own
+    // rule, and a corrected date carrying the previous kind is the one mistake here
+    // that matters: a use-by silently filed as a best-before stays donatable.
+    if (
+      expiresAt !== undefined &&
+      expiresAt !== null &&
+      updateInventoryItemDto.expiryKind === undefined
+    ) {
+      throw new BadRequestException(
+        'Say whether the new date is a best-before or a use-by: the two are treated differently.',
+      );
+    }
+
     Object.assign(item, rest);
 
     if (expiresAt !== undefined) {
       item.expiresAt = expiresAt ? new Date(expiresAt) : null;
+
+      // Clearing the date clears the kind with it, or the pair goes inconsistent and
+      // the database check rejects the write as a 500 rather than a readable 400.
+      if (item.expiresAt === null) {
+        item.expiryKind = null;
+      }
+    }
+
+    if ((item.expiresAt === null) !== (item.expiryKind === null)) {
+      throw new BadRequestException(
+        item.expiresAt === null
+          ? 'Remove the expiry kind as well, or give a date for it to describe.'
+          : 'Say whether that date is a best-before or a use-by: the two are treated differently.',
+      );
     }
 
     const updatedItem = await this.inventoryItemRepository.save(item);

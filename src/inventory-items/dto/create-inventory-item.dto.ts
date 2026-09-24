@@ -13,9 +13,11 @@ import {
   Max,
   MaxLength,
   Min,
+  ValidateIf,
 } from 'class-validator';
 
 import { DonationReason } from '../../common/enums/donation-reason.enum.js';
+import { ExpiryKind } from '../../common/enums/expiry-kind.enum.js';
 import { UnitOfMeasure } from '../../common/enums/unit-of-measure.enum.js';
 
 /**
@@ -168,6 +170,23 @@ export class CreateInventoryItemDto {
     { message: 'The expiry must be a valid ISO 8601 date-time.' },
   )
   expiresAt?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Which kind of date `expiresAt` is, and required whenever one is given. `BEST_BEFORE` is a quality date and the lot stays donatable after it passes; `USE_BY` is a safety date and the lot leaves the shelf. Read it off the pack rather than guessing — the two are not interchangeable in law.',
+    enum: ExpiryKind,
+    enumName: 'ExpiryKind',
+    example: ExpiryKind.BEST_BEFORE,
+  })
+  @ValidateIf((dto: CreateInventoryItemDto) => dto.expiresAt !== undefined)
+  @IsEnum(ExpiryKind, {
+    message: `The expiry kind must be one of: ${Object.values(ExpiryKind).join(', ')}.`,
+  })
+  @IsNotEmpty({
+    message:
+      'Say whether that date is a best-before or a use-by: the two are treated differently.',
+  })
+  expiryKind?: ExpiryKind;
 
   @ApiProperty({
     description: 'Why the lot is donatable rather than sellable.',

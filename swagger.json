@@ -7193,6 +7193,14 @@
         ],
         "description": "Unit the quantity is counted in."
       },
+      "ExpiryKind": {
+        "type": "string",
+        "enum": [
+          "BEST_BEFORE",
+          "USE_BY"
+        ],
+        "description": "Which kind of date `expiresAt` was, as snapshotted at handover. Best-before is a quality date; use-by is a safety one."
+      },
       "SurplusUrgency": {
         "type": "string",
         "enum": [
@@ -7293,6 +7301,15 @@
             "description": "Expiry snapshotted from the lot (ISO 8601).",
             "format": "date-time",
             "nullable": true
+          },
+          "expiryKind": {
+            "description": "Which kind of date `expiresAt` was, as snapshotted at handover. Best-before is a quality date; use-by is a safety one.",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ExpiryKind"
+              }
+            ]
           },
           "hoursRemaining": {
             "type": "number",
@@ -10816,6 +10833,19 @@
             "format": "date-time",
             "nullable": true
           },
+          "expiryKind": {
+            "description": "Which kind of date `expiresAt` is. Best-before is a quality date and the lot stays donatable past it; use-by is a safety date and the lot does not.",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ExpiryKind"
+              }
+            ]
+          },
+          "isPastUseBy": {
+            "type": "boolean",
+            "description": "True once a use-by date has passed, in which case the lot may no longer be offered or collected. Always false for a best-before lot, however long ago it passed."
+          },
           "hoursRemaining": {
             "type": "number",
             "description": "Hours until expiry, derived rather than stored. Negative once past, null when there is no expiry.",
@@ -10902,6 +10932,7 @@
           "unit",
           "weightKg",
           "currency",
+          "isPastUseBy",
           "reason",
           "status",
           "isListed",
@@ -11033,6 +11064,15 @@
             "format": "date-time",
             "example": "2026-09-18T23:59:00.000Z"
           },
+          "expiryKind": {
+            "description": "Which kind of date `expiresAt` is, and required whenever one is given. `BEST_BEFORE` is a quality date and the lot stays donatable after it passes; `USE_BY` is a safety date and the lot leaves the shelf. Read it off the pack rather than guessing — the two are not interchangeable in law.",
+            "example": "BEST_BEFORE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ExpiryKind"
+              }
+            ]
+          },
           "reason": {
             "description": "Why the lot is donatable rather than sellable.",
             "example": "NEAR_EXPIRY",
@@ -11142,6 +11182,19 @@
             "format": "date-time",
             "nullable": true
           },
+          "expiryKind": {
+            "description": "Which kind of date `expiresAt` is. Best-before is a quality date and the lot stays donatable past it; use-by is a safety date and the lot does not.",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ExpiryKind"
+              }
+            ]
+          },
+          "isPastUseBy": {
+            "type": "boolean",
+            "description": "True once a use-by date has passed, in which case the lot may no longer be offered or collected. Always false for a best-before lot, however long ago it passed."
+          },
           "hoursRemaining": {
             "type": "number",
             "description": "Hours until expiry, derived rather than stored. Negative once past, null when there is no expiry.",
@@ -11233,6 +11286,7 @@
           "unit",
           "weightKg",
           "currency",
+          "isPastUseBy",
           "reason",
           "status",
           "isListed",
@@ -11316,6 +11370,15 @@
             "description": "When the lot expires. Omit for non-perishables. Urgency and hours remaining are derived from this.",
             "format": "date-time",
             "example": "2026-09-18T23:59:00.000Z"
+          },
+          "expiryKind": {
+            "description": "Which kind of date `expiresAt` is, and required whenever one is given. `BEST_BEFORE` is a quality date and the lot stays donatable after it passes; `USE_BY` is a safety date and the lot leaves the shelf. Read it off the pack rather than guessing — the two are not interchangeable in law.",
+            "example": "BEST_BEFORE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ExpiryKind"
+              }
+            ]
           },
           "reason": {
             "description": "Why the lot is donatable rather than sellable.",

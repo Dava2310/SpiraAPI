@@ -1,3 +1,4 @@
+export * from './expiry-kind.enum.js';
 export * from './donation-reason.enum.js';
 export * from './product-category.enum.js';
 export * from './profile-status.enum.js';

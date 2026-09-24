@@ -4,6 +4,7 @@ import { DonationReason } from '../../common/enums/donation-reason.enum.js';
 import { ProductCategory } from '../../common/enums/product-category.enum.js';
 import { SurplusUrgency } from '../../common/enums/surplus-urgency.enum.js';
 import { UnitOfMeasure } from '../../common/enums/unit-of-measure.enum.js';
+import { ExpiryKind } from '../../common/enums/expiry-kind.enum.js';
 import { expiryView } from '../../common/expiry/expiry.view.js';
 import type { DonationLine } from '../entities/donation-line.entity.js';
 
@@ -98,6 +99,15 @@ export class DonationLineResponseDto {
   expiresAt: string | null;
 
   @ApiPropertyOptional({
+    description:
+      'Which kind of date `expiresAt` was, as snapshotted at handover. Best-before is a quality date; use-by is a safety one.',
+    enum: ExpiryKind,
+    enumName: 'ExpiryKind',
+    nullable: true,
+  })
+  expiryKind: ExpiryKind | null;
+
+  @ApiPropertyOptional({
     description: 'Hours until expiry, derived rather than stored.',
     type: Number,
     nullable: true,
@@ -156,6 +166,7 @@ export class DonationLineResponseDto {
     this.unitLabel = data.unitLabel;
     this.imageUrl = data.imageUrl;
     this.expiresAt = data.expiresAt ? data.expiresAt.toISOString() : null;
+    this.expiryKind = data.expiryKind;
 
     const expiry = expiryView(data.expiresAt);
 
