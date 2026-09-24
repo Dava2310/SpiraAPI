@@ -6,6 +6,7 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
+  Req,
   Post,
 } from '@nestjs/common';
 import {
@@ -31,6 +32,7 @@ import {
 } from './dto/index.js';
 import { ProductsService } from './products.service.js';
 import { UserRole } from '../users/enums/user-role.enum.js';
+import type { RequestWithUser } from '../common/interfaces/index.js';
 
 @ApiTags('products')
 @ApiBearerAuth()
@@ -49,8 +51,10 @@ export class ProductsController {
     description: 'List of all products.',
     type: [ProductResponseDto],
   })
-  async findAll(): Promise<ProductResponseDto[]> {
-    return await this.productsService.findAll();
+  async findAll(
+    @Req() request: RequestWithUser,
+  ): Promise<ProductResponseDto[]> {
+    return await this.productsService.findAll(request.user);
   }
 
   /**
@@ -83,9 +87,10 @@ export class ProductsController {
   @ApiOkResponse({ description: 'Product found.', type: ProductResponseDto })
   @ApiNotFoundResponse({ description: 'Product not found.' })
   async findOne(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<ProductResponseDto> {
-    return await this.productsService.findOne(id);
+    return await this.productsService.findOne(id, request.user);
   }
 
   /**
@@ -109,9 +114,10 @@ export class ProductsController {
     description: 'Invalid data — the barcode is already used by this retailer.',
   })
   async create(
+    @Req() request: RequestWithUser,
     @Body() createProductDto: CreateProductDto,
   ): Promise<ProductCreatedResponseDto> {
-    return await this.productsService.create(createProductDto);
+    return await this.productsService.create(createProductDto, request.user);
   }
 
   /**
@@ -140,10 +146,11 @@ export class ProductsController {
     description: 'Invalid data — the barcode is already used by this retailer.',
   })
   async update(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateProductDto: UpdateProductDto,
   ): Promise<ProductCreatedResponseDto> {
-    return await this.productsService.update(id, updateProductDto);
+    return await this.productsService.update(id, updateProductDto, request.user);
   }
 
   /**
@@ -162,8 +169,9 @@ export class ProductsController {
   })
   @ApiNotFoundResponse({ description: 'Product not found.' })
   async remove(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<MessageResponseDto> {
-    return await this.productsService.remove(id);
+    return await this.productsService.remove(id, request.user);
   }
 }

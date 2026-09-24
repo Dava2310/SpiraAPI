@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -8,6 +9,7 @@ import {
   In,
   LessThanOrEqual,
   Repository,
+  type FindOptionsWhere,
   type SelectQueryBuilder,
 } from 'typeorm';
 
@@ -25,6 +27,9 @@ import {
   SurplusUrgency,
 } from '../common/enums/surplus-urgency.enum.js';
 import { expiryView } from '../common/expiry/expiry.view.js';
+import type { AuthenticatedUser } from '../common/interfaces/index.js';
+import { resolveScope } from '../common/scoping/org-scope.js';
+import { Location } from '../locations/entities/location.entity.js';
 import type { CrudRepository } from '../common/use-case/index.js';
 import { UUID_PATTERN } from '../common/validation/index.js';
 import {
@@ -81,6 +86,138 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
   }
 
   /**
+   * Asserts the caller's retailer owns a branch, before filing stock at it.
+   * @param locationId The branch the lot would sit in.
+   * @param caller The authenticated caller.
+   * @throws ForbiddenException If the branch belongs to another retailer.
+   */
+  private async assertOwnsLocation(
+    locationId: string,
+    caller: AuthenticatedUser,
+  ): Promise<void> {
+    const scope = resolveScope(caller);
+
+    if (scope.isAdmin) {
+      return;
+    }
+
+    const location = await this.inventoryItemRepository.manager
+      .getRepository(Location)
+      .findOne({ where: { id: locationId } });
+
+    if (!location || location.retailerId !== scope.retailerId) {
+      throw new ForbiddenException('That branch belongs to another retailer.');
+    }
+  }
+
+  /**
+   * Asserts the caller's retailer owns the branch a lot sits in.
+   * @param id The lot.
+   * @param caller The authenticated caller.
+   * @throws NotFoundException If the lot is absent or belongs to another retailer.
+   */
+  private async assertOwnsLot(
+    id: string,
+    caller: AuthenticatedUser,
+  ): Promise<void> {
+    const item = await this.inventoryItemRepository.findOne({
+      where: { id },
+      relations: { location: true },
+    });
+
+    if (!item) {
+      throw new NotFoundException(`InventoryItem with ID ${id} not found`);
+    }
+
+    this.assertReadable(item, caller);
+  }
+
+  /**
+   * Narrows a query to what a caller is allowed to read.
+   *
+   * A retailer sees only lots at its own branches. A recipient sees only what has
+   * been published to the shelf — an unlisted lot is the shop's private stock, and
+   * its quantities and retail prices are commercially sensitive. An admin is
+   * unrestricted.
+   * @param builder The query to narrow, aliased `item`.
+   * @param caller The authenticated caller.
+   */
+  private scopeBuilder(
+    builder: SelectQueryBuilder<InventoryItem>,
+    caller: AuthenticatedUser,
+  ): void {
+    const scope = resolveScope(caller);
+
+    if (scope.isAdmin) {
+      return;
+    }
+
+    if (scope.retailerId) {
+      builder
+        .innerJoin('item.location', 'scopeLocation')
+        .andWhere('scopeLocation.retailer_id = :scopeRetailerId', {
+          scopeRetailerId: scope.retailerId,
+        });
+
+      return;
+    }
+
+    builder.andWhere('item.is_listed = true');
+  }
+
+  /**
+   * The `where` fragment that narrows a `find` to what a caller may read.
+   * @param caller The authenticated caller.
+   * @returns Extra conditions to merge into the `where` clause.
+   */
+  private scopeWhere(
+    caller: AuthenticatedUser,
+  ): FindOptionsWhere<InventoryItem> {
+    const scope = resolveScope(caller);
+
+    if (scope.isAdmin) {
+      return {};
+    }
+
+    if (scope.retailerId) {
+      return { location: { retailerId: scope.retailerId } };
+    }
+
+    return { isListed: true };
+  }
+
+  /**
+   * Asserts a caller may read one particular lot.
+   *
+   * Answers "not found" rather than "forbidden" for another organization's lot, so
+   * the route does not confirm that the id exists.
+   * @param item The lot loaded from the database.
+   * @param caller The authenticated caller.
+   * @throws NotFoundException If it belongs to another organization.
+   */
+  private assertReadable(item: InventoryItem, caller: AuthenticatedUser): void {
+    const scope = resolveScope(caller);
+
+    if (scope.isAdmin) {
+      return;
+    }
+
+    if (scope.retailerId) {
+      if (item.location?.retailerId !== scope.retailerId) {
+        throw new NotFoundException(
+          `InventoryItem with ID ${item.id} not found`,
+        );
+      }
+
+      return;
+    }
+
+    if (!item.isListed) {
+      throw new NotFoundException(`InventoryItem with ID ${item.id} not found`);
+    }
+  }
+
+  /**
    * Searches, filters, orders and pages the inventory list.
    *
    * The free-text term matches anywhere in the product name, brand or barcode,
@@ -92,10 +229,11 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
    */
   async search(
     query: QueryInventoryItemsDto,
+    caller: AuthenticatedUser,
   ): Promise<PaginatedResponseDto<InventoryItemResponseDto>> {
     const limit = query.limit ?? DEFAULT_PAGE_SIZE;
     const offset = this.decodeCursor(query.cursor);
-    const builder = this.buildSearchQuery(query);
+    const builder = this.buildSearchQuery(query, caller);
     const total = await builder.getCount();
 
     const items = await this.applySort(builder, query.sort)
@@ -126,6 +264,7 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
    * @returns A Promise that resolves with the facet counts.
    */
   async facets(
+    caller: AuthenticatedUser,
     locationId?: string,
     status: InventoryItemStatus = InventoryItemStatus.IN_INVENTORY,
   ): Promise<InventoryFacetsResponseDto> {
@@ -134,6 +273,8 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
       .innerJoin('item.product', 'product')
       .where('item.deleted_at IS NULL')
       .andWhere('item.status = :status', { status });
+
+    this.scopeBuilder(builder, caller);
 
     if (locationId) {
       builder.andWhere('item.location_id = :locationId', { locationId });
@@ -189,6 +330,7 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
    * @returns A Promise that resolves with the matching lots, soonest first.
    */
   async findExpiringOrFlagged(
+    caller: AuthenticatedUser,
     locationId?: string,
     withinDays = 2,
     includeReason?: DonationReason,
@@ -202,6 +344,8 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
       .andWhere('item.status = :status', {
         status: InventoryItemStatus.IN_INVENTORY,
       });
+
+    this.scopeBuilder(builder, caller);
 
     if (locationId) {
       builder.andWhere('item.location_id = :locationId', { locationId });
@@ -230,11 +374,14 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
    */
   private buildSearchQuery(
     query: QueryInventoryItemsDto,
+    caller: AuthenticatedUser,
   ): SelectQueryBuilder<InventoryItem> {
     const builder = this.inventoryItemRepository
       .createQueryBuilder('item')
       .leftJoinAndSelect('item.product', 'product')
       .where('item.deleted_at IS NULL');
+
+    this.scopeBuilder(builder, caller);
 
     if (query.locationId) {
       builder.andWhere('item.location_id = :locationId', {
@@ -375,8 +522,11 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
    * Retrieves every stock lot that is not soft-deleted.
    * @returns A Promise that resolves with all lots mapped to InventoryItemResponseDto.
    */
-  async findAll(): Promise<InventoryItemResponseDto[]> {
+  async findAll(
+    caller: AuthenticatedUser,
+  ): Promise<InventoryItemResponseDto[]> {
     const items = await this.inventoryItemRepository.find({
+      where: this.scopeWhere(caller),
       relations: { product: true },
       order: { listedAt: 'DESC' },
     });
@@ -390,8 +540,20 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
    * @returns A Promise that resolves with the lot mapped to InventoryItemResponseDto.
    * @throws NotFoundException If the lot is not found.
    */
-  async findOne(id: string): Promise<InventoryItemResponseDto> {
-    const item = await this.findValid(id);
+  async findOne(
+    id: string,
+    caller: AuthenticatedUser,
+  ): Promise<InventoryItemResponseDto> {
+    const item = await this.inventoryItemRepository.findOne({
+      where: { id },
+      relations: { product: true, location: true },
+    });
+
+    if (!item) {
+      throw new NotFoundException(`InventoryItem with ID ${id} not found`);
+    }
+
+    this.assertReadable(item, caller);
 
     return new InventoryItemResponseDto(item);
   }
@@ -405,10 +567,15 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
    */
   async findAllByLocation(
     locationId: string,
+    caller: AuthenticatedUser,
     status?: InventoryItemStatus,
   ): Promise<InventoryItemResponseDto[]> {
     const items = await this.inventoryItemRepository.find({
-      where: status ? { locationId, status } : { locationId },
+      where: {
+        ...this.scopeWhere(caller),
+        locationId,
+        ...(status ? { status } : {}),
+      },
       relations: { product: true },
       order: { listedAt: 'DESC' },
     });
@@ -425,12 +592,14 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
    */
   async findExpiringAtLocation(
     locationId: string,
+    caller: AuthenticatedUser,
     withinDays = 1,
   ): Promise<InventoryItemResponseDto[]> {
     const cutoff = new Date(Date.now() + withinDays * 24 * 60 * 60 * 1000);
 
     const items = await this.inventoryItemRepository.find({
       where: {
+        ...this.scopeWhere(caller),
         locationId,
         status: InventoryItemStatus.IN_INVENTORY,
         expiresAt: LessThanOrEqual(cutoff),
@@ -464,8 +633,11 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
    */
   async create(
     createInventoryItemDto: CreateInventoryItemDto,
+    caller: AuthenticatedUser,
   ): Promise<InventoryItemCreatedResponseDto> {
     const { expiresAt, ...rest } = createInventoryItemDto;
+
+    await this.assertOwnsLocation(createInventoryItemDto.locationId, caller);
 
     const item = this.inventoryItemRepository.create({
       ...rest,
@@ -494,7 +666,10 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
   async update(
     id: string,
     updateInventoryItemDto: UpdateInventoryItemDto,
+    caller: AuthenticatedUser,
   ): Promise<InventoryItemCreatedResponseDto> {
+    await this.assertOwnsLot(id, caller);
+
     const item = await this.findValid(id);
 
     this.assertAvailable(item, 'edited');
@@ -522,7 +697,12 @@ export class InventoryItemsService implements CrudRepository<InventoryItem> {
    * @throws NotFoundException If the lot is not found.
    * @throws BadRequestException If the lot is already committed to a donation.
    */
-  async remove(id: string): Promise<MessageResponseDto> {
+  async remove(
+    id: string,
+    caller: AuthenticatedUser,
+  ): Promise<MessageResponseDto> {
+    await this.assertOwnsLot(id, caller);
+
     const item = await this.findValid(id);
 
     this.assertAvailable(item, 'deleted');

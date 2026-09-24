@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -32,6 +33,7 @@ import {
   PaginatedResponseDto,
 } from '../common/dto/index.js';
 import { DonationReason } from '../common/enums/donation-reason.enum.js';
+import type { RequestWithUser } from '../common/interfaces/index.js';
 import {
   CreateInventoryItemDto,
   InventoryFacetsResponseDto,
@@ -76,9 +78,10 @@ export class InventoryItemsController {
     },
   })
   async search(
+    @Req() request: RequestWithUser,
     @Query() query: QueryInventoryItemsDto,
   ): Promise<PaginatedResponseDto<InventoryItemResponseDto>> {
-    return await this.inventoryItemsService.search(query);
+    return await this.inventoryItemsService.search(query, request.user);
   }
 
   /**
@@ -107,10 +110,15 @@ export class InventoryItemsController {
     type: InventoryFacetsResponseDto,
   })
   async facets(
+    @Req() request: RequestWithUser,
     @Query('locationId') locationId?: string,
     @Query('status') status?: InventoryItemStatus,
   ): Promise<InventoryFacetsResponseDto> {
-    return await this.inventoryItemsService.facets(locationId, status);
+    return await this.inventoryItemsService.facets(
+      request.user,
+      locationId,
+      status,
+    );
   }
 
   /**
@@ -147,12 +155,14 @@ export class InventoryItemsController {
     type: [InventoryItemResponseDto],
   })
   async findExpiringOrFlagged(
+    @Req() request: RequestWithUser,
     @Query('locationId') locationId?: string,
     @Query('withinDays', new ParseIntPipe({ optional: true }))
     withinDays?: number,
     @Query('includeReason') includeReason?: DonationReason,
   ): Promise<InventoryItemResponseDto[]> {
     return await this.inventoryItemsService.findExpiringOrFlagged(
+      request.user,
       locationId,
       withinDays,
       includeReason,
@@ -180,11 +190,13 @@ export class InventoryItemsController {
     type: [InventoryItemResponseDto],
   })
   async findAllByLocation(
+    @Req() request: RequestWithUser,
     @Param('locationId', ParseUUIDPipe) locationId: string,
     @Query('status') status?: InventoryItemStatus,
   ): Promise<InventoryItemResponseDto[]> {
     return await this.inventoryItemsService.findAllByLocation(
       locationId,
+      request.user,
       status,
     );
   }
@@ -209,12 +221,14 @@ export class InventoryItemsController {
     type: [InventoryItemResponseDto],
   })
   async findExpiringAtLocation(
+    @Req() request: RequestWithUser,
     @Param('locationId', ParseUUIDPipe) locationId: string,
     @Query('withinDays', new ParseIntPipe({ optional: true }))
     withinDays?: number,
   ): Promise<InventoryItemResponseDto[]> {
     return await this.inventoryItemsService.findExpiringAtLocation(
       locationId,
+      request.user,
       withinDays,
     );
   }
@@ -234,9 +248,10 @@ export class InventoryItemsController {
   })
   @ApiNotFoundResponse({ description: 'Inventory item not found.' })
   async findOne(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<InventoryItemResponseDto> {
-    return await this.inventoryItemsService.findOne(id);
+    return await this.inventoryItemsService.findOne(id, request.user);
   }
 
   /**
@@ -257,9 +272,13 @@ export class InventoryItemsController {
   })
   @ApiBadRequestResponse({ description: 'Invalid data.' })
   async create(
+    @Req() request: RequestWithUser,
     @Body() createInventoryItemDto: CreateInventoryItemDto,
   ): Promise<InventoryItemCreatedResponseDto> {
-    return await this.inventoryItemsService.create(createInventoryItemDto);
+    return await this.inventoryItemsService.create(
+      createInventoryItemDto,
+      request.user,
+    );
   }
 
   /**
@@ -291,10 +310,11 @@ export class InventoryItemsController {
     description: 'The inventory item is already committed to a donation.',
   })
   async update(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateInventoryItemDto: UpdateInventoryItemDto,
   ): Promise<InventoryItemCreatedResponseDto> {
-    return await this.inventoryItemsService.update(id, updateInventoryItemDto);
+    return await this.inventoryItemsService.update(id, updateInventoryItemDto, request.user);
   }
 
   /**
@@ -317,8 +337,9 @@ export class InventoryItemsController {
     description: 'The inventory item is already committed to a donation.',
   })
   async remove(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<MessageResponseDto> {
-    return await this.inventoryItemsService.remove(id);
+    return await this.inventoryItemsService.remove(id, request.user);
   }
 }

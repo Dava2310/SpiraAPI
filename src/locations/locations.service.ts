@@ -9,6 +9,12 @@ import { IsNull, Not, Repository } from 'typeorm';
 import { MessageResponseDto } from '../common/dto/index.js';
 import type { CrudRepository } from '../common/use-case/index.js';
 import { assertSingleOwner, UUID_PATTERN } from '../common/validation/index.js';
+import type { AuthenticatedUser } from '../common/interfaces/index.js';
+import {
+  assertCanCreateFor,
+  assertOwn,
+  ownScopeWhere,
+} from '../common/scoping/org-scope.js';
 import {
   CreateLocationDto,
   LocationCreatedResponseDto,
@@ -58,8 +64,9 @@ export class LocationsService implements CrudRepository<Location> {
    * Retrieves every location that is not soft-deleted.
    * @returns A Promise that resolves with all locations mapped to LocationResponseDto.
    */
-  async findAll(): Promise<LocationResponseDto[]> {
+  async findAll(caller: AuthenticatedUser): Promise<LocationResponseDto[]> {
     const locations = await this.locationRepository.find({
+      where: ownScopeWhere(caller, { retailer: "retailerId", recipient: "recipientId" }) ?? undefined,
       order: { createdAt: 'DESC' },
     });
 
@@ -72,7 +79,7 @@ export class LocationsService implements CrudRepository<Location> {
    * @returns A Promise that resolves with the location mapped to LocationResponseDto.
    * @throws NotFoundException If the location is not found.
    */
-  async findOne(id: string): Promise<LocationResponseDto> {
+  async findOne(id: string, caller: AuthenticatedUser): Promise<LocationResponseDto> {
     if (!UUID_PATTERN.test(id)) {
       throw new NotFoundException(`Invalid Location ID: ${id}`);
     }
@@ -94,6 +101,8 @@ export class LocationsService implements CrudRepository<Location> {
         `Location with ID: ${id} not found or not valid`,
       );
     }
+
+    assertOwn(caller, location, 'Location');
 
     return new LocationResponseDto(location);
   }
@@ -137,7 +146,10 @@ export class LocationsService implements CrudRepository<Location> {
    */
   async create(
     createLocationDto: CreateLocationDto,
+    caller: AuthenticatedUser,
   ): Promise<LocationCreatedResponseDto> {
+    assertCanCreateFor(caller, createLocationDto);
+
     const { retailerId, recipientId, isPrimary } = createLocationDto;
 
     assertSingleOwner('location', retailerId, recipientId);
@@ -172,10 +184,13 @@ export class LocationsService implements CrudRepository<Location> {
   async update(
     id: string,
     updateLocationDto: UpdateLocationDto,
+    caller: AuthenticatedUser,
   ): Promise<LocationCreatedResponseDto> {
     const { retailerId, recipientId, ...rest } = updateLocationDto;
 
     const location = await this.findValid(id);
+
+    assertOwn(caller, location, 'Location');
 
     Object.assign(location, rest);
 
@@ -211,8 +226,13 @@ export class LocationsService implements CrudRepository<Location> {
    * @returns A Promise that resolves with a success message.
    * @throws NotFoundException If the location is not found.
    */
-  async remove(id: string): Promise<MessageResponseDto> {
+  async remove(
+    id: string,
+    caller: AuthenticatedUser,
+  ): Promise<MessageResponseDto> {
     const location = await this.findValid(id);
+
+    assertOwn(caller, location, 'Location');
 
     await this.locationRepository.softRemove(location);
 

@@ -6,6 +6,7 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
+  Req,
   Post,
 } from '@nestjs/common';
 import {
@@ -31,6 +32,7 @@ import {
 } from './dto/index.js';
 import { PartnershipsService } from './partnerships.service.js';
 import { UserRole } from '../users/enums/user-role.enum.js';
+import type { RequestWithUser } from '../common/interfaces/index.js';
 
 @ApiTags('partnerships')
 @ApiBearerAuth()
@@ -49,8 +51,10 @@ export class PartnershipsController {
     description: 'List of all partnerships.',
     type: [PartnershipResponseDto],
   })
-  async findAll(): Promise<PartnershipResponseDto[]> {
-    return await this.partnershipsService.findAll();
+  async findAll(
+    @Req() request: RequestWithUser,
+  ): Promise<PartnershipResponseDto[]> {
+    return await this.partnershipsService.findAll(request.user);
   }
 
   /**
@@ -86,9 +90,10 @@ export class PartnershipsController {
   })
   @ApiNotFoundResponse({ description: 'Partnership not found.' })
   async findOne(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<PartnershipResponseDto> {
-    return await this.partnershipsService.findOne(id);
+    return await this.partnershipsService.findOne(id, request.user);
   }
 
   /**
@@ -113,9 +118,10 @@ export class PartnershipsController {
       'Invalid data — these two organizations are already partnered.',
   })
   async create(
+    @Req() request: RequestWithUser,
     @Body() createPartnershipDto: CreatePartnershipDto,
   ): Promise<PartnershipCreatedResponseDto> {
-    return await this.partnershipsService.create(createPartnershipDto);
+    return await this.partnershipsService.create(createPartnershipDto, request.user);
   }
 
   /**
@@ -148,10 +154,11 @@ export class PartnershipsController {
       'Invalid data — these two organizations are already partnered.',
   })
   async update(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updatePartnershipDto: UpdatePartnershipDto,
   ): Promise<PartnershipCreatedResponseDto> {
-    return await this.partnershipsService.update(id, updatePartnershipDto);
+    return await this.partnershipsService.update(id, updatePartnershipDto, request.user);
   }
 
   /**
@@ -170,8 +177,9 @@ export class PartnershipsController {
   })
   @ApiNotFoundResponse({ description: 'Partnership not found.' })
   async remove(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<MessageResponseDto> {
-    return await this.partnershipsService.remove(id);
+    return await this.partnershipsService.remove(id, request.user);
   }
 }

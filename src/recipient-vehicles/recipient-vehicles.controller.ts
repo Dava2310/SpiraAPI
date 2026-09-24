@@ -6,6 +6,7 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
+  Req,
   Post,
 } from '@nestjs/common';
 import {
@@ -31,6 +32,7 @@ import {
 } from './dto/index.js';
 import { RecipientVehiclesService } from './recipient-vehicles.service.js';
 import { UserRole } from '../users/enums/user-role.enum.js';
+import type { RequestWithUser } from '../common/interfaces/index.js';
 
 @ApiTags('recipient-vehicles')
 @ApiBearerAuth()
@@ -51,8 +53,10 @@ export class RecipientVehiclesController {
     description: 'List of all vehicles.',
     type: [RecipientVehicleResponseDto],
   })
-  async findAll(): Promise<RecipientVehicleResponseDto[]> {
-    return await this.recipientVehiclesService.findAll();
+  async findAll(
+    @Req() request: RequestWithUser,
+  ): Promise<RecipientVehicleResponseDto[]> {
+    return await this.recipientVehiclesService.findAll(request.user);
   }
 
   /**
@@ -92,9 +96,10 @@ export class RecipientVehiclesController {
   })
   @ApiNotFoundResponse({ description: 'RecipientVehicle not found.' })
   async findOne(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<RecipientVehicleResponseDto> {
-    return await this.recipientVehiclesService.findOne(id);
+    return await this.recipientVehiclesService.findOne(id, request.user);
   }
 
   /**
@@ -119,10 +124,12 @@ export class RecipientVehiclesController {
       'Invalid data — the plate is already registered to this recipient.',
   })
   async create(
+    @Req() request: RequestWithUser,
     @Body() createRecipientVehicleDto: CreateRecipientVehicleDto,
   ): Promise<RecipientVehicleCreatedResponseDto> {
     return await this.recipientVehiclesService.create(
       createRecipientVehicleDto,
+      request.user,
     );
   }
 
@@ -156,13 +163,11 @@ export class RecipientVehiclesController {
       'Invalid data — the plate is already registered to this recipient.',
   })
   async update(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateRecipientVehicleDto: UpdateRecipientVehicleDto,
   ): Promise<RecipientVehicleCreatedResponseDto> {
-    return await this.recipientVehiclesService.update(
-      id,
-      updateRecipientVehicleDto,
-    );
+    return await this.recipientVehiclesService.update(id, updateRecipientVehicleDto, request.user);
   }
 
   /**
@@ -181,8 +186,9 @@ export class RecipientVehiclesController {
   })
   @ApiNotFoundResponse({ description: 'RecipientVehicle not found.' })
   async remove(
+    @Req() request: RequestWithUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<MessageResponseDto> {
-    return await this.recipientVehiclesService.remove(id);
+    return await this.recipientVehiclesService.remove(id, request.user);
   }
 }

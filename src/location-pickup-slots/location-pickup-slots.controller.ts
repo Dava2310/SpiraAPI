@@ -47,6 +47,7 @@ export class LocationPickupSlotsController {
    * @returns A Promise that resolves with an array of LocationPickupSlotResponseDto.
    */
   @Get()
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Get all pickup slots' })
   @ApiOkResponse({
     description: 'List of all pickup slots.',

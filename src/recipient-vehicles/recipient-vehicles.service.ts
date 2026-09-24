@@ -9,6 +9,12 @@ import { Not, Repository } from 'typeorm';
 import { MessageResponseDto } from '../common/dto/index.js';
 import type { CrudRepository } from '../common/use-case/index.js';
 import { UUID_PATTERN } from '../common/validation/index.js';
+import type { AuthenticatedUser } from '../common/interfaces/index.js';
+import {
+  assertCanCreateFor,
+  assertOwn,
+  ownScopeWhere,
+} from '../common/scoping/org-scope.js';
 import {
   CreateRecipientVehicleDto,
   RecipientVehicleCreatedResponseDto,
@@ -59,8 +65,9 @@ export class RecipientVehiclesService implements CrudRepository<RecipientVehicle
    * Retrieves every vehicle that is not soft-deleted.
    * @returns A Promise that resolves with all vehicles mapped to RecipientVehicleResponseDto.
    */
-  async findAll(): Promise<RecipientVehicleResponseDto[]> {
+  async findAll(caller: AuthenticatedUser): Promise<RecipientVehicleResponseDto[]> {
     const vehicles = await this.vehicleRepository.find({
+      where: ownScopeWhere(caller, { recipient: "recipientId" }) ?? undefined,
       order: { plate: 'ASC' },
     });
 
@@ -73,8 +80,10 @@ export class RecipientVehiclesService implements CrudRepository<RecipientVehicle
    * @returns A Promise that resolves with the vehicle mapped to RecipientVehicleResponseDto.
    * @throws NotFoundException If the vehicle is not found.
    */
-  async findOne(id: string): Promise<RecipientVehicleResponseDto> {
+  async findOne(id: string, caller: AuthenticatedUser): Promise<RecipientVehicleResponseDto> {
     const vehicle = await this.findValid(id);
+
+    assertOwn(caller, vehicle, 'Vehicle');
 
     return new RecipientVehicleResponseDto(vehicle);
   }
@@ -136,7 +145,10 @@ export class RecipientVehiclesService implements CrudRepository<RecipientVehicle
    */
   async create(
     createRecipientVehicleDto: CreateRecipientVehicleDto,
+    caller: AuthenticatedUser,
   ): Promise<RecipientVehicleCreatedResponseDto> {
+    assertCanCreateFor(caller, createRecipientVehicleDto);
+
     const { recipientId, plate } = createRecipientVehicleDto;
 
     if (await this.findOneByPlate(recipientId, plate)) {
@@ -166,8 +178,11 @@ export class RecipientVehiclesService implements CrudRepository<RecipientVehicle
   async update(
     id: string,
     updateRecipientVehicleDto: UpdateRecipientVehicleDto,
+    caller: AuthenticatedUser,
   ): Promise<RecipientVehicleCreatedResponseDto> {
     const vehicle = await this.findValid(id);
+
+    assertOwn(caller, vehicle, 'Vehicle');
     const { plate } = updateRecipientVehicleDto;
 
     if (
@@ -196,8 +211,13 @@ export class RecipientVehiclesService implements CrudRepository<RecipientVehicle
    * @returns A Promise that resolves with a success message.
    * @throws NotFoundException If the vehicle is not found.
    */
-  async remove(id: string): Promise<MessageResponseDto> {
+  async remove(
+    id: string,
+    caller: AuthenticatedUser,
+  ): Promise<MessageResponseDto> {
     const vehicle = await this.findValid(id);
+
+    assertOwn(caller, vehicle, 'Vehicle');
 
     await this.vehicleRepository.softRemove(vehicle);
 
