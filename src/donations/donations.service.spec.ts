@@ -7,6 +7,7 @@ import { PickupToken } from './entities/pickup-token.entity.js';
 import { InventoryItem } from '../inventory-items/entities/inventory-item.entity.js';
 import { Partnership } from '../partnerships/entities/partnership.entity.js';
 import { Contact } from '../contacts/entities/contact.entity.js';
+import { Location } from '../locations/entities/location.entity.js';
 import { DonationReceiptsService } from '../donation-receipts/donation-receipts.service.js';
 import { DonationsService } from './donations.service.js';
 
@@ -23,6 +24,7 @@ describe('DonationsService', () => {
         { provide: getRepositoryToken(InventoryItem), useValue: {} },
         { provide: getRepositoryToken(Partnership), useValue: {} },
         { provide: getRepositoryToken(Contact), useValue: {} },
+        { provide: getRepositoryToken(Location), useValue: {} },
         { provide: DonationReceiptsService, useValue: {} },
       ],
     }).compile();
