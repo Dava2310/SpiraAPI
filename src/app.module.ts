@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller.js';
@@ -35,6 +36,11 @@ import configuration from './config/configuration.js';
       load: configuration,
       envFilePath: ['.env', '.env.development', '.env.production'],
     }),
+    // Exactly one bucket. Every throttler named here applies to every route and the
+    // tightest one wins, so listing a strict named bucket alongside a loose one
+    // silently applies the strict limit platform-wide. The tight limits belong on
+    // their routes, as @Throttle overrides of this bucket.
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 300 }]),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
@@ -73,6 +79,9 @@ import configuration from './config/configuration.js';
   // the role off it.
   providers: [
     AppService,
+    // Ahead of AuthGuard: an unauthenticated flood should be turned away before it
+    // costs a token lookup or a bcrypt comparison.
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],

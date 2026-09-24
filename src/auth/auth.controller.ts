@@ -18,6 +18,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 import { Public } from '../common/decorators/index.js';
 import { MessageResponseDto } from '../common/dto/index.js';
@@ -44,6 +45,7 @@ export class AuthController {
    */
   @Post('register/retailer')
   @Public()
+  @Throttle({ default: { ttl: 3_600_000, limit: 5 } })
   @ApiOperation({ summary: 'Register a retailer' })
   @ApiBody({
     type: RegisterRetailerDto,
@@ -72,6 +74,7 @@ export class AuthController {
    */
   @Post('register/recipient')
   @Public()
+  @Throttle({ default: { ttl: 3_600_000, limit: 5 } })
   @ApiOperation({ summary: 'Register an NGO or foodbank' })
   @ApiBody({
     type: RegisterRecipientDto,
@@ -101,6 +104,7 @@ export class AuthController {
    */
   @Post('login')
   @Public()
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiOperation({ summary: 'Sign in' })
   @ApiBody({ type: LoginDto, description: 'Credentials to sign in with.' })
   @ApiCreatedResponse({

@@ -157,6 +157,7 @@ Commit the migration file. It is part of the source, not a build artefact.
 | `DB_SSL_REJECT_UNAUTHORIZED` | `false` | Set `true` with `DB_SSL_CA` for a verified chain. |
 | `DB_SYNCHRONIZE` | **`false`** | Non-negotiable (§2). |
 | `DB_LOGGING` | `false` | `true` logs every query; useful for a bad afternoon, not for production. |
+| `TRUST_PROXY_HOPS` | **`1`** on Render | How many reverse proxies sit in front. Without it every request reports the proxy's address, so rate limiting counts the whole internet as one client and locks everyone out together. Leave it **unset** when the app is exposed directly, or a caller can spoof its own address with an `X-Forwarded-For` header nobody strips. |
 | `ACCESS_TOKEN_SECRET` | a long random string | Rotate it and every live session is revoked. |
 | `TOKEN_EXPIRATION_HOURS` | `8` | |
 | `CORS_ORIGIN` | the two frontend origins, space-separated | |
@@ -174,6 +175,30 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 On PostgreSQL 13+ `gen_random_uuid()` is built in, so this is usually a no-op.
 
 ---
+
+## 5.1 Rate limiting
+
+Three public routes need no token, so they are the ones worth limiting:
+
+| Route | Limit |
+|---|---|
+| `POST /api/auth/login` | 10 per minute per IP |
+| `POST /api/auth/register/retailer` | 5 per hour per IP |
+| `POST /api/auth/register/recipient` | 5 per hour per IP |
+
+Everything else shares one generous bucket of 300 per minute, which normal use does
+not approach — a portal screen makes three or four requests.
+
+**One bucket, overridden per route.** Every throttler named in
+`ThrottlerModule.forRoot` applies to *every* route and the tightest one wins, so
+listing a strict named bucket next to a loose one silently applies the strict limit
+platform-wide. Getting this wrong once limited the whole API to five requests an
+hour, which is worse than no limit at all: it fails closed on everybody. The tight
+limits therefore live on their routes as `@Throttle({ default: … })` overrides.
+
+**This is per instance, held in memory.** Two instances mean two buckets and
+effectively double the limits, and a restart forgets everything. That is acceptable
+for a pilot on one instance; a shared store is needed before scaling out.
 
 ## 6. Supabase — three things that will cost you an afternoon
 

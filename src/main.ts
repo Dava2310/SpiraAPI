@@ -1,17 +1,26 @@
 import { ConsoleLogger, Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from './app.module.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: new ConsoleLogger({
       colors: true,
       json: true,
     }),
   });
+
+  // Render terminates TLS in front of the app, so without this every request
+  // reports the proxy's address and rate limiting would count the whole internet as
+  // one client — worse than no limit, because it would lock everyone out together.
+  // `1` trusts exactly one hop, which is what a single reverse proxy adds.
+  if (process.env.TRUST_PROXY_HOPS) {
+    app.set('trust proxy', Number(process.env.TRUST_PROXY_HOPS));
+  }
 
   // Validation Pipes
   app.useGlobalPipes(
